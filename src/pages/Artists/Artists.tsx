@@ -4,6 +4,7 @@ import { FiX } from 'react-icons/fi';
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from 'react-router-dom';
 import { fetchArtists, Artist } from '../../services/api';
+import { StorageImage } from "../Admin/components/StorageImage";
 
 const MAX_ARTISTS_TO_SHOW = 30;
 
@@ -115,7 +116,12 @@ const Artists = () => {
 
             {modalArtist.photo_url && (
               <div className="artists__modal__image">
-                <img src={modalArtist.photo_url} alt={modalArtist.name} />
+                <StorageImage
+                  bucket="artist_photos"
+                  path={modalArtist.photo_url}
+                  alt={modalArtist.name}
+                  className="artists__modal__image"
+                />
               </div>
             )}
 
