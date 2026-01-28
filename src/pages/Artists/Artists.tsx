@@ -1,9 +1,6 @@
 import "./Artists.scss";
 import { useState, useEffect, useRef } from "react";
 import { FiX } from 'react-icons/fi';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
-import 'swiper/css';
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from 'react-router-dom';
 import { fetchArtists, Artist } from '../../services/api';
@@ -18,8 +15,9 @@ const Artists = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [hoveredArtist, setHoveredArtist] = useState<Artist | null>(null);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [modalArtist, setModalArtist] = useState<Artist | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const hasFetched = useRef(false);
@@ -33,6 +31,7 @@ const Artists = () => {
       try {
         setIsLoading(true);
         const data = await fetchArtists();
+        console.log(data);
         setArtists(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load artists');
@@ -50,9 +49,13 @@ const Artists = () => {
   );
 
   const handleClick = (artist: Artist) => {
-    if (!isMember) return;
-    // Navigate to artist detail page
-    navigate(`/artists/${artist.slug}`);
+    setModalArtist(artist);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalArtist(null);
   };
 
   const handleClose = () => {
@@ -71,60 +74,15 @@ const Artists = () => {
         </button>
       </div>
 
-      {/* Swiper carousel */}
-      {!isLoading && artists.length > 0 && (
-        <Swiper
-          modules={[Autoplay]}
-          spaceBetween={10}
-          slidesPerView="auto"
-          loop={true}
-          speed={10000}
-          autoplay={{
-            delay: 0,
-            pauseOnMouseEnter: true,
-            disableOnInteraction: false,
-          }}
-          className="artistsSwiper"
-        >
-          {artists.map((artist) => {
-            console.log(artist)
-            if (artist.photo_url) return null;
-            return (
-              <SwiperSlide key={artist.id}>
-                <div className="artistImage">
-                  <img 
-                    src={artist.photo_url || '/artists/default-artist.jpg'} 
-                    alt={artist.name}
-                    onError={(e) => {
-                      e.currentTarget.src = '/artists/default-artist.jpg';
-                    }}
-                  />
-                </div>
-              </SwiperSlide>
-            )
-          })}
-        </Swiper>
-      )}
-      
-      <div className="artists__header">
-        <p className="artists__header__description">
-          Highlighting artists that inspire, innovate, and transform the music scene.
-        </p>
-      </div>
-      
-      <div className="artists__content">
-        
-        {isLoading && <p className="loading">Loading artists...</p>}
-
-        {error && (
-          <div className="error">
-            <p>Error: {error}</p>
-            <button onClick={() => window.location.reload()}>Retry</button>
+      {!isMember ? (
+        <>
+          <div className="artists__header">
+            <p className="artists__header__description">
+              Highlighting artists that inspire, innovate, and transform the music scene.
+            </p>
           </div>
-        )}
 
-        {!isLoading && !error && (
-          <>
+          <div className="artists__content">
             <div className="artists__content__searchBar">
               <input
                 type="text"
@@ -133,55 +91,50 @@ const Artists = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-
-            <div className="artistsLayout">
-              <div className="artistsList__container">
-                {/* LEFT SIDE: LIST */}
-                <div className="artistsList">
-                  {filteredArtists.slice(0, MAX_ARTISTS_TO_SHOW).map((artist) => (
-                    <div
-                      key={artist.id}
-                      className={`artistName ${!isMember ? "disabled" : ""}`}
-                      onMouseEnter={() => setHoveredArtist(artist)}
-                      onMouseLeave={() => setHoveredArtist(null)}
-                      onClick={() => handleClick(artist)}
-                    >
-                      {artist.name}
-                    </div>
-                  ))}
-                  
-                  {/* Show "..." if more than MAX_ARTISTS_TO_SHOW results */}
-                  {filteredArtists.length > MAX_ARTISTS_TO_SHOW && (
-                    <div className="artistName dots">...</div>
-                  )}
-
-                  {filteredArtists.length === 0 && (
-                    <p className="noResults">No artists found.</p>
-                  )}
-                </div>
-
-                {/* RIGHT SIDE: ONE IMAGE */}
-                <div className="artistsPreview">
-                  {hoveredArtist && (
-                    <div
-                      style={{ 
-                        backgroundImage: `url(${hoveredArtist.photo_url || '/artists/default-artist.jpg'})` 
-                      }}
-                      className="previewImage"
-                    />
-                  )}
-                </div>
+            {filteredArtists.map((artist) => (
+              <div key={artist.id}>
+                <h2 className="artists__content__artistName" onClick={() => handleClick(artist)}>{artist.name}</h2>
               </div>
-            </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div>
+          <h2>🔒 Only members can access artist profiles. Log in or join to unlock.</h2>
+        </div>
+      )}
 
-            {!isMember && (
-              <p className="notice">
-                🔒 Only members can access artist profiles. Log in or join to unlock.
-              </p>
+
+      {/* Modal */}
+      {isModalOpen && modalArtist && (
+        <div className="artists__modal" onClick={handleCloseModal}>
+          <div className="artists__modal__content" onClick={(e) => e.stopPropagation()}>
+            <button className="artists__modal__close" onClick={handleCloseModal}>
+              <FiX size={24} />
+            </button>
+
+            {modalArtist.photo_url && (
+              <div className="artists__modal__image">
+                <img src={modalArtist.photo_url} alt={modalArtist.name} />
+              </div>
             )}
-          </>
-        )}
-      </div>
+
+            <div className="artists__modal__info">
+              <h1 className="artists__modal__name">{modalArtist.name}</h1>
+
+              {modalArtist.country && (
+                <p className="artists__modal__country">{modalArtist.country}</p>
+              )}
+              
+
+              {modalArtist.bio && (
+                <p className="artists__modal__bio">{modalArtist.bio}</p>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
