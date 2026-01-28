@@ -1,0 +1,26 @@
+@import '../../_breakpoints.scss';
+
+.member {
+  padding: 40px 24px;
+
+  h1 {
+    font-size: 48px;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+
+  .member__button {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: var(--tertiary-color);
+    color: #000;
+    border: 1px solid var(--tertiary-color);
+    font-weight: 700;
+
+    &:hover { filter: brightness(1.08); }
+    &:active { transform: translateY(1px); }
+  }
+}
+
+

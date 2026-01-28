@@ -1,0 +1,71 @@
+@import '../../_breakpoints.scss';
+
+.join {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 24px;
+
+  h1 {
+    font-size: 48px;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+
+  .join__forms {
+    width: 100%;
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .join__form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h2 {
+      font-size: 18px;
+      opacity: 0.9;
+      margin: 0 0 2px;
+      text-transform: none;
+    }
+
+    input {
+      width: 100%;
+    }
+
+    button {
+      align-self: flex-start;
+      margin-top: 6px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      background: var(--tertiary-color);
+      color: #000;
+      border: 1px solid var(--tertiary-color);
+      font-weight: 700;
+
+      &:hover { filter: brightness(1.08); }
+      &:active { transform: translateY(1px); }
+    }
+  }
+
+  .join__logout {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .join__message {
+    width: 100%;
+    max-width: 720px;
+    margin-top: 8px;
+    color: var(--tertiary-color);
+  }
+}

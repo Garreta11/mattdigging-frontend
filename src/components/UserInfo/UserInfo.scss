@@ -1,0 +1,26 @@
+@import '../../_breakpoints.scss';
+.userinfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__image {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    @include respond-to(md) {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &__name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    @include respond-to(md) {
+      font-size: 0.5rem;
+    }
+  }
+}

@@ -1,0 +1,54 @@
+@import '../../_breakpoints.scss';
+.searchPage {
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.searchBar {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 2rem;
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+.results {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.resultGroup {
+  h2 {
+    text-transform: capitalize;
+    font-size: 1.2rem;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      padding: 0.6rem 1rem;
+      background: #141414;
+      border-radius: 8px;
+      margin-bottom: 0.4rem;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #222;
+      }
+    }
+  }
+}

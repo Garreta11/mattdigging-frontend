@@ -1,0 +1,19 @@
+// _breakpoints.scss
+
+$breakpoint-sm: 480px;   // small devices
+$breakpoint-md: 768px;   // tablets
+$breakpoint-lg: 1024px;  // small desktops
+$breakpoint-xl: 1440px;  // large desktops
+
+// Mixin for easier usage
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == sm {
+    @media (max-width: #{$breakpoint-sm}) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: #{$breakpoint-md}) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: #{$breakpoint-lg}) { @content; }
+  } @else if $breakpoint == xl {
+    @media (max-width: #{$breakpoint-xl}) { @content; }
+  }
+}

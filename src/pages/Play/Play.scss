@@ -1,0 +1,65 @@
+@import '../../_breakpoints.scss';
+
+.play {
+  padding: 16px;
+
+  .play__title {
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .play__label {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .play__controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+
+    @include respond-to(md) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .play__input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #111;
+    color: #fff;
+  }
+
+  .play__button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #fff;
+    color: #000;
+    border: 1px solid #fff;
+    cursor: pointer;
+    font-weight: 600;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .play__error {
+    color: #ff6b6b;
+    margin-bottom: 12px;
+  }
+
+  .play__audio {
+    width: 100%;
+  }
+}
+
+

@@ -1,0 +1,26 @@
+@import '../../_breakpoints.scss';
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: inherit;
+  transform: inherit;
+  width: 100%;
+  height: 100%;
+  max-width: inherit;
+  max-height: inherit;
+
+  .home__frame {
+    width: 75dvh;
+    height: 75dvh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    @include respond-to(md) {
+      width: 95dvw;
+      height: 95dvw;
+    }
+  }
+}

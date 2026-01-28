@@ -1,0 +1,189 @@
+@import './_breakpoints.scss';
+@import './_typography.scss';
+
+:root {
+  --primary-color: #ffffff;
+  --secondary-color: #0f0f0f;
+  // --tertiary-color: #C6AA61;
+  --tertiary-color: #D6A81B;
+  --quaternary-color: #d5d5d5;
+
+  --border-radius: 0.5rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-circle: 50%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+body {
+  //font-family: 'HelveticaNeue', sans-serif;
+  font-family: 'NeueMontreal', sans-serif;
+  text-transform: lowercase;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+
+  // font-family: 'Nohemi', sans-serif;
+}
+
+// Links
+a {
+  text-decoration: none;
+  color: transparent;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+// Buttons
+button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius-2xl);
+  padding: 0.5rem 1rem;
+  color: var(--primary-color);
+}
+
+// Inputs
+input {
+  background-color: transparent;
+  border: none;
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius-2xl);
+  color: var(--primary-color);
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+// Layout
+.main {
+  display: flex;
+  // flex-direction: column;
+  width: 100dvw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main-content {
+  position: relative;
+
+  animation: fadeIn 1s ease-in-out forwards;
+  overflow: hidden;
+
+  overflow-y: scroll;
+
+  border-left: 0.1px solid var(--quaternary-color);
+
+  // Override animation when fading out
+  &.fade-out {
+    animation: fadeOut 1s ease-in-out forwards;
+    @include respond-to(md) {
+      animation: fadeOutMobile 1s ease-in-out forwards;
+    }
+  }
+
+  &__close {
+    display: flex;
+    justify-content: flex-end;
+
+    position: sticky;
+    background: transparent;
+    top: 0;
+    z-index: 1000;
+
+    &__button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--primary-color);
+
+      @include respond-to(md) {
+        padding: 0;
+      }
+
+      &:hover {
+        transform: rotate(90deg);
+      }
+    }
+
+    @include respond-to(md) {
+      display: none;
+    }
+  }
+
+  @include respond-to(md) {
+    border-left: none;
+    background-color: var(--secondary-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    animation: fadeInMobile 1s ease-in-out forwards;
+    min-height: 100dvh;
+  }
+}
+
+// Swiper
+.swiper {
+  width: 100%;
+  height: 300px; // or whatever height you want
+}
+
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content !important;
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    max-width: 0;
+    opacity: 0;
+  }
+  to {
+    max-width: 50%;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    max-width: 50%;
+    opacity: 1;
+  }
+  to {
+    max-width: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInMobile {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutMobile {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

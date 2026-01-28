@@ -1,0 +1,46 @@
+/**
+* Helvetica Neue
+* Font weight: 500
+* Font style: normal
+* Font file: HelveticaNeue-Medium.otf
+*/
+@font-face {
+  font-family: 'HelveticaNeue';
+  src: url('../public/fonts/HelveticaNeue/HelveticaNeue-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+/**
+* Neue Montreal
+* Font weight: 300, 400, 500, 700
+* Font style: normal
+* Font file: NeueMontreal-Light.otf, NeueMontreal-Regular.otf, NeueMontreal-Medium.otf, NeueMontreal-Bold.otf
+*/
+@font-face {
+  font-family: 'NeueMontreal';
+  src: url('../public/fonts/NeueMontreal/NeueMontreal-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NeueMontreal';
+  src: url('../public/fonts/NeueMontreal/NeueMontreal-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NeueMontreal';
+  src: url('../public/fonts/NeueMontreal/NeueMontreal-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NeueMontreal';
+  src: url('../public/fonts/NeueMontreal/NeueMontreal-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
