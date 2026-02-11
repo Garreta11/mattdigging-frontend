@@ -11,6 +11,7 @@ const Room: React.FC = () => {
 
   useEffect(() => {
     if (!roomRef.current) return;
+  
     outputRef.current = new Output({
       container: roomRef.current,
       isMobile,
@@ -18,12 +19,19 @@ const Room: React.FC = () => {
         console.log('chest clicked');
       }
     });
-
+  
     return () => {
       outputRef.current?.dispose();
       outputRef.current = null;
     };
+  }, []); 
+  
+  useEffect(() => {
+    if (outputRef.current) {
+      outputRef.current.setIsMobile(isMobile);
+    }
   }, [isMobile]);
+  
 
   return <div className="room" ref={roomRef} />;
 };

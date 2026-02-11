@@ -397,6 +397,10 @@ export default class Output {
     this.updateDebugOverlay();
   }
 
+  setIsMobile(value) {
+    this.isMobile = value;
+  }
+
   animate() {
     const now = performance.now();
     const dt = (now - this.lastTime) / 1000;
