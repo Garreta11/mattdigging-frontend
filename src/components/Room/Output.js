@@ -50,12 +50,20 @@ export default class Output {
     this.animate();
 
     // Event listeners
-    window.addEventListener('mousemove', this.onMouseMove.bind(this));
-    window.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-    window.addEventListener('touchstart', this.onTouchStart.bind(this));
-    window.addEventListener('click', this.onClick.bind(this));
-    window.addEventListener('touchend', this.onTouchEnd.bind(this));
-    window.addEventListener('resize', this.onResize.bind(this));
+
+    this.onResize = this.onResize.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onClick = this.onClick.bind(this);
+
+    window.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('touchmove', this.onTouchMove, { passive: false });
+    window.addEventListener('touchstart', this.onTouchStart);
+    window.addEventListener('click', this.onClick);
+    window.addEventListener('touchend', this.onTouchEnd);
+    window.addEventListener('resize', this.onResize);
   }
 
   setRenderer() {
@@ -376,7 +384,15 @@ export default class Output {
   }
   
   onResize() {
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    const w = this.container.clientWidth;
+    const h = this.container.clientHeight;
+  
+    if (w === this.lastWidth && h === this.lastHeight) return;
+  
+    this.lastWidth = w;
+    this.lastHeight = h;
+  
+    this.renderer.setSize(w, h);
     this.updateViewport();
     this.updateDebugOverlay();
   }
