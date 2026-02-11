@@ -37,24 +37,27 @@ const About = () => {
             <div className="textBox__content" ref={textRef}>
               <p>
               welcome dear music lovers and listeners,
-              <br/>
-              happy you found your way into this space of vintage sounds with soul. hand-picked gems, curated by a digging nerd. want to pay homage with this site to musical heritage from all over the world, giving your heart and ears some great variety of emotions, impressions and love. this living room can be your space and helper for any mood and emotional state you might be in.
+              </p>
+              <p>
+              happy you found your way into this space of vintage sounds with soul. hand-picked gems, curated by a digging nerd. want to pay homage with this site to musical heritage from all over the world, giving your heart and ears some great variety of emotions, impressions and love. this living room can be your space and supporter for any mood and emotional state you might be in.
               </p>
 
               <p>
-              get a deep look into my collection. over the past two decades i gathered thousands and thousands of sweet tracks, coming from 1500 records and endless other releases. now it's a good time to share those goodies with each other.
-              <br/>
-              a lush and infinite source of digging pleasure is waiting for you to be discovered, with one new selection adding up to the library each week (happy sundays).
-              <br/>
-              a constantly evolving collection of moods and genres will be accessible through plenty of different playlists and weekly selections. also, if you pay attention, you can discover all sorts of musical obscurities.
+              get a deep look into my collection. over the past two decades i gathered thousands and thousands of sweet tracks, coming from over 1500 records and endless other releases. now it's time to share those goodies with each other.
               </p>
-
+              <p>
+              a lush and infinite source of digging pleasure is waiting for you to be discovered, with one new selection (containing a playlist of 10 well curated songs) adding up to the library each week. happy sundays!
+              </p>
+              <p>
+              a constantly evolving collection of moods, countries and genres will be accessible through plenty of different playlists and weekly selections. also, if you pay attention, you can discover all sorts of musical obscurities (hidden gems).
+              </p>
               <p>
               sit back, relax and enjoy the dive into the wonderful world of sounds, curated by a music enthusiast.
-              <br/>
+              </p>
+              <p>
               much love,
-              <br/>
-              <br/>
+              </p>
+              <p>
               Matti / mattmosphere
               </p>
             </div>

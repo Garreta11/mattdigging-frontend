@@ -5,7 +5,7 @@ interface StorageAudioProps {
   bucket: string;
   path: string | null | undefined;
   localFile?: File | null;
-  audioRef?: React.RefObject<HTMLAudioElement>;
+  audioRef?: React.Ref<HTMLAudioElement>; // 👈 was RefObject, now accepts callback too
 }
 
 /**
@@ -18,7 +18,7 @@ export function StorageAudio({ bucket, path, localFile, audioRef }: StorageAudio
   if (!url) return null;
 
   return (
-    <div className="admin-audio-player">
+    <div className="admin-audio-player" style={{ display: 'none' }}>
       <audio ref={audioRef} controls src={url} preload="metadata">
         Your browser does not support the audio element.
       </audio>

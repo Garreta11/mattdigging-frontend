@@ -17,6 +17,7 @@ import Admin from './pages/Admin/Admin';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 
 // Components
+import Player from './components/Player/Player';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 
@@ -54,7 +55,10 @@ root.render(
               <RequireAuth>
                 <Header />
                 <main className="main">
-                  <Home />
+                  <div className="main__wrapper">
+                    <Home />
+                    <Player />
+                  </div>
                   <Routes>
                     <Route path="/" element={<></>} />
                     <Route path="/about" element={<About />} />

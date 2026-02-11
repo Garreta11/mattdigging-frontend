@@ -22,6 +22,21 @@ export interface Artist {
   country: string;
 }
 
+export interface Track {
+  id: number;
+  title: string;
+  artist_id: number;
+  album_name: string;
+  year: number;
+  decade: string;
+  country: string;
+  season: string;
+  audio_url: string;
+  cover_url: string;
+  description: string;
+  is_free: boolean;
+}
+
 export const fetchGenres = async (): Promise<Genre[]> => {
   const response = await fetch(`${API_BASE_URL}/genres`);
   if (!response.ok) {
@@ -42,6 +57,18 @@ export const fetchArtists = async (): Promise<Artist[]> => {
   const response = await fetch(`${API_BASE_URL}/artists`);
   if (!response.ok) {
     throw new Error('Failed to fetch artists');
+  }
+  return response.json();
+};
+
+export const fetchTracks = async (): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch tracks");
   }
   return response.json();
 };

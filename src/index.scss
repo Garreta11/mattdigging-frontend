@@ -73,6 +73,14 @@ input {
   width: 100dvw;
   height: 100dvh;
   overflow: hidden;
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .main-content {
