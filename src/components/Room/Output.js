@@ -5,14 +5,14 @@ export default class Output {
     // Options
     this.container = _options.container;
     this.isMobile = _options.isMobile;
-    this.onChestClick = _options.onChestClick || null; // Callback for chest clicks
+    this.onChestClick = _options.onChestClick || null;
 
     // Config
     this.BASE_VIDEO_URL = "/base.mp4";
     this.CHEST_DIR = "/chest/";
     this.CHEST_PREFIX = "chest_";
     this.CHEST_PAD = 5;
-    this.CHEST_COUNT = 120;
+    this.CHEST_COUNT = this.isMobile ? 60 : 120; // Mitad de frames en móvil
     this.CHEST_EXT = ".jpg";
     
     // Chest zone (normalized inside square viewport)
@@ -31,7 +31,8 @@ export default class Output {
     this.parallaxMouse = new THREE.Vector2(0, 0);
     this.chestCtl = { state: "idle", timer: 0, frame: 0, target: 0, bias: 0 };
     this.wasHovering = false;
-    this.chestFrames = null;
+    this.chestFrames = new Array(this.CHEST_COUNT).fill(null); // Inicializar array con nulls
+    this.framesLoading = new Set(); // Track frames being loaded
     this.chestLoaded = false;
     this.lastTime = performance.now();
 
@@ -50,7 +51,6 @@ export default class Output {
     this.animate();
 
     // Event listeners
-
     this.onResize = this.onResize.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
@@ -167,23 +167,88 @@ export default class Output {
   }
 
   chestFrameUrl(i) {
-    return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(i, this.CHEST_PAD)}${this.CHEST_EXT}`;
+    const actualFrame = this.isMobile ? i * 2 : i;
+    return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(actualFrame, this.CHEST_PAD)}${this.CHEST_EXT}`;
   }
 
   async loadChestFrames() {
-    const frames = new Array(this.CHEST_COUNT);
-    for (let i = 0; i < this.CHEST_COUNT; i++) {
-      const bmp = await this.bitmapLoader.loadAsync(this.chestFrameUrl(i));
+    console.log('[loadChestFrames] Starting, isMobile:', this.isMobile);
+    
+    if (this.isMobile) {
+      // En móvil: cargar solo frames clave (0, 1, 2, mitad, y última)
+      const keyFrames = [0, 1, 2, Math.floor(this.CHEST_COUNT / 2), this.CHEST_COUNT - 1];
+      
+      for (const i of keyFrames) {
+        await this.loadFrame(i);
+      }
+      
+      this.chestLoaded = true;
+      if (this.chestFrames[0]) {
+        this.material.uniforms.tChest.value = this.chestFrames[0];
+      }
+      console.log('[loadChestFrames] Mobile: Key frames loaded');
+      
+    } else {
+      // Desktop: cargar todas
+      for (let i = 0; i < this.CHEST_COUNT; i++) {
+        await this.loadFrame(i);
+      }
+      
+      this.chestLoaded = true;
+      if (this.chestFrames[0]) {
+        this.material.uniforms.tChest.value = this.chestFrames[0];
+      }
+      console.log('[loadChestFrames] Desktop: All frames loaded');
+    }
+  }
+
+  async loadFrame(index) {
+    if (this.chestFrames[index] || this.framesLoading.has(index)) {
+      return; // Ya está cargado o cargando
+    }
+    
+    this.framesLoading.add(index);
+    
+    try {
+      const bmp = await this.bitmapLoader.loadAsync(this.chestFrameUrl(index));
       const tex = new THREE.Texture(bmp);
       tex.needsUpdate = true;
       tex.minFilter = THREE.LinearFilter;
       tex.magFilter = THREE.LinearFilter;
       tex.generateMipmaps = false;
-      frames[i] = tex;
+      this.chestFrames[index] = tex;
+    } catch (error) {
+      console.error(`[loadFrame] Failed to load frame ${index}:`, error);
+    } finally {
+      this.framesLoading.delete(index);
     }
-    this.chestFrames = frames;
-    this.chestLoaded = true;
-    this.material.uniforms.tChest.value = frames[0];
+  }
+
+  // Precargar frames cercanas cuando se acerca el hover (solo móvil)
+  async preloadNearbyFrames(currentIdx, range = 10) {
+    if (!this.isMobile) return; // Solo en móvil
+    
+    const start = Math.max(0, currentIdx - range);
+    const end = Math.min(this.CHEST_COUNT - 1, currentIdx + range);
+    
+    for (let i = start; i <= end; i++) {
+      if (!this.chestFrames[i]) {
+        this.loadFrame(i); // No await, cargar en background
+      }
+    }
+  }
+
+  findNearestLoadedFrame(targetIdx) {
+    // Buscar frame cargada más cercana
+    for (let distance = 1; distance < this.CHEST_COUNT; distance++) {
+      const lower = targetIdx - distance;
+      const upper = targetIdx + distance;
+      
+      if (lower >= 0 && this.chestFrames[lower]) return lower;
+      if (upper < this.CHEST_COUNT && this.chestFrames[upper]) return upper;
+    }
+    
+    return 0; // Fallback a frame 0
   }
 
   updateViewport() {
@@ -199,7 +264,6 @@ export default class Output {
     this.renderer.setScissorTest(true);
   }
 
-  // Helper to update mouse/touch position
   updatePointerPosition(clientX, clientY) {
     const rect = this.container.getBoundingClientRect();
     const sx = (clientX - rect.left - this.viewport.x) / this.viewport.size;
@@ -224,7 +288,6 @@ export default class Output {
     if (event.touches.length > 0) {
       const touch = event.touches[0];
       this.updatePointerPosition(touch.clientX, touch.clientY);
-      // Prevent scrolling while touching the interactive area
       if (this.hoveringChest()) {
         event.preventDefault();
       }
@@ -239,11 +302,9 @@ export default class Output {
   }
 
   onTouchEnd(event) {
-    // Check if chest was tapped
     if (this.hoveringChest()) {
       this.handleChestClick();
     }
-    // Reset position after touch ends
     this.mouseSquare.set(-1, -1);
     this.parallaxMouse.set(0, 0);
   }
@@ -256,11 +317,9 @@ export default class Output {
   }
 
   handleChestClick() {
-    // Call the callback if provided
     if (this.onChestClick && typeof this.onChestClick === 'function') {
       this.onChestClick();
     }
-
   }
 
   hoveringChest() {
@@ -279,6 +338,11 @@ export default class Output {
     if (hover && !this.wasHovering) {
       this.chestCtl.state = "pre";
       this.chestCtl.timer = 0;
+      
+      // Precargar frames cuando el usuario empieza a hover
+      if (this.isMobile) {
+        this.preloadNearbyFrames(Math.round(this.chestCtl.frame), 10);
+      }
     }
     if (!hover && this.wasHovering) {
       this.chestCtl.state = "release";
@@ -294,6 +358,11 @@ export default class Output {
       if (this.chestCtl.timer >= this.HOVER_DELAY) {
         this.chestCtl.state = "active";
         this.chestCtl.target = this.CHEST_COUNT - 1;
+        
+        // Precargar frames finales cuando se activa
+        if (this.isMobile) {
+          this.preloadNearbyFrames(this.CHEST_COUNT - 1, 15);
+        }
       } else {
         this.chestCtl.target = 2;
       }
@@ -318,12 +387,26 @@ export default class Output {
     this.chestCtl.frame = Math.max(0, Math.min(this.CHEST_COUNT - 1, this.chestCtl.frame));
     const idx = Math.round(this.chestCtl.frame);
 
-    this.material.uniforms.tChest.value = this.chestFrames[idx];
+    // Usar frame si existe, sino usar la más cercana disponible
+    if (this.chestFrames[idx]) {
+      this.material.uniforms.tChest.value = this.chestFrames[idx];
+    } else {
+      // Buscar frame más cercana disponible
+      const fallbackIdx = this.findNearestLoadedFrame(idx);
+      if (this.chestFrames[fallbackIdx]) {
+        this.material.uniforms.tChest.value = this.chestFrames[fallbackIdx];
+      }
+      
+      // Cargar la frame que falta en móvil
+      if (this.isMobile) {
+        this.loadFrame(idx);
+      }
+    }
+    
     this.material.uniforms.uBias.value = this.chestCtl.bias;
   }
 
   setupDebugOverlay() {
-    // Create a canvas overlay
     this.debugCanvas = document.createElement('canvas');
     this.debugCanvas.style.position = 'absolute';
     this.debugCanvas.style.top = '0';
@@ -346,15 +429,13 @@ export default class Output {
     const ctx = this.debugCanvas.getContext('2d');
     ctx.clearRect(0, 0, w, h);
     
-    // Draw the square viewport
     ctx.strokeStyle = 'cyan';
     ctx.lineWidth = 2;
     ctx.strokeRect(this.viewport.x, this.viewport.y, this.viewport.size, this.viewport.size);
     
-    // Draw the chest zone (converted from normalized coords)
     const z = this.CHEST_ZONE;
     const zoneX = this.viewport.x + z.x0 * this.viewport.size;
-    const zoneY = this.viewport.y + (1 - z.y1) * this.viewport.size; // Flip Y
+    const zoneY = this.viewport.y + (1 - z.y1) * this.viewport.size;
     const zoneW = (z.x1 - z.x0) * this.viewport.size;
     const zoneH = (z.y1 - z.y0) * this.viewport.size;
     
@@ -364,7 +445,6 @@ export default class Output {
     ctx.lineWidth = 3;
     ctx.strokeRect(zoneX, zoneY, zoneW, zoneH);
     
-    // Draw mouse position if inside viewport
     if (this.mouseSquare.x >= 0) {
       const mouseX = this.viewport.x + this.mouseSquare.x * this.viewport.size;
       const mouseY = this.viewport.y + (1 - this.mouseSquare.y) * this.viewport.size;
@@ -374,7 +454,6 @@ export default class Output {
       ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
       ctx.fill();
       
-      // Show coordinates
       ctx.fillStyle = 'white';
       ctx.font = '14px monospace';
       ctx.fillText(`Mouse: (${this.mouseSquare.x.toFixed(3)}, ${this.mouseSquare.y.toFixed(3)})`, 10, 20);
@@ -432,7 +511,9 @@ export default class Output {
     }
 
     if (this.chestFrames) {
-      this.chestFrames.forEach(tex => tex.dispose());
+      this.chestFrames.forEach(tex => {
+        if (tex) tex.dispose();
+      });
     }
 
     this.material.dispose();

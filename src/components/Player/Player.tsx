@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { fetchTracks, Track } from '../../services/api';
 import { StorageAudio } from '../../pages/Admin/components/StorageAudio';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds)) return '0:00';
@@ -12,6 +13,7 @@ const formatTime = (seconds: number): string => {
 };
 
 const Player = () => {
+  const isMobile = useIsMobile();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -21,6 +23,7 @@ const Player = () => {
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const pendingPlayRef = useRef(false);
@@ -59,20 +62,43 @@ const Player = () => {
     if (!audio) return;
 
     const handleCanPlay = () => {
+      console.log('[Player] Audio can play');
       setIsReady(true);
       if (pendingPlayRef.current) {
-        audio.play();
+        console.log('[Player] Playing pending track');
+        audio.play().catch(err => console.warn('[Player] Play failed:', err));
         pendingPlayRef.current = false;
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      console.log('[Player] Metadata loaded');
+      if (isMobile && !isReady) {
+        setIsReady(true);
+        // En móvil, intentar reproducir inmediatamente cuando metadata está lista
+        if (pendingPlayRef.current) {
+          console.log('[Player] Mobile: Playing on metadata loaded');
+          audio.play().catch(err => console.warn('[Player] Play failed:', err));
+          pendingPlayRef.current = false;
+        }
       }
     };
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleDurationChange = () => setDuration(audio.duration);
 
-    if (audio.readyState >= 3) {
-      handleCanPlay();
+    if (isMobile) {
+      if (audio.readyState >= 1) {
+        handleLoadedMetadata();
+      } else {
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      }
     } else {
-      audio.addEventListener('canplay', handleCanPlay);
+      if (audio.readyState >= 3) {
+        handleCanPlay();
+      } else {
+        audio.addEventListener('canplay', handleCanPlay);
+      }
     }
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -80,27 +106,41 @@ const Player = () => {
 
     return () => {
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('durationchange', handleDurationChange);
     };
-  }, [audioElement]);
+  }, [audioElement, isMobile, isReady]);
 
   // Play/pause in sync with isPlaying state
   useEffect(() => {
     if (!audioRef.current || !isReady) return;
+    
     if (isPlaying) {
-      audioRef.current.play();
+      if (isMobile && !hasUserInteracted) {
+        console.log('[Player] First interaction - loading audio');
+        audioRef.current.load();
+        setHasUserInteracted(true);
+      }
+      
+      audioRef.current.play().catch(err => {
+        console.warn('[Player] Play failed:', err);
+        setIsPlaying(false);
+      });
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying, isReady]);
+  }, [isPlaying, isReady, isMobile, hasUserInteracted]);
 
   // Auto-advance to next track when current ends
   useEffect(() => {
     const audio = audioElement;
     if (!audio) return;
 
-    const handleEnded = () => playNextTrack();
+    const handleEnded = () => {
+      console.log('[Player] Track ended, playing next');
+      playNextTrack();
+    };
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
   }, [audioElement, tracks, playedIndices, currentTrackIndex, history]);
@@ -124,28 +164,37 @@ const Player = () => {
     const nextIndex = getRandomUnplayedIndex();
     if (nextIndex === null) return;
 
+    console.log('[Player] Playing next track:', nextIndex);
+
     if (currentTrackIndex !== null) {
       setHistory(prev => [...prev, currentTrackIndex]);
     }
+    
+    // CRÍTICO: Marcar que queremos reproducir
     pendingPlayRef.current = true;
+    setIsPlaying(true); // Mantener el estado de playing
+    
     setCurrentTrackIndex(nextIndex);
     setPlayedIndices(prev => [...prev, nextIndex]);
-    setIsPlaying(true);
   };
 
   const playPreviousTrack = () => {
     if (history.length === 0) return;
 
     const previousIndex = history[history.length - 1];
+    console.log('[Player] Playing previous track:', previousIndex);
+    
     setHistory(prev => prev.slice(0, -1));
 
     if (currentTrackIndex !== null) {
       setPlayedIndices(prev => prev.filter(i => i !== currentTrackIndex));
     }
 
+    // CRÍTICO: Marcar que queremos reproducir
     pendingPlayRef.current = true;
+    setIsPlaying(true); // Mantener el estado de playing
+    
     setCurrentTrackIndex(previousIndex);
-    setIsPlaying(true);
   };
 
   const togglePlayPause = () => {
@@ -161,7 +210,7 @@ const Player = () => {
   };
 
   const currentTrack = currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
-  const controlsDisabled = !isReady;
+  const controlsDisabled = isMobile ? !currentTrack : !isReady;
 
   return (
     <div className='player'>
@@ -170,6 +219,7 @@ const Player = () => {
           bucket="tracks"
           path={currentTrack.audio_url}
           audioRef={handleAudioRef}
+          preload={isMobile ? "metadata" : "auto"} // Cambiar de "none" a "metadata"
         />
       )}
 
