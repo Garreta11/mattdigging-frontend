@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../../types/user";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
+import { Track } from "../services/api";
 
 interface AppContextType {
   user: User | null;
@@ -9,6 +10,9 @@ interface AppContextType {
   isAuthed: boolean;
   loading: boolean;
   setIsAuthed: (isAuthed: boolean) => void;
+
+  track: Track | null;
+  setTrack: (track: Track | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -17,6 +21,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [track, setTrack] = useState<Track | null>(null);
 
   useEffect(() => {
     // Check active session on mount
@@ -65,7 +70,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, setUser, isAuthed, loading, setIsAuthed }}>
+    <AppContext.Provider value={{ user, setUser, isAuthed, loading, setIsAuthed, track, setTrack }}>
       {children}
     </AppContext.Provider>
   );

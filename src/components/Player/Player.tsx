@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { fetchTracks, Track } from '../../services/api';
 import { StorageAudio } from '../../pages/Admin/components/StorageAudio';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
-import { useIsMobile } from '../../hooks/useIsMobile';
+import { useAppContext } from '../../context/AppContext';
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds)) return '0:00';
@@ -13,6 +13,8 @@ const formatTime = (seconds: number): string => {
 };
 
 const Player = () => {
+  const { track, setTrack } = useAppContext();
+
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -161,6 +163,12 @@ const Player = () => {
     currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
 
   const controlsDisabled = !currentTrack;
+
+  useEffect(() => {
+    if (currentTrack) {
+      setTrack(currentTrack);
+    }
+  }, [currentTrack]);
 
   return (
     <div className='player'>

@@ -4,7 +4,6 @@ export default class Output {
   constructor(_options = {}) {
     // Options
     this.container = _options.container;
-    this.isMobile = _options.isMobile;
     this.onChestClick = _options.onChestClick || null;
 
     // Config
@@ -44,6 +43,7 @@ export default class Output {
     this.setCamera();
     this.setupVideo();
     this.setupMaterial();
+    // this.setTrackCover();
     // this.setupDebugOverlay();
     this.loadChestFrames();
     
@@ -80,6 +80,114 @@ export default class Output {
 
   setCamera() {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+  }
+
+  async setTrackCover(config = {}) {
+    // Si no hay config con contenido real, no crear/mostrar el mesh
+    if (!config.text && !config.subtitle && !config.backgroundImage) {
+      // Si ya existe el mesh, ocultarlo o eliminarlo
+      if (this.trackCoverMesh) {
+        this.trackCoverMesh.visible = false;
+      }
+      return;
+    }
+  
+    // Si llegamos aquí, hay contenido para mostrar
+    if (!this.trackCover) {
+      this.trackCover = new THREE.PlaneGeometry(0.45, 0.45);
+    }
+    
+    // Generar imagen
+    const canvas = await this.generateCoverImage(config);
+    
+    // Crear textura
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    this.trackCoverMaterial = new THREE.MeshBasicMaterial({ 
+      map: texture,
+      transparent: true
+    });
+    
+    if (this.trackCoverMesh) {
+      // Ya existe, solo actualizar material y hacerlo visible
+      if (this.trackCoverMesh.material.map) {
+        this.trackCoverMesh.material.map.dispose();
+      }
+      this.trackCoverMesh.material.dispose();
+      this.trackCoverMesh.material = this.trackCoverMaterial;
+      this.trackCoverMesh.visible = true;
+    } else {
+      // Primera vez, crear mesh
+      this.trackCoverMesh = new THREE.Mesh(this.trackCover, this.trackCoverMaterial);
+      this.trackCoverMesh.position.set(0.49, 0.32, 0);
+      this.scene.add(this.trackCoverMesh);
+    }
+  }
+
+  async generateCoverImage(config) {
+    const {
+      backgroundImage = null,
+      text = '',
+      subtitle = '',
+      backgroundColor = '#1a1a1a',
+      textColor = '#ffffff',
+      fontSize = 48,
+      subtitleSize = 32
+    } = config;
+  
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+  
+    // Si hay imagen de fondo, cargarla
+    if (backgroundImage) {
+      const img = await this.loadImage(backgroundImage);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Overlay oscuro para mejorar legibilidad del texto
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Fondo sólido
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  
+    // Texto principal
+    if (text) {
+      ctx.fillStyle = textColor;
+      ctx.font = `bold ${fontSize}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Sombra para mejor legibilidad
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2 - 30);
+    }
+  
+    // Subtítulo
+    if (subtitle) {
+      ctx.font = `${subtitleSize}px Arial`;
+      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 40);
+    }
+  
+    return canvas;
+  }
+
+  loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous'; // Importante para imágenes externas
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
   }
 
   setupVideo() {
@@ -334,6 +442,13 @@ export default class Output {
 
     const hover = this.hoveringChest();
 
+    // Cambiar cursor según hover
+    if (hover) {
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'auto';
+    }
+
     // Edge-triggered transitions
     if (hover && !this.wasHovering) {
       this.chestCtl.state = "pre";
@@ -478,6 +593,8 @@ export default class Output {
 
   setIsMobile(value) {
     this.isMobile = value;
+
+    this.CHEST_COUNT = this.isMobile ? 60 : 120;
   }
 
   animate() {

@@ -136,7 +136,6 @@
   display: none;
 
   @include respond-to(md) {
-    display: block;
     position: fixed;
     top: 0;
     right: -100%;
@@ -148,13 +147,16 @@
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    padding: 5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     &--open {
       right: 0;
     }
 
     &__content {
-      padding: 5rem 2rem 2rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;

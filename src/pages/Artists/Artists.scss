@@ -6,6 +6,10 @@
   padding: 0;
   color: #fff;
 
+  @include respond-to(md) {
+    padding-top: 5rem;
+  }
+
   &__header {
     display: flex;
     justify-content: flex-start;

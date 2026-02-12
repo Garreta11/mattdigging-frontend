@@ -3,7 +3,7 @@ import './Header.scss';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { useAppContext } from '../../context/AppContext';
-/* import UserInfo from '../UserInfo/UserInfo'; */
+import { supabase } from '../../lib/supabase';
 
 const Header = () => {
   const { user } = useAppContext();
@@ -65,6 +65,20 @@ const Header = () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  // Logout
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      console.log("Logged out successfully");
+      // The auth state listener will handle updating the context
+      // User will automatically be redirected to SignIn by RequireAuth
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   // Early return AFTER all hooks
   if (location.pathname.startsWith("/admin")) return null;
@@ -193,6 +207,10 @@ const Header = () => {
                 <UserInfo />
               </div> */}
             </div>
+
+            <button className="header__mobile-menu__logout" onClick={handleLogout}>
+              Logout
+            </button>
           </nav>
         </header>
       )}
