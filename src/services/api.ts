@@ -64,14 +64,8 @@ export const fetchArtists = async (): Promise<Artist[]> => {
   return response.json();
 };
 
-export const fetchTracks = async (): Promise<Track[]> => {
-  const response = await fetch(`${API_BASE_URL}/tracks`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch tracks");
-  }
+export const fetchTracks = async (queryString: string = ''): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks${queryString}`);
+  if (!response.ok) throw new Error('Failed to fetch tracks');
   return response.json();
 };

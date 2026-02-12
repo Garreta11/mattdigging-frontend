@@ -86,6 +86,8 @@ input {
 .main-content {
   position: relative;
 
+  width: 100%;
+
   animation: fadeIn 1s ease-in-out forwards;
   overflow: hidden;
 
@@ -145,7 +147,6 @@ input {
 // Swiper
 .swiper {
   width: 100%;
-  height: 300px; // or whatever height you want
 }
 
 .swiper-slide {
@@ -153,6 +154,34 @@ input {
   align-items: center;
   justify-content: center;
   width: fit-content !important;
+}
+
+.swiper-button-prev {
+  height: 100% !important;
+  top: 0 !important;
+  margin-top: 0 !important;
+
+  svg {
+    width: 20px !important;
+    fill: var(--primary-color) !important;
+    * {
+      fill: var(--primary-color) !important;
+    }
+  }
+}
+
+.swiper-button-next {
+  height: 100% !important;
+  top: 0 !important;
+  margin-top: 0 !important;
+
+  svg {
+    width: 20px !important;
+    fill: var(--primary-color) !important;
+    * {
+      fill: var(--primary-color) !important;
+    }
+  }
 }
 
 // Animations

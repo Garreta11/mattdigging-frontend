@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import './TrackModal.scss';
 import { Track } from '../../services/api';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
+import { useNavigate } from 'react-router-dom';
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface TrackModalProps {
 }
 
 const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
+  const navigate = useNavigate();
+
   // Cerrar con ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -33,6 +36,20 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
 
   const genres = track.track_genres?.map(tg => tg.genre) ?? [];
   const moods = track.track_moods?.map(tm => tm.mood) ?? [];
+
+  const handleGenreClick = (slug: string) => {
+    onClose(); // Cerrar el modal primero
+    setTimeout(() => {
+      navigate(`/playlists?genre=${slug}`);
+    }, 300);
+  };
+
+  const handleMoodClick = (slug: string) => {
+    onClose(); // Cerrar el modal primero
+    setTimeout(() => {
+      navigate(`/playlists?mood=${slug}`);
+    }, 300);
+  };
 
   return (
     <div className="track-modal" onClick={onClose}>
@@ -109,10 +126,14 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
 
             {genres.length > 0 && (
               <div className="track-modal__tags">
-                <span className="track-modal__tags-label">Genres</span>
+                <div className="track-modal__tags-label">Genres</div>
                 <div className="track-modal__tags-list">
                   {genres.map((genre) => (
-                    <span key={genre.id} className="track-modal__tag track-modal__tag--genre">
+                    <span 
+                      key={genre.id} 
+                      className="track-modal__tag track-modal__tag--genre"
+                      onClick={() => handleGenreClick(genre.slug)}
+                    >
                       {genre.name}
                     </span>
                   ))}
@@ -125,7 +146,11 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
                 <span className="track-modal__tags-label">Moods</span>
                 <div className="track-modal__tags-list">
                   {moods.map((mood) => (
-                    <span key={mood.id} className="track-modal__tag track-modal__tag--mood">
+                    <span 
+                      key={mood.id} 
+                      className="track-modal__tag track-modal__tag--mood"
+                      onClick={() => handleMoodClick(mood.slug)}
+                    >
                       {mood.name}
                     </span>
                   ))}

@@ -177,20 +177,20 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
 
-  &__tags-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #666;
-  }
+    &-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+    }
 
-  &__tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    &-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
   }
 
   &__tag {
@@ -201,25 +201,26 @@
     font-size: 13px;
     font-weight: 500;
     transition: all 0.2s ease;
-
+    cursor: pointer; // 👈 Añade cursor pointer
+  
     &--genre {
       background: rgba(99, 102, 241, 0.15);
       color: #a5b4fc;
       border: 1px solid rgba(99, 102, 241, 0.3);
-
+  
       &:hover {
-        background: rgba(99, 102, 241, 0.25);
+        background: rgba(99, 102, 241, 0.3); // 👈 Hover más intenso
         border-color: rgba(99, 102, 241, 0.5);
       }
     }
-
+  
     &--mood {
       background: rgba(236, 72, 153, 0.15);
       color: #f9a8d4;
       border: 1px solid rgba(236, 72, 153, 0.3);
-
+  
       &:hover {
-        background: rgba(236, 72, 153, 0.25);
+        background: rgba(236, 72, 153, 0.3); // 👈 Hover más intenso
         border-color: rgba(236, 72, 153, 0.5);
       }
     }
