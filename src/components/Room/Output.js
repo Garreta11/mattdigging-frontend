@@ -5,6 +5,7 @@ export default class Output {
     // Options
     this.container = _options.container;
     this.onChestClick = _options.onChestClick || null;
+    this.onTrackCoverClick = _options.onTrackCoverClick || null;
 
     // Config
     this.BASE_VIDEO_URL = "/base.mp4";
@@ -16,6 +17,7 @@ export default class Output {
     
     // Chest zone (normalized inside square viewport)
     this.CHEST_ZONE = { x0: 0.2, x1: 0.56, y0: 0, y1: 0.38 };
+    this.TRACK_COVER_ZONE = { x0: 0.6, x1: 0.9, y0: 0.5, y1: 0.8 };
     
     // Interaction feel
     this.HOVER_DELAY = 0.10;
@@ -34,6 +36,7 @@ export default class Output {
     this.framesLoading = new Set(); // Track frames being loaded
     this.chestLoaded = false;
     this.lastTime = performance.now();
+    this.interactionsEnabled = true;
 
     this.bitmapLoader = new THREE.ImageBitmapLoader();
     this.bitmapLoader.setOptions({ imageOrientation: "flipY" });
@@ -128,12 +131,7 @@ export default class Output {
   async generateCoverImage(config) {
     const {
       backgroundImage = null,
-      text = '',
-      subtitle = '',
       backgroundColor = '#1a1a1a',
-      textColor = '#ffffff',
-      fontSize = 48,
-      subtitleSize = 32
     } = config;
   
     const canvas = document.createElement('canvas');
@@ -154,29 +152,7 @@ export default class Output {
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-  
-    // Texto principal
-    if (text) {
-      ctx.fillStyle = textColor;
-      ctx.font = `bold ${fontSize}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      // Sombra para mejor legibilidad
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
-      
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2 - 30);
-    }
-  
-    // Subtítulo
-    if (subtitle) {
-      ctx.font = `${subtitleSize}px Arial`;
-      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 40);
-    }
-  
+
     return canvas;
   }
 
@@ -359,6 +335,24 @@ export default class Output {
     return 0; // Fallback a frame 0
   }
 
+  // Método para habilitar/deshabilitar interacciones
+  setInteractionsEnabled(enabled) {
+    this.interactionsEnabled = enabled;
+    
+    // Si se deshabilitan, resetear el estado del mouse y cursor
+    if (!enabled) {
+      this.mouseSquare.set(-1, -1);
+      this.parallaxMouse.set(0, 0);
+      document.body.style.cursor = 'auto';
+      
+      // Forzar cierre del chest si estaba abierto
+      if (this.chestCtl.state !== "idle") {
+        this.chestCtl.state = "release";
+        this.chestCtl.target = 0;
+      }
+    }
+  }
+
   updateViewport() {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
@@ -373,6 +367,12 @@ export default class Output {
   }
 
   updatePointerPosition(clientX, clientY) {
+    if (!this.interactionsEnabled) {
+      this.mouseSquare.set(-1, -1);
+      this.parallaxMouse.set(0, 0);
+      return;
+    }
+
     const rect = this.container.getBoundingClientRect();
     const sx = (clientX - rect.left - this.viewport.x) / this.viewport.size;
     const sy = 1.0 - (clientY - rect.top - this.viewport.y) / this.viewport.size;
@@ -410,17 +410,39 @@ export default class Output {
   }
 
   onTouchEnd(event) {
+    if (!this.interactionsEnabled) {
+      this.mouseSquare.set(-1, -1);
+      this.parallaxMouse.set(0, 0);
+      return;
+    }
+
     if (this.hoveringChest()) {
       this.handleChestClick();
+      this.mouseSquare.set(-1, -1);
+      this.parallaxMouse.set(0, 0);
+      return;
     }
+
+    if (this.hoveringTrackCover()) {
+      this.handleTrackCoverClick();
+    }
+    
     this.mouseSquare.set(-1, -1);
     this.parallaxMouse.set(0, 0);
   }
 
   onClick(event) {
+    if (!this.interactionsEnabled) return;
+
     this.updatePointerPosition(event.clientX, event.clientY);
+    
     if (this.hoveringChest()) {
       this.handleChestClick();
+      return;
+    }
+
+    if (this.hoveringTrackCover()) {
+      this.handleTrackCoverClick();
     }
   }
 
@@ -430,9 +452,24 @@ export default class Output {
     }
   }
 
+  handleTrackCoverClick() {
+    if (this.onTrackCoverClick && typeof this.onTrackCoverClick === 'function') {
+      this.onTrackCoverClick();
+    }
+  }
+
   hoveringChest() {
+    if (!this.interactionsEnabled) return false;
     if (this.mouseSquare.x < 0) return false;
     const z = this.CHEST_ZONE;
+    return this.mouseSquare.x > z.x0 && this.mouseSquare.x < z.x1 &&
+           this.mouseSquare.y > z.y0 && this.mouseSquare.y < z.y1;
+  }
+
+  hoveringTrackCover() {
+    if (!this.interactionsEnabled) return false;
+    if (this.mouseSquare.x < 0) return false;
+    const z = this.TRACK_COVER_ZONE;
     return this.mouseSquare.x > z.x0 && this.mouseSquare.x < z.x1 &&
            this.mouseSquare.y > z.y0 && this.mouseSquare.y < z.y1;
   }
@@ -440,17 +477,18 @@ export default class Output {
   updateChest(dt) {
     if (!this.chestLoaded) return;
 
-    const hover = this.hoveringChest();
+    const hoverChest = this.hoveringChest();
+    const hoverCover = this.hoveringTrackCover();
 
     // Cambiar cursor según hover
-    if (hover) {
+    if (hoverChest || hoverCover) {
       document.body.style.cursor = 'pointer';
     } else {
       document.body.style.cursor = 'auto';
     }
 
     // Edge-triggered transitions
-    if (hover && !this.wasHovering) {
+    if (hoverChest && !this.wasHovering) {
       this.chestCtl.state = "pre";
       this.chestCtl.timer = 0;
       
@@ -459,11 +497,11 @@ export default class Output {
         this.preloadNearbyFrames(Math.round(this.chestCtl.frame), 10);
       }
     }
-    if (!hover && this.wasHovering) {
+    if (!hoverChest && this.wasHovering) {
       this.chestCtl.state = "release";
       this.chestCtl.target = 0;
     }
-    this.wasHovering = hover;
+    this.wasHovering = hoverChest;
 
     if (this.chestCtl.state === "pre") {
       this.chestCtl.timer += dt;
@@ -544,36 +582,69 @@ export default class Output {
     const ctx = this.debugCanvas.getContext('2d');
     ctx.clearRect(0, 0, w, h);
     
+    // Viewport square (cyan)
     ctx.strokeStyle = 'cyan';
     ctx.lineWidth = 2;
     ctx.strokeRect(this.viewport.x, this.viewport.y, this.viewport.size, this.viewport.size);
     
-    const z = this.CHEST_ZONE;
-    const zoneX = this.viewport.x + z.x0 * this.viewport.size;
-    const zoneY = this.viewport.y + (1 - z.y1) * this.viewport.size;
-    const zoneW = (z.x1 - z.x0) * this.viewport.size;
-    const zoneH = (z.y1 - z.y0) * this.viewport.size;
+    // CHEST ZONE (red)
+    const chestZone = this.CHEST_ZONE;
+    const chestZoneX = this.viewport.x + chestZone.x0 * this.viewport.size;
+    const chestZoneY = this.viewport.y + (1 - chestZone.y1) * this.viewport.size;
+    const chestZoneW = (chestZone.x1 - chestZone.x0) * this.viewport.size;
+    const chestZoneH = (chestZone.y1 - chestZone.y0) * this.viewport.size;
     
     ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.fillRect(zoneX, zoneY, zoneW, zoneH);
+    ctx.fillRect(chestZoneX, chestZoneY, chestZoneW, chestZoneH);
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 3;
-    ctx.strokeRect(zoneX, zoneY, zoneW, zoneH);
+    ctx.strokeRect(chestZoneX, chestZoneY, chestZoneW, chestZoneH);
     
+    // Label for chest zone
+    ctx.fillStyle = 'white';
+    ctx.font = '12px monospace';
+    ctx.fillText('CHEST', chestZoneX + 5, chestZoneY + 15);
+    
+    // TRACK COVER ZONE (green)
+    const coverZone = this.TRACK_COVER_ZONE;
+    const coverZoneX = this.viewport.x + coverZone.x0 * this.viewport.size;
+    const coverZoneY = this.viewport.y + (1 - coverZone.y1) * this.viewport.size;
+    const coverZoneW = (coverZone.x1 - coverZone.x0) * this.viewport.size;
+    const coverZoneH = (coverZone.y1 - coverZone.y0) * this.viewport.size;
+    
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+    ctx.fillRect(coverZoneX, coverZoneY, coverZoneW, coverZoneH);
+    ctx.strokeStyle = 'lime';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(coverZoneX, coverZoneY, coverZoneW, coverZoneH);
+    
+    // Label for track cover zone
+    ctx.fillStyle = 'white';
+    ctx.font = '12px monospace';
+    ctx.fillText('COVER', coverZoneX + 5, coverZoneY + 15);
+    
+    // Mouse cursor
     if (this.mouseSquare.x >= 0) {
       const mouseX = this.viewport.x + this.mouseSquare.x * this.viewport.size;
       const mouseY = this.viewport.y + (1 - this.mouseSquare.y) * this.viewport.size;
       
-      ctx.fillStyle = this.hoveringChest() ? 'lime' : 'yellow';
+      // Color según dónde está hovering
+      let cursorColor = 'yellow';
+      if (this.hoveringChest()) cursorColor = 'red';
+      if (this.hoveringTrackCover()) cursorColor = 'lime';
+      
+      ctx.fillStyle = cursorColor;
       ctx.beginPath();
       ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
       ctx.fill();
       
+      // Info text
       ctx.fillStyle = 'white';
       ctx.font = '14px monospace';
       ctx.fillText(`Mouse: (${this.mouseSquare.x.toFixed(3)}, ${this.mouseSquare.y.toFixed(3)})`, 10, 20);
-      ctx.fillText(`Hovering: ${this.hoveringChest()}`, 10, 40);
-      ctx.fillText(`Frame: ${Math.round(this.chestCtl.frame)}`, 10, 60);
+      ctx.fillText(`Hovering Chest: ${this.hoveringChest()}`, 10, 40);
+      ctx.fillText(`Hovering Cover: ${this.hoveringTrackCover()}`, 10, 60);
+      ctx.fillText(`Frame: ${Math.round(this.chestCtl.frame)}`, 10, 80);
     }
   }
   

@@ -32,6 +32,7 @@ const Player = () => {
     const loadTracks = async () => {
       const data = await fetchTracks();
       setTracks(data);
+      console.log(data);
 
       if (data.length > 0) {
         const randomIndex = Math.floor(Math.random() * data.length);
@@ -184,15 +185,9 @@ const Player = () => {
       <div className='player__info'>
         {currentTrack ? (
           <>
-            <StorageImage
-              bucket="covers"
-              path={currentTrack.cover_url}
-              alt={currentTrack.title}
-              className="player__info__cover"
-            />
             <div className='player__info__text'>
               <h3>{currentTrack.title}</h3>
-              <p>{currentTrack?.album_name}</p>
+              <p>{currentTrack?.artist?.name}</p>
             </div>
           </>
         ) : (

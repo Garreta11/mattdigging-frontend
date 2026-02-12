@@ -25,6 +25,7 @@ export interface Artist {
 export interface Track {
   id: number;
   title: string;
+  artist: Artist;
   artist_id: number;
   album_name: string;
   year: number;
@@ -35,6 +36,8 @@ export interface Track {
   cover_url: string;
   description: string;
   is_free: boolean;
+  track_genres?: Array<{ genre: Genre }>;
+  track_moods?: Array<{ mood: Mood }>;
 }
 
 export const fetchGenres = async (): Promise<Genre[]> => {

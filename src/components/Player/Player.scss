@@ -20,7 +20,7 @@
 
   &__controls {
 
-    width: 40%;
+    width: 50%;
 
     @include respond-to(md) {
       width: 100%;
@@ -137,7 +137,7 @@
     align-items: center;
     gap: 1rem;
     text-align: left;
-    width: 60%;
+    width: 50%;
 
     @include respond-to(md) {
       width: 100%;
@@ -151,7 +151,10 @@
     }
 
     &__text {
-      width: calc(80% - 56px);
+      width: 100%;
+      @include respond-to(md) {
+        text-align: center;
+      }
     }
 
     h3 {
@@ -173,7 +176,4 @@
       color: #999;
     }
   }
-
-  
-  
 }
