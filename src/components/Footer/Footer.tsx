@@ -16,9 +16,7 @@ const Footer = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      console.log("Logged out successfully");
-      // The auth state listener will handle updating the context
+            // The auth state listener will handle updating the context
       // User will automatically be redirected to SignIn by RequireAuth
     } catch (error) {
       console.error("Error logging out:", error);

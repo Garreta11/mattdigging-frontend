@@ -1,5 +1,5 @@
 .track-modal {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -80,6 +80,7 @@
       grid-template-columns: 1fr;
       gap: 24px;
       padding: 24px;
+      padding-top: 80px;
     }
   }
 

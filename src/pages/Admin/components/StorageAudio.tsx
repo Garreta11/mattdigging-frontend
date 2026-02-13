@@ -27,7 +27,6 @@ export function StorageAudio({
   // Llamar al callback cuando la URL cambia
   useEffect(() => {
     if (url && onSourceChange) {
-      console.log('[StorageAudio] URL changed, calling onSourceChange');
       onSourceChange();
     }
   }, [url, onSourceChange]);

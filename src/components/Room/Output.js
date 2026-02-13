@@ -256,7 +256,6 @@ export default class Output {
   }
 
   async loadChestFrames() {
-    console.log('[loadChestFrames] Starting, isMobile:', this.isMobile);
     
     if (this.isMobile) {
       // En móvil: cargar solo frames clave (0, 1, 2, mitad, y última)
@@ -270,7 +269,6 @@ export default class Output {
       if (this.chestFrames[0]) {
         this.material.uniforms.tChest.value = this.chestFrames[0];
       }
-      console.log('[loadChestFrames] Mobile: Key frames loaded');
       
     } else {
       // Desktop: cargar todas
@@ -282,7 +280,6 @@ export default class Output {
       if (this.chestFrames[0]) {
         this.material.uniforms.tChest.value = this.chestFrames[0];
       }
-      console.log('[loadChestFrames] Desktop: All frames loaded');
     }
   }
 

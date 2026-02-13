@@ -15,8 +15,6 @@ const Admin = () => {
   const [moods, setMoods] = React.useState<Mood[]>([]);
   const [selections, setSelections] = React.useState<Selection[]>([]);
 
-  console.log('ADMIN PAGE');
-
   const api = useAdminApi();
 
   const refreshArtists = React.useCallback(async () => {

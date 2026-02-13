@@ -16,11 +16,13 @@ const Player = () => {
   const { track, setTrack, playerTrackList, setPlayerTrackList, playlistName } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playedIndices, setPlayedIndices] = useState<number[]>([]);
   const [history, setHistory] = useState<number[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [controlsDisabled, setControlsDisabled] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
@@ -37,13 +39,11 @@ const Player = () => {
     const loadTracks = async () => {
       const data = await fetchTracks();
       setPlayerTrackList(data);
-      console.log('Initial tracks loaded:', data);
 
       if (data.length > 0) {
         const randomIndex = Math.floor(Math.random() * data.length);
         setCurrentTrackIndex(randomIndex);
         setPlayedIndices([randomIndex]);
-        // NO establecer isPlaying aquí, dejar que el usuario lo active manualmente
       }
     };
 
@@ -54,18 +54,28 @@ const Player = () => {
   // REACT TO PLAYLIST CHANGES
   // --------------------------------
   useEffect(() => {
-    // Solo reaccionar si ya se inicializó y playerTrackList tiene contenido
     if (!hasInitialized.current || playerTrackList.length === 0) return;
-
-    console.log('Playlist changed:', playerTrackList);
     
-    // Resetear el estado cuando cambie la playlist
     const randomIndex = Math.floor(Math.random() * playerTrackList.length);
     setCurrentTrackIndex(randomIndex);
     setPlayedIndices([randomIndex]);
     setHistory([]);
-    setIsPlaying(false); // Auto-play cuando se carga nueva playlist
+    setIsPlaying(false);
   }, [playerTrackList]);
+
+  // --------------------------------
+  // UPDATE CURRENT TRACK cuando cambie el índice
+  // --------------------------------
+  useEffect(() => {
+    if (currentTrackIndex !== null && playerTrackList.length > 0) {
+      const track = playerTrackList[currentTrackIndex];
+      setCurrentTrack(track);
+      setControlsDisabled(false);
+    } else {
+      setCurrentTrack(null);
+      setControlsDisabled(true);
+    }
+  }, [currentTrackIndex, playerTrackList]);
 
   // --------------------------------
   // REACT TO TRACK CHANGES (cuando se selecciona un track específico)
@@ -73,80 +83,124 @@ const Player = () => {
   useEffect(() => {
     if (!track || playerTrackList.length === 0) return;
 
-    // Buscar el índice del track en la playlist actual
     const trackIndex = playerTrackList.findIndex(t => t.id === track.id);
     
     if (trackIndex !== -1) {
-      console.log('Track change detected:', track, 'Index:', trackIndex, 'Current:', currentTrackIndex);
       
-      // Si el track ID cambió o si es la primera vez
       if (previousTrackId.current !== track.id) {
-        console.log('Track ID changed, updating player');
         previousTrackId.current = track.id;
         isManualTrackChange.current = true;
         
-        // Actualizar el índice actual
         if (currentTrackIndex !== null && currentTrackIndex !== trackIndex) {
           setHistory(prev => [...prev, currentTrackIndex]);
         }
         
         setCurrentTrackIndex(trackIndex);
         
-        // Solo agregar a playedIndices si no está ya
         if (!playedIndices.includes(trackIndex)) {
           setPlayedIndices(prev => [...prev, trackIndex]);
         }
         
-        setIsPlaying(true); // Auto-play cuando se selecciona un track
+        setIsPlaying(true);
       }
     }
-  }, [track, playerTrackList]);
+  }, [track, playerTrackList, currentTrackIndex, playedIndices]);
+
+  // --------------------------------
+  // RESET DURATION WHEN TRACK CHANGES
+  // --------------------------------
+  useEffect(() => {
+    setDuration(0);
+    setCurrentTime(0);
+  }, [currentTrack]);
 
   // --------------------------------
   // AUDIO EVENTS + SYNC PLAYING STATE
   // --------------------------------
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    
+    if (!audio || !currentTrack) {
+      return;
+    }
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const updateDuration = () => {
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+      // Fallback: actualizar duración si aún no se ha establecido
+      if (duration === 0 && audio.duration) {
+        updateDuration();
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      updateDuration();
+    };
+
+    const handleLoadedData = () => {
+      updateDuration();
+    };
+
+    const handleCanPlay = () => {
+      updateDuration();
+    };
+
+    const handleDurationChange = () => {
+      updateDuration();
+    };
+
     const handleEnded = () => playNextTrack();
     
-    // Sincronizar el estado isPlaying con el estado real del audio
     const handlePlay = () => {
-      console.log('Audio play event');
       setIsPlaying(true);
+      updateDuration();
     };
+
     const handlePause = () => {
-      console.log('Audio pause event');
       setIsPlaying(false);
     };
 
+    // Añadir múltiples listeners para asegurar que capturamos la duración
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
 
     // Sincronizar estado inicial
     setIsPlaying(!audio.paused);
+    
+    // Intentar obtener la duración inmediatamente si está disponible
+    if (audio.readyState >= 1) { // HAVE_METADATA
+      updateDuration();
+    }
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
     };
-  }, [currentTrackIndex]);
+  }, [currentTrack]); // Solo depende de currentTrack
 
   // --------------------------------
   // PLAY / PAUSE CONTROL
   // --------------------------------
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentTrack) return;
 
     if (isPlaying) {
       audio.play().catch((err) => {
@@ -156,14 +210,14 @@ const Player = () => {
     } else {
       audio.pause();
     }
-  }, [isPlaying, currentTrackIndex]);
+  }, [isPlaying, currentTrack]);
 
   // --------------------------------
   // AUTO PLAY WHEN TRACK CHANGES
   // --------------------------------
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentTrack) return;
 
     const handleCanPlay = () => {
       if (isPlaying) {
@@ -179,7 +233,7 @@ const Player = () => {
     return () => {
       audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, [currentTrackIndex, isPlaying]);
+  }, [currentTrack, isPlaying]);
 
   // --------------------------------
   // RANDOM LOGIC
@@ -189,11 +243,17 @@ const Player = () => {
 
     if (playedIndices.length >= playerTrackList.length) {
       setPlayedIndices([]);
+      return Math.floor(Math.random() * playerTrackList.length);
     }
 
     const available = playerTrackList
       .map((_, i) => i)
       .filter(i => !playedIndices.includes(i));
+
+    if (available.length === 0) {
+      setPlayedIndices([]);
+      return Math.floor(Math.random() * playerTrackList.length);
+    }
 
     return available[Math.floor(Math.random() * available.length)];
   };
@@ -204,13 +264,14 @@ const Player = () => {
   const playNextTrack = () => {
     const nextIndex = getRandomUnplayedIndex();
     if (nextIndex === null) return;
-
+  
     if (currentTrackIndex !== null) {
       setHistory(prev => [...prev, currentTrackIndex]);
     }
-
+  
     setCurrentTrackIndex(nextIndex);
     setPlayedIndices(prev => [...prev, nextIndex]);
+    setIsPlaying(true);
   };
 
   // --------------------------------
@@ -222,6 +283,7 @@ const Player = () => {
     const previousIndex = history[history.length - 1];
     setHistory(prev => prev.slice(0, -1));
     setCurrentTrackIndex(previousIndex);
+    setIsPlaying(true);
   };
 
   // --------------------------------
@@ -241,39 +303,32 @@ const Player = () => {
     setCurrentTime(newTime);
   };
 
-  const currentTrack =
-    currentTrackIndex !== null ? playerTrackList[currentTrackIndex] : null;
-
-  const controlsDisabled = !currentTrack;
-
-  // Actualizar el track en el contexto cuando cambie currentTrackIndex
-  // PERO solo si no fue un cambio manual
+  // --------------------------------
+  // Actualizar el track en el contexto cuando cambie currentTrack
+  // --------------------------------
   useEffect(() => {
     if (currentTrack) {
-      // Si fue un cambio manual, no actualizar el contexto
       if (isManualTrackChange.current) {
         isManualTrackChange.current = false;
         return;
       }
       
-      // Solo actualizar si el ID cambió
       if (currentTrack.id !== previousTrackId.current) {
         previousTrackId.current = currentTrack.id;
         setTrack(currentTrack);
       }
     }
-  }, [currentTrackIndex, currentTrack, setTrack]);
+  }, [currentTrack, setTrack]);
 
   return (
     <div className='player'>
-      {currentTrack && (
-        <StorageAudio
-          bucket="tracks"
-          path={currentTrack.audio_url}
-          audioRef={audioRef}
-          preload={"auto"}
-        />
-      )}
+      {/* Siempre renderiza el audio, nunca se desmonta */}
+      <StorageAudio
+        bucket="tracks"
+        path={currentTrack ? currentTrack.audio_url : ''}
+        audioRef={audioRef}
+        preload="auto"
+      />
 
       <div className='player__info'>
         {currentTrack ? (
@@ -338,7 +393,7 @@ const Player = () => {
           <div
             className={`player__controls__progress__bar${controlsDisabled ? ' player__controls__progress__bar--disabled' : ''}`}
             onClick={(e) => {
-              if (controlsDisabled || !audioRef.current) return;
+              if (controlsDisabled || !audioRef.current || duration === 0) return;
               const rect = e.currentTarget.getBoundingClientRect();
               const ratio = (e.clientX - rect.left) / rect.width;
               const newTime = ratio * duration;

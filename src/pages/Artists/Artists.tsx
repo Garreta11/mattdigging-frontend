@@ -5,6 +5,7 @@ import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from 'react-router-dom';
 import { fetchArtists, Artist } from '../../services/api';
 import { StorageImage } from "../Admin/components/StorageImage";
+import ArtistModal from "../../components/ArtistModal/ArtistModal";
 
 const MAX_ARTISTS_TO_SHOW = 30;
 
@@ -32,7 +33,6 @@ const Artists = () => {
       try {
         setIsLoading(true);
         const data = await fetchArtists();
-        console.log(data);
         setArtists(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load artists');
@@ -108,38 +108,11 @@ const Artists = () => {
 
       {/* Modal */}
       {isModalOpen && modalArtist && (
-        <div className="artists__modal" onClick={handleCloseModal}>
-          <div className="artists__modal__content" onClick={(e) => e.stopPropagation()}>
-            <button className="artists__modal__close" onClick={handleCloseModal}>
-              <FiX size={24} />
-            </button>
-
-            {modalArtist.photo_url && (
-              <div className="artists__modal__image">
-                <StorageImage
-                  bucket="artist_photos"
-                  path={modalArtist.photo_url}
-                  alt={modalArtist.name}
-                  className="artists__modal__image"
-                />
-              </div>
-            )}
-
-            <div className="artists__modal__info">
-              <h1 className="artists__modal__name">{modalArtist.name}</h1>
-
-              {modalArtist.country && (
-                <p className="artists__modal__country">{modalArtist.country}</p>
-              )}
-              
-
-              {modalArtist.bio && (
-                <p className="artists__modal__bio">{modalArtist.bio}</p>
-              )}
-
-            </div>
-          </div>
-        </div>
+        <ArtistModal
+          artist={modalArtist}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
       )}
     </section>
   );

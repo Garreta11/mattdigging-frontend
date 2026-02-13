@@ -42,10 +42,8 @@ const Room: React.FC = () => {
     outputRef.current = new Output({
       container: roomRef.current,
       onChestClick: () => {
-        console.log('chest clicked');
       },
       onTrackCoverClick: () => {
-        console.log('track cover clicked');
         setIsModalOpen(true);
       }
     });

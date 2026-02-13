@@ -52,9 +52,7 @@ const PlaylistsPage = () => {
           if (genreParam) params.append('genre', genreParam);
           if (moodParam) params.append('mood', moodParam);
           
-          console.log(params.toString());
           const data = await fetchTracks(`?${params.toString()}`);
-          console.log('Tracks loaded:', data.length);
           setTracks(data);
         } else {
           // Si no hay filtro, cargar géneros y moods
@@ -125,7 +123,6 @@ const PlaylistsPage = () => {
   };
 
   const handleTrackClick = async (track: Track) => {
-    console.log(track);
     
     // Establecer el nombre de la playlist
     if (genreParam) {
@@ -168,7 +165,6 @@ const PlaylistsPage = () => {
       ];
       
       const genre = genres.find(g => g.slug === genreParam);
-      console.log(genre);
       if (genre) {
         const randomPrefix = genrePrefixes[Math.floor(Math.random() * genrePrefixes.length)];
         return `${randomPrefix} <span>${genre.name}</span>`;
