@@ -9,6 +9,15 @@
   cursor: pointer;
   transition: all 0.2s ease;
 
+  &--playing {
+    background: rgba(29, 185, 84, 0.1); // Verde suave
+    border-left: 3px solid var(--primary-color, #1db954);
+    
+    .trackItem__info h3 {
+      color: var(--primary-color, #1db954);
+    }
+  }
+
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     transform: translateY(-2px);

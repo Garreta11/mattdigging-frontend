@@ -13,6 +13,16 @@ interface AppContextType {
 
   track: Track | null;
   setTrack: (track: Track | null) => void;
+
+  playerTrackList: Track[];
+  setPlayerTrackList: (trackList: Track[]) => void;
+
+  playlistName: string | null;
+  setPlaylistName: (name: string | null) => void;
+
+  playlistReady: boolean;
+  setPlaylistReady: (ready: boolean) => void;
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -22,6 +32,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [track, setTrack] = useState<Track | null>(null);
+  const [playerTrackList, setPlayerTrackList] = useState<Track[]>([]);
+  const [playlistName, setPlaylistName] = useState<string | null>(null);
+  const [playlistReady, setPlaylistReady] = useState(false);
 
   useEffect(() => {
     // Check active session on mount
@@ -70,7 +83,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, setUser, isAuthed, loading, setIsAuthed, track, setTrack }}>
+    <AppContext.Provider value={{ user, setUser, isAuthed, loading, setIsAuthed, track, setTrack, playerTrackList, setPlayerTrackList, playlistName, setPlaylistName, playlistReady, setPlaylistReady }}>
       {children}
     </AppContext.Provider>
   );

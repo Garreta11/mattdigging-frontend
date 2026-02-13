@@ -166,6 +166,13 @@
       margin: 0.25rem 0 0;
       color: #666;
     }
+
+    &__playlist-name {
+      color: #666;
+      font-weight: 400;
+      text-transform: lowercase;
+      font-style: italic;
+    }
   }
 
   &__meta {

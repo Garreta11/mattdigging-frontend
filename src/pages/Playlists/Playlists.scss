@@ -1,20 +1,40 @@
+@import '../../_breakpoints.scss';
 .playlistsPage {
   padding: 40px;
   max-width: 1400px;
   margin: 0 auto;
 
+  @include respond-to(md) {
+    padding: 1rem;
+    padding-top: 5rem;
+  }
+
   &__header {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 48px;
 
-    h1 {
+    &__title {
       margin: 0;
-      font-size: 48px;
+      font-size: 40px;
       font-weight: 700;
       color: #fff;
       text-transform: lowercase;
+
+      span {
+        font-size: 40px;
+        font-weight: 700;
+        color: var(--tertiary-color);
+        text-transform: uppercase;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
     }
   }
 
@@ -280,26 +300,5 @@
     border-radius: 12px;
     color: #fca5a5;
     text-align: center;
-  }
-
-  @media (max-width: 768px) {
-    padding: 24px 16px;
-
-    &__header {
-      margin-bottom: 32px;
-
-      h1 {
-        font-size: 32px;
-      }
-    }
-
-    &__section {
-      margin-bottom: 48px;
-
-      h2 {
-        font-size: 24px;
-        margin-bottom: 24px;
-      }
-    }
   }
 }

@@ -6,11 +6,16 @@ import { StorageImage } from '../../pages/Admin/components/StorageImage';
 interface TrackItemProps {
   track: Track;
   onClick: () => void;
+  isPlaying: boolean;
 }
 
-const TrackItem: React.FC<TrackItemProps> = ({ track, onClick }) => {
+const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying }) => {
   return (
-    <div className="track-item" onClick={onClick}>
+    <div
+      onClick={onClick}
+      className={`track-item ${isPlaying ? 'track-item--playing' : ''}`}
+
+    >
       <div className="track-item__cover">
         {track.cover_url ? (
           <StorageImage 

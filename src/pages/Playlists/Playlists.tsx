@@ -8,7 +8,8 @@ import { fetchGenres, fetchMoods, fetchTracks, Genre, Mood, Track } from '../../
 import TrackItem from '../../components/TrackItem/TrackItem';
 import TrackModal from '../../components/TrackModal/TrackModal';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, FreeMode } from 'swiper/modules';
+import { Navigation, FreeMode, Mousewheel } from 'swiper/modules';
+import { useAppContext } from '../../context/AppContext';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -16,6 +17,8 @@ import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
 const PlaylistsPage = () => {
+  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylistName } = useAppContext();
+  
   const [genres, setGenres] = useState<Genre[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -32,7 +35,8 @@ const PlaylistsPage = () => {
   const genreParam = searchParams.get('genre');
   const moodParam = searchParams.get('mood');
 
-  console.log(genreParam, moodParam);
+  // Determinar si la playlist está completamente cargada
+  const isPlaylistLoaded = !isLoading && tracks.length > 0 && (genreParam || moodParam);
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -48,7 +52,9 @@ const PlaylistsPage = () => {
           if (genreParam) params.append('genre', genreParam);
           if (moodParam) params.append('mood', moodParam);
           
+          console.log(params.toString());
           const data = await fetchTracks(`?${params.toString()}`);
+          console.log('Tracks loaded:', data.length);
           setTracks(data);
         } else {
           // Si no hay filtro, cargar géneros y moods
@@ -79,39 +85,93 @@ const PlaylistsPage = () => {
     setTimeout(() => navigate('/'), 1000);
   };
 
-  const handleGenreClick = (slug: string) => {
-    navigate(`/playlists?genre=${slug}`);
+  const handleGenreClick = async (slug: string) => {
+    try {
+      // Precargar tracks antes de navegar
+      setIsLoading(true);
+      const data = await fetchTracks(`?genre=${slug}`);
+      setTracks(data);
+      
+      // Navegar después de cargar
+      navigate(`/playlists?genre=${slug}`);
+    } catch (err) {
+      console.error('Error loading genre tracks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tracks');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMoodClick = (slug: string) => {
-    navigate(`/playlists?mood=${slug}`);
+  const handleMoodClick = async (slug: string) => {
+    try {
+      // Precargar tracks antes de navegar
+      setIsLoading(true);
+      const data = await fetchTracks(`?mood=${slug}`);
+      setTracks(data);
+      
+      // Navegar después de cargar
+      navigate(`/playlists?mood=${slug}`);
+    } catch (err) {
+      console.error('Error loading mood tracks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tracks');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClearFilter = () => {
+    setTracks([]);
     navigate('/playlists');
   };
 
-  const handleTrackClick = (track: Track) => {
-    setSelectedTrack(track);
-    setModalOpen(true);
+  const handleTrackClick = async (track: Track) => {
+    console.log(track);
+    
+    // Establecer el nombre de la playlist
+    if (genreParam) {
+      const genre = genres.find(g => g.slug === genreParam);
+      setPlaylistName(genre?.name || null);
+    } else if (moodParam) {
+      const mood = moods.find(m => m.slug === moodParam);
+      setPlaylistName(mood?.name || null);
+    }
+  
+    // Actualizar la playlist primero
+    setPlayerTrackList(tracks);
+    
+    // Esperar al siguiente tick para que React procese el cambio
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    // Ahora actualizar el track
+    setTrack(track);
+  };
+
+  const handlePlayPlaylist = () => {
+    if (tracks.length > 0) {
+      setPlayerTrackList(tracks);
+      
+      // Establecer el nombre de la playlist
+      if (genreParam) {
+        const genre = genres.find(g => g.slug === genreParam);
+        setPlaylistName(genre?.name || null);
+      } else if (moodParam) {
+        const mood = moods.find(m => m.slug === moodParam);
+        setPlaylistName(mood?.name || null);
+      }
+    }
   };
 
   const getPageTitle = useMemo(() => {
     if (genreParam) {
       const genrePrefixes = [
         'diving into',
-        'lost in',
-        'exploring',
-        'vibing with',
-        'discovering',
-        'swimming through',
-        'journey through',
       ];
       
       const genre = genres.find(g => g.slug === genreParam);
+      console.log(genre);
       if (genre) {
         const randomPrefix = genrePrefixes[Math.floor(Math.random() * genrePrefixes.length)];
-        return `${randomPrefix} ${genre.name}`;
+        return `${randomPrefix} <span>${genre.name}</span>`;
       }
       return 'genre journey';
     }
@@ -119,18 +179,12 @@ const PlaylistsPage = () => {
     if (moodParam) {
       const moodPrefixes = [
         'when you\'re feeling',
-        'for those',
-        'embracing',
-        'channeling',
-        'living in',
-        'captured in sound:',
-        'the essence of',
       ];
       
       const mood = moods.find(m => m.slug === moodParam);
       if (mood) {
         const randomPrefix = moodPrefixes[Math.floor(Math.random() * moodPrefixes.length)];
-        return `${randomPrefix} ${mood.name}`;
+        return `${randomPrefix} <span>${mood.name}</span>`;
       }
       return 'mood journey';
     }
@@ -147,12 +201,25 @@ const PlaylistsPage = () => {
       </div>
 
       <div className="playlistsPage__header">
-        <h1>{getPageTitle}</h1>
-        {(genreParam || moodParam) && (
-          <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
-            Clear filter
-          </button>
-        )}
+        <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
+        <div className="playlistsPage__header__actions">
+          {/* Mostrar botones solo cuando la playlist está completamente cargada */}
+          {isPlaylistLoaded && (
+            <>
+              <button 
+                className="playlistsPage__play-playlist" 
+                onClick={handlePlayPlaylist}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+                </svg>
+              </button>
+              <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
+                Clear filter
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {isLoading && <p>Loading...</p>}
@@ -164,11 +231,16 @@ const PlaylistsPage = () => {
           <section className="playlistsPage__section">
             <h2>Genres</h2>
             <Swiper
-              modules={[Navigation, FreeMode]}
+              modules={[Navigation, FreeMode, Mousewheel]}
               spaceBetween={24}
               slidesPerView="auto"
               freeMode={true}
               navigation
+              mousewheel={{
+                forceToAxis: true,
+                sensitivity: 1,
+                releaseOnEdges: true,
+              }}
               className="playlistsPage__carousel"
             >
               {genres.map((genre, index) => (
@@ -189,11 +261,16 @@ const PlaylistsPage = () => {
           <section className="playlistsPage__section">
             <h2>Moods</h2>
             <Swiper
-              modules={[Navigation, FreeMode]}
+              modules={[Navigation, FreeMode, Mousewheel]}
               spaceBetween={24}
               slidesPerView="auto"
               freeMode={true}
               navigation
+              mousewheel={{
+                forceToAxis: true,
+                sensitivity: 1,
+                releaseOnEdges: true,
+              }}
               className="playlistsPage__carousel"
             >
               {moods.map((mood, index) => (
@@ -224,6 +301,7 @@ const PlaylistsPage = () => {
                 key={track.id}
                 track={track}
                 onClick={() => handleTrackClick(track)}
+                isPlaying={currentTrack?.id === track.id}
               />
             ))
           )}
