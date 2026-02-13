@@ -12,7 +12,8 @@ export default class Output {
     this.CHEST_DIR = "/chest/";
     this.CHEST_PREFIX = "chest_";
     this.CHEST_PAD = 5;
-    this.CHEST_COUNT = this.isMobile ? 60 : 120; // Mitad de frames en móvil
+    // this.CHEST_COUNT = this.isMobile ? 60 : 120; // Mitad de frames en móvil
+    this.CHEST_COUNT = 60; // Mitad de frames en móvil
     this.CHEST_EXT = ".jpg";
     
     // Chest zone (normalized inside square viewport)
@@ -251,7 +252,8 @@ export default class Output {
   }
 
   chestFrameUrl(i) {
-    const actualFrame = this.isMobile ? i * 2 : i;
+    // const actualFrame = this.isMobile ? i * 2 : i;
+    const actualFrame = i * 2;
     return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(actualFrame, this.CHEST_PAD)}${this.CHEST_EXT}`;
   }
 
@@ -662,7 +664,7 @@ export default class Output {
   setIsMobile(value) {
     this.isMobile = value;
 
-    this.CHEST_COUNT = this.isMobile ? 60 : 120;
+    //this.CHEST_COUNT = this.isMobile ? 60 : 120;
   }
 
   animate() {
