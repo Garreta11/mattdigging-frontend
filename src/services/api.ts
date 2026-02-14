@@ -29,6 +29,14 @@ export interface Artist {
   country?: string;
 }
 
+export interface Year {
+  year: number;
+}
+
+export interface Country {
+  country: string;
+}
+
 export interface Track {
   id: number;
   title: string;
@@ -74,6 +82,18 @@ export const fetchTracks = async (
 ): Promise<Track[]> => {
   const response = await fetch(`${API_BASE_URL}/tracks${queryString}`);
   if (!response.ok) throw new Error("Failed to fetch tracks");
+  return response.json();
+};
+
+export const fetchYears = async (): Promise<Year[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/years`);
+  if (!response.ok) throw new Error('Failed to fetch years');
+  return response.json();
+};
+
+export const fetchCountries = async (): Promise<Country[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/countries`);
+  if (!response.ok) throw new Error('Failed to fetch countries');
   return response.json();
 };
 

@@ -38,16 +38,37 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
   const moods = track.track_moods?.map(tm => tm.mood) ?? [];
 
   const handleGenreClick = (slug: string) => {
-    onClose(); // Cerrar el modal primero
+    onClose();
     setTimeout(() => {
       navigate(`/playlists?genre=${slug}`);
     }, 300);
   };
 
   const handleMoodClick = (slug: string) => {
-    onClose(); // Cerrar el modal primero
+    onClose();
     setTimeout(() => {
       navigate(`/playlists?mood=${slug}`);
+    }, 300);
+  };
+
+  const handleCountryClick = (country: string) => {
+    onClose();
+    setTimeout(() => {
+      navigate(`/playlists?country=${encodeURIComponent(country)}`);
+    }, 300);
+  };
+
+  const handleYearClick = (year: number) => {
+    onClose();
+    setTimeout(() => {
+      navigate(`/playlists?year=${year}`);
+    }, 300);
+  };
+
+  const handleSeasonClick = (season: string) => {
+    onClose();
+    setTimeout(() => {
+      navigate(`/playlists?season=${season.toLowerCase()}`);
     }, 300);
   };
 
@@ -103,23 +124,38 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
               )}
 
               {track.country && (
-                <div className="track-modal__detail">
+                <div className="track-modal__detail track-modal__detail--clickable">
                   <span className="track-modal__detail-label">Country</span>
-                  <span className="track-modal__detail-value">{track.country}</span>
+                  <span 
+                    className="track-modal__detail-value track-modal__detail-value--link"
+                    onClick={() => handleCountryClick(track.country!)}
+                  >
+                    {track.country}
+                  </span>
                 </div>
               )}
 
               {track.year && (
-                <div className="track-modal__detail">
+                <div className="track-modal__detail track-modal__detail--clickable">
                   <span className="track-modal__detail-label">Year</span>
-                  <span className="track-modal__detail-value">{track.year}</span>
+                  <span 
+                    className="track-modal__detail-value track-modal__detail-value--link"
+                    onClick={() => handleYearClick(track.year!)}
+                  >
+                    {track.year}
+                  </span>
                 </div>
               )}
 
-              {track.decade && (
-                <div className="track-modal__detail">
-                  <span className="track-modal__detail-label">Decade</span>
-                  <span className="track-modal__detail-value">{track.decade}</span>
+              {track.season && (
+                <div className="track-modal__detail track-modal__detail--clickable">
+                  <span className="track-modal__detail-label">Season</span>
+                  <span 
+                    className="track-modal__detail-value track-modal__detail-value--link"
+                    onClick={() => handleSeasonClick(track.season!)}
+                  >
+                    {track.season}
+                  </span>
                 </div>
               )}
             </div>

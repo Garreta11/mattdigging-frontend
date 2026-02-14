@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./Playlists.scss";
 import { FiX } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchGenres, fetchMoods, fetchTracks, Genre, Mood, Track } from '../../services/api';
+import { fetchGenres, fetchMoods, fetchTracks, Genre, Mood, Track, fetchYears, fetchCountries, Year, Country } from '../../services/api';
 import TrackItem from '../../components/TrackItem/TrackItem';
 import TrackModal from '../../components/TrackModal/TrackModal';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -16,11 +16,25 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
+interface Season {
+  slug: string;
+  name: string;
+}
+
+const SEASONS: Season[] = [
+  { slug: 'winter', name: 'Winter' },
+  { slug: 'spring', name: 'Spring' },
+  { slug: 'summer', name: 'Summer' },
+  { slug: 'autumn', name: 'Autumn' },
+];
+
 const PlaylistsPage = () => {
   const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylistName } = useAppContext();
   
   const [genres, setGenres] = useState<Genre[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
+  const [years, setYears] = useState<Year[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +48,13 @@ const PlaylistsPage = () => {
 
   const genreParam = searchParams.get('genre');
   const moodParam = searchParams.get('mood');
+  const yearParam = searchParams.get('year');
+  const seasonParam = searchParams.get('season');
+  const countryParam = searchParams.get('country');
 
   // Determinar si la playlist está completamente cargada
-  const isPlaylistLoaded = !isLoading && tracks.length > 0 && (genreParam || moodParam);
+  const isPlaylistLoaded = !isLoading && tracks.length > 0 && 
+    (genreParam || moodParam || yearParam || seasonParam || countryParam);
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -47,21 +65,28 @@ const PlaylistsPage = () => {
         setIsLoading(true);
         
         // Si hay filtro, cargar tracks filtrados
-        if (genreParam || moodParam) {
+        if (genreParam || moodParam || yearParam || seasonParam || countryParam) {
           const params = new URLSearchParams();
           if (genreParam) params.append('genre', genreParam);
           if (moodParam) params.append('mood', moodParam);
+          if (yearParam) params.append('year', yearParam);
+          if (seasonParam) params.append('season', seasonParam);
+          if (countryParam) params.append('country', countryParam);
           
           const data = await fetchTracks(`?${params.toString()}`);
           setTracks(data);
         } else {
-          // Si no hay filtro, cargar géneros y moods
-          const [genresData, moodsData] = await Promise.all([
+          // Si no hay filtro, cargar géneros, moods, years y countries
+          const [genresData, moodsData, yearsData, countriesData] = await Promise.all([
             fetchGenres(),
-            fetchMoods()
+            fetchMoods(),
+            fetchYears(),
+            fetchCountries()
           ]);
           setGenres(genresData);
           setMoods(moodsData);
+          setYears(yearsData);
+          setCountries(countriesData);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -71,12 +96,12 @@ const PlaylistsPage = () => {
     };
 
     loadData();
-  }, [genreParam, moodParam]);
+  }, [genreParam, moodParam, yearParam, seasonParam, countryParam]);
 
   // Reset hasFetched cuando cambien los params
   useEffect(() => {
     hasFetched.current = false;
-  }, [genreParam, moodParam]);
+  }, [genreParam, moodParam, yearParam, seasonParam, countryParam]);
 
   const handleClose = () => {
     setIsFadingOut(true);
@@ -85,12 +110,9 @@ const PlaylistsPage = () => {
 
   const handleGenreClick = async (slug: string) => {
     try {
-      // Precargar tracks antes de navegar
       setIsLoading(true);
       const data = await fetchTracks(`?genre=${slug}`);
       setTracks(data);
-      
-      // Navegar después de cargar
       navigate(`/playlists?genre=${slug}`);
     } catch (err) {
       console.error('Error loading genre tracks:', err);
@@ -102,15 +124,54 @@ const PlaylistsPage = () => {
 
   const handleMoodClick = async (slug: string) => {
     try {
-      // Precargar tracks antes de navegar
       setIsLoading(true);
       const data = await fetchTracks(`?mood=${slug}`);
       setTracks(data);
-      
-      // Navegar después de cargar
       navigate(`/playlists?mood=${slug}`);
     } catch (err) {
       console.error('Error loading mood tracks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tracks');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleYearClick = async (year: number) => {
+    try {
+      setIsLoading(true);
+      const data = await fetchTracks(`?year=${year}`);
+      setTracks(data);
+      navigate(`/playlists?year=${year}`);
+    } catch (err) {
+      console.error('Error loading year tracks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tracks');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSeasonClick = async (slug: string) => {
+    try {
+      setIsLoading(true);
+      const data = await fetchTracks(`?season=${slug}`);
+      setTracks(data);
+      navigate(`/playlists?season=${slug}`);
+    } catch (err) {
+      console.error('Error loading season tracks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tracks');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCountryClick = async (country: string) => {
+    try {
+      setIsLoading(true);
+      const data = await fetchTracks(`?country=${country}`);
+      setTracks(data);
+      navigate(`/playlists?country=${encodeURIComponent(country)}`);
+    } catch (err) {
+      console.error('Error loading country tracks:', err);
       setError(err instanceof Error ? err.message : 'Failed to load tracks');
     } finally {
       setIsLoading(false);
@@ -123,7 +184,6 @@ const PlaylistsPage = () => {
   };
 
   const handleTrackClick = async (track: Track) => {
-    
     // Establecer el nombre de la playlist
     if (genreParam) {
       const genre = genres.find(g => g.slug === genreParam);
@@ -131,15 +191,17 @@ const PlaylistsPage = () => {
     } else if (moodParam) {
       const mood = moods.find(m => m.slug === moodParam);
       setPlaylistName(mood?.name || null);
+    } else if (yearParam) {
+      setPlaylistName(yearParam);
+    } else if (seasonParam) {
+      const season = SEASONS.find(s => s.slug === seasonParam);
+      setPlaylistName(season?.name || null);
+    } else if (countryParam) {
+      setPlaylistName(countryParam);
     }
   
-    // Actualizar la playlist primero
     setPlayerTrackList(tracks);
-    
-    // Esperar al siguiente tick para que React procese el cambio
     await new Promise(resolve => setTimeout(resolve, 0));
-    
-    // Ahora actualizar el track
     setTrack(track);
   };
 
@@ -154,39 +216,52 @@ const PlaylistsPage = () => {
       } else if (moodParam) {
         const mood = moods.find(m => m.slug === moodParam);
         setPlaylistName(mood?.name || null);
+      } else if (yearParam) {
+        setPlaylistName(yearParam);
+      } else if (seasonParam) {
+        const season = SEASONS.find(s => s.slug === seasonParam);
+        setPlaylistName(season?.name || null);
+      } else if (countryParam) {
+        setPlaylistName(countryParam);
       }
     }
   };
 
   const getPageTitle = useMemo(() => {
     if (genreParam) {
-      const genrePrefixes = [
-        'diving into',
-      ];
-      
       const genre = genres.find(g => g.slug === genreParam);
       if (genre) {
-        const randomPrefix = genrePrefixes[Math.floor(Math.random() * genrePrefixes.length)];
-        return `${randomPrefix} <span>${genre.name}</span>`;
+        return `diving into <span>${genre.name}</span>`;
       }
       return 'genre journey';
     }
     
     if (moodParam) {
-      const moodPrefixes = [
-        'when you\'re feeling',
-      ];
-      
       const mood = moods.find(m => m.slug === moodParam);
       if (mood) {
-        const randomPrefix = moodPrefixes[Math.floor(Math.random() * moodPrefixes.length)];
-        return `${randomPrefix} <span>${mood.name}</span>`;
+        return `when you're feeling <span>${mood.name}</span>`;
       }
       return 'mood journey';
     }
+
+    if (yearParam) {
+      return `throwback to <span>${yearParam}</span>`;
+    }
+
+    if (seasonParam) {
+      const season = SEASONS.find(s => s.slug === seasonParam);
+      if (season) {
+        return `vibes of <span>${season.name}</span>`;
+      }
+      return 'season journey';
+    }
+
+    if (countryParam) {
+      return `sounds from <span>${countryParam}</span>`;
+    }
     
     return 'let the music find you';
-  }, [genreParam, moodParam, genres, moods]);
+  }, [genreParam, moodParam, yearParam, seasonParam, countryParam, genres, moods]);
 
   return (
     <section className={`playlistsPage main-content ${isFadingOut ? 'fade-out' : ''}`}>
@@ -199,7 +274,6 @@ const PlaylistsPage = () => {
       <div className="playlistsPage__header">
         <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
         <div className="playlistsPage__header__actions">
-          {/* Mostrar botones solo cuando la playlist está completamente cargada */}
           {isPlaylistLoaded && (
             <>
               <button 
@@ -222,7 +296,7 @@ const PlaylistsPage = () => {
       {error && <p className="error">{error}</p>}
 
       {/* Carousels cuando no hay filtro */}
-      {!genreParam && !moodParam && !isLoading && (
+      {!genreParam && !moodParam && !yearParam && !seasonParam && !countryParam && !isLoading && (
         <>
           <section className="playlistsPage__section">
             <h2>Genres</h2>
@@ -283,11 +357,101 @@ const PlaylistsPage = () => {
               ))}
             </Swiper>
           </section>
+
+          <section className="playlistsPage__section">
+            <h2>Years</h2>
+            <Swiper
+              modules={[Navigation, FreeMode, Mousewheel]}
+              spaceBetween={24}
+              slidesPerView="auto"
+              freeMode={true}
+              navigation
+              mousewheel={{
+                forceToAxis: true,
+                sensitivity: 1,
+                releaseOnEdges: true,
+              }}
+              className="playlistsPage__carousel"
+            >
+              {years.map((yearObj, index) => (
+                <SwiperSlide key={yearObj.year} className="playlistsPage__slide">
+                  <div 
+                    className={`card card--color-${(index % 12) + 1}`}
+                    onClick={() => handleYearClick(yearObj.year)}
+                  >
+                    <div className="info">
+                      <h3>{yearObj.year}</h3>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </section>
+
+          <section className="playlistsPage__section">
+            <h2>Seasons</h2>
+            <Swiper
+              modules={[Navigation, FreeMode, Mousewheel]}
+              spaceBetween={24}
+              slidesPerView="auto"
+              freeMode={true}
+              navigation
+              mousewheel={{
+                forceToAxis: true,
+                sensitivity: 1,
+                releaseOnEdges: true,
+              }}
+              className="playlistsPage__carousel"
+            >
+              {SEASONS.map((season, index) => (
+                <SwiperSlide key={season.slug} className="playlistsPage__slide">
+                  <div 
+                    className={`card card--color-${(index % 4) + 1}`}
+                    onClick={() => handleSeasonClick(season.slug)}
+                  >
+                    <div className="info">
+                      <h3>{season.name}</h3>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </section>
+
+          <section className="playlistsPage__section">
+            <h2>Countries</h2>
+            <Swiper
+              modules={[Navigation, FreeMode, Mousewheel]}
+              spaceBetween={24}
+              slidesPerView="auto"
+              freeMode={true}
+              navigation
+              mousewheel={{
+                forceToAxis: true,
+                sensitivity: 1,
+                releaseOnEdges: true,
+              }}
+              className="playlistsPage__carousel"
+            >
+              {countries.map((countryObj, index) => (
+                <SwiperSlide key={countryObj.country} className="playlistsPage__slide">
+                  <div 
+                    className={`card card--color-${(index % 12) + 1}`}
+                    onClick={() => handleCountryClick(countryObj.country)}
+                  >
+                    <div className="info">
+                      <h3>{countryObj.country}</h3>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </section>
         </>
       )}
 
       {/* Mostrar tracks cuando hay filtro */}
-      {(genreParam || moodParam) && !isLoading && (
+      {(genreParam || moodParam || yearParam || seasonParam || countryParam) && !isLoading && (
         <div className="playlistsPage__tracks">
           {tracks.length === 0 ? (
             <p>No tracks found</p>
