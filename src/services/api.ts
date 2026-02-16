@@ -27,6 +27,7 @@ export interface Artist {
   photo_url?: string;
   image_url?: string; // for compatibility
   country?: string;
+  tracks?: Track[];
 }
 
 export interface Year {
@@ -53,6 +54,17 @@ export interface Track {
   is_free?: boolean;
   track_genres?: Array<{ genre: Genre }>;
   track_moods?: Array<{ mood: Mood }>;
+}
+
+export interface Selections {
+  title: string;
+  week_number: number;
+  year: number;
+  description: string;
+  cover_url: string;
+  is_published: boolean;
+  published_at: string;
+  tracks?: Track[];
 }
 
 /* =========================
@@ -94,6 +106,12 @@ export const fetchYears = async (): Promise<Year[]> => {
 export const fetchCountries = async (): Promise<Country[]> => {
   const response = await fetch(`${API_BASE_URL}/tracks/countries`);
   if (!response.ok) throw new Error('Failed to fetch countries');
+  return response.json();
+};
+
+export const fetchSelections = async (): Promise<Selections[]> => {
+  const response = await fetch(`${API_BASE_URL}/selections`);
+  if (!response.ok) throw new Error('Failed to fetch selections');
   return response.json();
 };
 

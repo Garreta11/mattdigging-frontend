@@ -77,11 +77,11 @@ const Artists = () => {
 
       {!isMember ? (
         <>
-          <div className="artists__header">
+          {/* <div className="artists__header">
             <p className="artists__header__description">
               Highlighting artists that inspire, innovate, and transform the music scene.
             </p>
-          </div>
+          </div> */}
 
           <div className="artists__content">
             <div className="artists__content__searchBar">

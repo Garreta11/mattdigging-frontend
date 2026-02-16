@@ -231,7 +231,7 @@ const PlaylistsPage = () => {
     if (genreParam) {
       const genre = genres.find(g => g.slug === genreParam);
       if (genre) {
-        return `diving into <span>${genre.name}</span>`;
+        return `<span>${genre.name}</span>`;
       }
       return 'genre journey';
     }
@@ -239,25 +239,25 @@ const PlaylistsPage = () => {
     if (moodParam) {
       const mood = moods.find(m => m.slug === moodParam);
       if (mood) {
-        return `when you're feeling <span>${mood.name}</span>`;
+        return `<span>${mood.name}</span>`;
       }
       return 'mood journey';
     }
 
     if (yearParam) {
-      return `throwback to <span>${yearParam}</span>`;
+      return `<span>${yearParam}</span>`;
     }
 
     if (seasonParam) {
       const season = SEASONS.find(s => s.slug === seasonParam);
       if (season) {
-        return `vibes of <span>${season.name}</span>`;
+        return `<span>${season.name}</span>`;
       }
       return 'season journey';
     }
 
     if (countryParam) {
-      return `sounds from <span>${countryParam}</span>`;
+      return `<span>${countryParam}</span>`;
     }
     
     return 'let the music find you';
@@ -272,18 +272,20 @@ const PlaylistsPage = () => {
       </div>
 
       <div className="playlistsPage__header">
-        <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
+        <div className="playlistsPage__header__left">
+          <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
+          <button 
+            className="playlistsPage__play-playlist" 
+            onClick={handlePlayPlaylist}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
         <div className="playlistsPage__header__actions">
           {isPlaylistLoaded && (
             <>
-              <button 
-                className="playlistsPage__play-playlist" 
-                onClick={handlePlayPlaylist}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
-                </svg>
-              </button>
               <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
                 Clear filter
               </button>

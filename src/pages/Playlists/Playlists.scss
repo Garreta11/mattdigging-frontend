@@ -11,10 +11,17 @@
 
   &__header {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 48px;
+    margin-top: 2rem;
+
+    &__left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
     &__title {
       margin: 0;
@@ -27,7 +34,6 @@
         font-size: 40px;
         font-weight: 700;
         color: var(--tertiary-color);
-        text-transform: uppercase;
       }
     }
 

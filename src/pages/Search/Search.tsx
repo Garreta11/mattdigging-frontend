@@ -121,8 +121,6 @@ const SearchPage = () => {
         </button>
       </div>
 
-      <h1 className="searchPage__title">MattDigging explorer</h1>
-
       <div className="searchBar">
         <input
           type="text"
