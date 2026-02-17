@@ -2,11 +2,12 @@
 @import './_typography.scss';
 
 :root {
-  --primary-color: #ffffff;
+  --primary-color: #d5d5d5;
   --secondary-color: #0f0f0f;
-  // --tertiary-color: #C6AA61;
-  --tertiary-color: #D6A81B;
+  --tertiary-color: #375D2C;
   --quaternary-color: #d5d5d5;
+
+  --primary-color-transparent: rgba(144, 137, 92, 1);
 
   --border-radius: 0.5rem;
   --border-radius-xl: 1rem;
@@ -26,7 +27,8 @@
 
 body {
   //font-family: 'HelveticaNeue', sans-serif;
-  font-family: 'NeueMontreal', sans-serif;
+  //font-family: 'NeueMontreal', sans-serif;
+  font-family: 'PlayfairDisplay', serif;
   /* text-transform: lowercase; */
   background-color: var(--secondary-color);
   color: var(--primary-color);
@@ -34,8 +36,13 @@ body {
   // font-family: 'Nohemi', sans-serif;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'BebasNeue', sans-serif;
+}
+
 // Links
 a {
+  font-family: 'BebasNeue', sans-serif;
   text-decoration: none;
   color: transparent;
   font-size: 1rem;
@@ -93,7 +100,9 @@ input {
 
   overflow-y: scroll;
 
-  border-left: 0.1px solid var(--quaternary-color);
+  border-left: 0.1px solid var(--primary-color);
+
+  
 
   // Override animation when fading out
   &.fade-out {

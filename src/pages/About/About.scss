@@ -16,7 +16,7 @@
 
   &__content {
     margin: 0 auto;
-    width: 50%;
+    width: 100%;
     padding: 2rem;
     display: flex;
     flex-direction: column;
@@ -51,7 +51,7 @@
   
     .textBox {
       width: 100%;
-      text-align: center;
+      text-align: left;
       &__content {
         p {
           margin-bottom: 1rem;

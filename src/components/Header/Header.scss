@@ -64,23 +64,14 @@
     text-transform: uppercase;
     transition: all 0.3s ease;
 
-    @include respond-to(md) {
-      font-size: 1rem;
-    }
-    
-    &:hover {      
-      @include respond-to(md) {
-        font-size: 1.5rem;
-      }
+    font-size: 2rem;
+
+    &:hover {
+      color: var(--tertiary-color);
     }
     
     &.selected {
       color: var(--tertiary-color);
-      -webkit-text-stroke: 0.5px var(--tertiary-color);
-      
-      @include respond-to(md) {
-        font-size: 1.5rem;
-      }
     }
   }
 }

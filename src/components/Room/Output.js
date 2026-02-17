@@ -12,8 +12,7 @@ export default class Output {
     this.CHEST_DIR = "/chest/";
     this.CHEST_PREFIX = "chest_";
     this.CHEST_PAD = 5;
-    // this.CHEST_COUNT = this.isMobile ? 60 : 120; // Mitad de frames en móvil
-    this.CHEST_COUNT = 60; // Mitad de frames en móvil
+    this.CHEST_COUNT = 60;
     this.CHEST_EXT = ".jpg";
     
     // Chest zone (normalized inside square viewport)
@@ -33,8 +32,9 @@ export default class Output {
     this.parallaxMouse = new THREE.Vector2(0, 0);
     this.chestCtl = { state: "idle", timer: 0, frame: 0, target: 0, bias: 0 };
     this.wasHovering = false;
-    this.chestFrames = new Array(this.CHEST_COUNT).fill(null); // Inicializar array con nulls
-    this.framesLoading = new Set(); // Track frames being loaded
+    this.glowTime = 0; // Glow animation clock
+    this.chestFrames = new Array(this.CHEST_COUNT).fill(null);
+    this.framesLoading = new Set();
     this.chestLoaded = false;
     this.lastTime = performance.now();
     this.interactionsEnabled = true;
@@ -86,25 +86,90 @@ export default class Output {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
   }
 
-  async setTrackCover(config = {}) {
-    // Si no hay config con contenido real, no crear/mostrar el mesh
-    if (!config.text && !config.subtitle && !config.backgroundImage) {
-      // Si ya existe el mesh, ocultarlo o eliminarlo
-      if (this.trackCoverMesh) {
-        this.trackCoverMesh.visible = false;
+  // ─── GLOW HALO ────────────────────────────────────────────────────────────
+  // Creates (or updates) the animated glow halo mesh positioned behind the cover.
+  // The halo is a slightly larger plane rendered with a transparent radial-gradient
+  // shader that pulses over time.
+  setupGlowHalo() {
+    console.log("setupGlowHalo");
+    // Shader: soft radial glow with a breathing pulse
+    const glowVS = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
+    `;
+
+    const glowFS = `
+      precision highp float;
+      varying vec2 vUv;
+      uniform float uTime;
+      uniform vec3 uColor;
+
+      void main() {
+        // Distance from center (0.5, 0.5) in UV space
+        vec2 centered = vUv - 0.5;
+        float dist = length(centered);
+
+        // Breathing pulse: oscillates between 0.6 and 1.0 in intensity
+        // float pulse = 0.7 + 0.3 * sin(uTime * 2.0);
+        // Breathing pulse: oscillates between 0.25 and 0.5 in intensity
+        float pulse = 0.5 * sin(uTime * 2.0);
+
+
+        // Soft radial falloff — bright core, fades to transparent edge
+        // float glow = smoothstep(0.5, 0.1, dist) * pulse;
+        float glow = pulse;
+
+        float alpha = clamp(glow, 0.0, 1.0);
+
+        gl_FragColor = vec4(uColor, alpha * 0.65);
+      }
+    `;
+
+    this.glowMaterial = new THREE.ShaderMaterial({
+      vertexShader: glowVS,
+      fragmentShader: glowFS,
+      uniforms: {
+        uTime:  { value: 0.0 },
+        uColor: { value: new THREE.Color(0xffc44d) }, // warm amber glow
+      },
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    // Halo plane is slightly larger than the cover (0.45 × 0.45)
+    const haloGeo = new THREE.PlaneGeometry(0.45, 0.45);
+    this.glowHaloMesh = new THREE.Mesh(haloGeo, this.glowMaterial);
+
+    // Match the cover's position but push it just behind (z = -0.01)
+    this.glowHaloMesh.position.set(0.49, 0.32, 0.0);
+    this.scene.add(this.glowHaloMesh);
+  }
+
+  // Called every frame to advance the glow animation
+  updateGlow(dt) {
+    if (!this.glowMaterial) return;
+    this.glowTime += dt;
+    this.glowMaterial.uniforms.uTime.value = this.glowTime / 2.0;
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
+  async setTrackCover(config = {}) {
+    // If no real content, hide
+    if (!config.text && !config.subtitle && !config.backgroundImage) {
+      if (this.trackCoverMesh) this.trackCoverMesh.visible = false;
+      if (this.glowHaloMesh)   this.glowHaloMesh.visible   = false;
       return;
     }
   
-    // Si llegamos aquí, hay contenido para mostrar
     if (!this.trackCover) {
       this.trackCover = new THREE.PlaneGeometry(0.45, 0.45);
     }
     
-    // Generar imagen
     const canvas = await this.generateCoverImage(config);
-    
-    // Crear textura
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
     
@@ -114,7 +179,6 @@ export default class Output {
     });
     
     if (this.trackCoverMesh) {
-      // Ya existe, solo actualizar material y hacerlo visible
       if (this.trackCoverMesh.material.map) {
         this.trackCoverMesh.material.map.dispose();
       }
@@ -122,10 +186,16 @@ export default class Output {
       this.trackCoverMesh.material = this.trackCoverMaterial;
       this.trackCoverMesh.visible = true;
     } else {
-      // Primera vez, crear mesh
       this.trackCoverMesh = new THREE.Mesh(this.trackCover, this.trackCoverMaterial);
       this.trackCoverMesh.position.set(0.49, 0.32, 0);
       this.scene.add(this.trackCoverMesh);
+    }
+
+    // Create / show glow halo whenever cover becomes visible
+    if (!this.glowHaloMesh) {
+      this.setupGlowHalo();
+    } else {
+      this.glowHaloMesh.visible = true;
     }
   }
 
@@ -140,16 +210,12 @@ export default class Output {
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
   
-    // Si hay imagen de fondo, cargarla
     if (backgroundImage) {
       const img = await this.loadImage(backgroundImage);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      // Overlay oscuro para mejorar legibilidad del texto
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
-      // Fondo sólido
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
@@ -160,7 +226,7 @@ export default class Output {
   loadImage(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // Importante para imágenes externas
+      img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
       img.onerror = reject;
       img.src = url;
@@ -252,32 +318,24 @@ export default class Output {
   }
 
   chestFrameUrl(i) {
-    // const actualFrame = this.isMobile ? i * 2 : i;
     const actualFrame = i * 2;
     return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(actualFrame, this.CHEST_PAD)}${this.CHEST_EXT}`;
   }
 
   async loadChestFrames() {
-    
     if (this.isMobile) {
-      // En móvil: cargar solo frames clave (0, 1, 2, mitad, y última)
       const keyFrames = [0, 1, 2, Math.floor(this.CHEST_COUNT / 2), this.CHEST_COUNT - 1];
-      
       for (const i of keyFrames) {
         await this.loadFrame(i);
       }
-      
       this.chestLoaded = true;
       if (this.chestFrames[0]) {
         this.material.uniforms.tChest.value = this.chestFrames[0];
       }
-      
     } else {
-      // Desktop: cargar todas
       for (let i = 0; i < this.CHEST_COUNT; i++) {
         await this.loadFrame(i);
       }
-      
       this.chestLoaded = true;
       if (this.chestFrames[0]) {
         this.material.uniforms.tChest.value = this.chestFrames[0];
@@ -286,12 +344,8 @@ export default class Output {
   }
 
   async loadFrame(index) {
-    if (this.chestFrames[index] || this.framesLoading.has(index)) {
-      return; // Ya está cargado o cargando
-    }
-    
+    if (this.chestFrames[index] || this.framesLoading.has(index)) return;
     this.framesLoading.add(index);
-    
     try {
       const bmp = await this.bitmapLoader.loadAsync(this.chestFrameUrl(index));
       const tex = new THREE.Texture(bmp);
@@ -307,44 +361,31 @@ export default class Output {
     }
   }
 
-  // Precargar frames cercanas cuando se acerca el hover (solo móvil)
   async preloadNearbyFrames(currentIdx, range = 10) {
-    if (!this.isMobile) return; // Solo en móvil
-    
+    if (!this.isMobile) return;
     const start = Math.max(0, currentIdx - range);
     const end = Math.min(this.CHEST_COUNT - 1, currentIdx + range);
-    
     for (let i = start; i <= end; i++) {
-      if (!this.chestFrames[i]) {
-        this.loadFrame(i); // No await, cargar en background
-      }
+      if (!this.chestFrames[i]) this.loadFrame(i);
     }
   }
 
   findNearestLoadedFrame(targetIdx) {
-    // Buscar frame cargada más cercana
     for (let distance = 1; distance < this.CHEST_COUNT; distance++) {
       const lower = targetIdx - distance;
       const upper = targetIdx + distance;
-      
       if (lower >= 0 && this.chestFrames[lower]) return lower;
       if (upper < this.CHEST_COUNT && this.chestFrames[upper]) return upper;
     }
-    
-    return 0; // Fallback a frame 0
+    return 0;
   }
 
-  // Método para habilitar/deshabilitar interacciones
   setInteractionsEnabled(enabled) {
     this.interactionsEnabled = enabled;
-    
-    // Si se deshabilitan, resetear el estado del mouse y cursor
     if (!enabled) {
       this.mouseSquare.set(-1, -1);
       this.parallaxMouse.set(0, 0);
       document.body.style.cursor = 'auto';
-      
-      // Forzar cierre del chest si estaba abierto
       if (this.chestCtl.state !== "idle") {
         this.chestCtl.state = "release";
         this.chestCtl.target = 0;
@@ -395,9 +436,7 @@ export default class Output {
     if (event.touches.length > 0) {
       const touch = event.touches[0];
       this.updatePointerPosition(touch.clientX, touch.clientY);
-      if (this.hoveringChest()) {
-        event.preventDefault();
-      }
+      if (this.hoveringChest()) event.preventDefault();
     }
   }
 
@@ -432,14 +471,11 @@ export default class Output {
 
   onClick(event) {
     if (!this.interactionsEnabled) return;
-
     this.updatePointerPosition(event.clientX, event.clientY);
-    
     if (this.hoveringChest()) {
       this.handleChestClick();
       return;
     }
-
     if (this.hoveringTrackCover()) {
       this.handleTrackCoverClick();
     }
@@ -479,19 +515,15 @@ export default class Output {
     const hoverChest = this.hoveringChest();
     const hoverCover = this.hoveringTrackCover();
 
-    // Cambiar cursor según hover
     if (hoverChest || hoverCover) {
       document.body.style.cursor = 'pointer';
     } else {
       document.body.style.cursor = 'auto';
     }
 
-    // Edge-triggered transitions
     if (hoverChest && !this.wasHovering) {
       this.chestCtl.state = "pre";
       this.chestCtl.timer = 0;
-      
-      // Precargar frames cuando el usuario empieza a hover
       if (this.isMobile) {
         this.preloadNearbyFrames(Math.round(this.chestCtl.frame), 10);
       }
@@ -510,8 +542,6 @@ export default class Output {
       if (this.chestCtl.timer >= this.HOVER_DELAY) {
         this.chestCtl.state = "active";
         this.chestCtl.target = this.CHEST_COUNT - 1;
-        
-        // Precargar frames finales cuando se activa
         if (this.isMobile) {
           this.preloadNearbyFrames(this.CHEST_COUNT - 1, 15);
         }
@@ -535,24 +565,17 @@ export default class Output {
       ? this.OPEN_EASE 
       : this.CLOSE_EASE;
     this.chestCtl.frame += (this.chestCtl.target - this.chestCtl.frame) * easing;
-
     this.chestCtl.frame = Math.max(0, Math.min(this.CHEST_COUNT - 1, this.chestCtl.frame));
     const idx = Math.round(this.chestCtl.frame);
 
-    // Usar frame si existe, sino usar la más cercana disponible
     if (this.chestFrames[idx]) {
       this.material.uniforms.tChest.value = this.chestFrames[idx];
     } else {
-      // Buscar frame más cercana disponible
       const fallbackIdx = this.findNearestLoadedFrame(idx);
       if (this.chestFrames[fallbackIdx]) {
         this.material.uniforms.tChest.value = this.chestFrames[fallbackIdx];
       }
-      
-      // Cargar la frame que falta en móvil
-      if (this.isMobile) {
-        this.loadFrame(idx);
-      }
+      if (this.isMobile) this.loadFrame(idx);
     }
     
     this.material.uniforms.uBias.value = this.chestCtl.bias;
@@ -566,7 +589,6 @@ export default class Output {
     this.debugCanvas.style.pointerEvents = 'none';
     this.debugCanvas.style.zIndex = '1000';
     this.container.appendChild(this.debugCanvas);
-    
     this.updateDebugOverlay();
   }
 
@@ -581,12 +603,10 @@ export default class Output {
     const ctx = this.debugCanvas.getContext('2d');
     ctx.clearRect(0, 0, w, h);
     
-    // Viewport square (cyan)
     ctx.strokeStyle = 'cyan';
     ctx.lineWidth = 2;
     ctx.strokeRect(this.viewport.x, this.viewport.y, this.viewport.size, this.viewport.size);
     
-    // CHEST ZONE (red)
     const chestZone = this.CHEST_ZONE;
     const chestZoneX = this.viewport.x + chestZone.x0 * this.viewport.size;
     const chestZoneY = this.viewport.y + (1 - chestZone.y1) * this.viewport.size;
@@ -598,13 +618,10 @@ export default class Output {
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 3;
     ctx.strokeRect(chestZoneX, chestZoneY, chestZoneW, chestZoneH);
-    
-    // Label for chest zone
     ctx.fillStyle = 'white';
     ctx.font = '12px monospace';
     ctx.fillText('CHEST', chestZoneX + 5, chestZoneY + 15);
     
-    // TRACK COVER ZONE (green)
     const coverZone = this.TRACK_COVER_ZONE;
     const coverZoneX = this.viewport.x + coverZone.x0 * this.viewport.size;
     const coverZoneY = this.viewport.y + (1 - coverZone.y1) * this.viewport.size;
@@ -616,18 +633,14 @@ export default class Output {
     ctx.strokeStyle = 'lime';
     ctx.lineWidth = 3;
     ctx.strokeRect(coverZoneX, coverZoneY, coverZoneW, coverZoneH);
-    
-    // Label for track cover zone
     ctx.fillStyle = 'white';
     ctx.font = '12px monospace';
     ctx.fillText('COVER', coverZoneX + 5, coverZoneY + 15);
     
-    // Mouse cursor
     if (this.mouseSquare.x >= 0) {
       const mouseX = this.viewport.x + this.mouseSquare.x * this.viewport.size;
       const mouseY = this.viewport.y + (1 - this.mouseSquare.y) * this.viewport.size;
       
-      // Color según dónde está hovering
       let cursorColor = 'yellow';
       if (this.hoveringChest()) cursorColor = 'red';
       if (this.hoveringTrackCover()) cursorColor = 'lime';
@@ -637,7 +650,6 @@ export default class Output {
       ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
       ctx.fill();
       
-      // Info text
       ctx.fillStyle = 'white';
       ctx.font = '14px monospace';
       ctx.fillText(`Mouse: (${this.mouseSquare.x.toFixed(3)}, ${this.mouseSquare.y.toFixed(3)})`, 10, 20);
@@ -650,12 +662,9 @@ export default class Output {
   onResize() {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
-  
     if (w === this.lastWidth && h === this.lastHeight) return;
-  
     this.lastWidth = w;
     this.lastHeight = h;
-  
     this.renderer.setSize(w, h);
     this.updateViewport();
     this.updateDebugOverlay();
@@ -663,8 +672,6 @@ export default class Output {
 
   setIsMobile(value) {
     this.isMobile = value;
-
-    //this.CHEST_COUNT = this.isMobile ? 60 : 120;
   }
 
   animate() {
@@ -673,6 +680,7 @@ export default class Output {
     this.lastTime = now;
 
     this.updateChest(dt);
+    this.updateGlow(dt);       // ← advance the glow shader clock
     this.renderer.render(this.scene, this.camera);
 
     this.updateDebugOverlay();
@@ -701,6 +709,13 @@ export default class Output {
       this.chestFrames.forEach(tex => {
         if (tex) tex.dispose();
       });
+    }
+
+    // Dispose glow halo
+    if (this.glowHaloMesh) {
+      this.glowHaloMesh.geometry.dispose();
+      this.glowMaterial.dispose();
+      this.scene.remove(this.glowHaloMesh);
     }
 
     this.material.dispose();

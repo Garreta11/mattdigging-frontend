@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi';
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from 'react-router-dom';
 import { fetchArtists, Artist } from '../../services/api';
-import { StorageImage } from "../Admin/components/StorageImage";
+import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import ArtistModal from "../../components/ArtistModal/ArtistModal";
 
 const MAX_ARTISTS_TO_SHOW = 30;
@@ -77,12 +77,6 @@ const Artists = () => {
 
       {!isMember ? (
         <>
-          {/* <div className="artists__header">
-            <p className="artists__header__description">
-              Highlighting artists that inspire, innovate, and transform the music scene.
-            </p>
-          </div> */}
-
           <div className="artists__content">
             <div className="artists__content__searchBar">
               <input
@@ -92,11 +86,19 @@ const Artists = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            {filteredArtists.map((artist) => (
-              <div key={artist.id}>
-                <h2 className="artists__content__artistName" onClick={() => handleClick(artist)}>{artist.name}</h2>
-              </div>
-            ))}
+            <div className="artists__content__artistsList">
+              {filteredArtists.map((artist) => (
+                <div key={artist.id} className="artists__content__artistItem">
+                  <p className="artists__content__artistName" onClick={() => handleClick(artist)}>{artist.name}</p>
+                  <ImageStorage
+                    bucket="artist_photos"
+                    path={artist.photo_url}
+                    alt={artist.name}
+                    className="artists__content__artistImage"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </>
       ) : (

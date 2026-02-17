@@ -44,3 +44,25 @@
   font-weight: 700;
   font-style: normal;
 }
+
+/**
+* Playfair Display
+* Font style: normal
+*/
+@font-face {
+  font-family: 'PlayfairDisplay';
+  src: url('../public/fonts/PlayfairDisplay/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/**
+* BebasNeue
+* Font style: normal
+*/
+@font-face {
+  font-family: 'BebasNeue';
+  src: url('../public/fonts/BebasNeue/BebasNeue-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}

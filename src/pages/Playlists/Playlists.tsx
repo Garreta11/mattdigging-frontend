@@ -233,7 +233,7 @@ const PlaylistsPage = () => {
       if (genre) {
         return `<span>${genre.name}</span>`;
       }
-      return 'genre journey';
+      return '';
     }
     
     if (moodParam) {
@@ -241,7 +241,7 @@ const PlaylistsPage = () => {
       if (mood) {
         return `<span>${mood.name}</span>`;
       }
-      return 'mood journey';
+      return '';
     }
 
     if (yearParam) {
@@ -253,14 +253,14 @@ const PlaylistsPage = () => {
       if (season) {
         return `<span>${season.name}</span>`;
       }
-      return 'season journey';
+      return '';
     }
 
     if (countryParam) {
       return `<span>${countryParam}</span>`;
     }
     
-    return 'let the music find you';
+    return '';
   }, [genreParam, moodParam, yearParam, seasonParam, countryParam, genres, moods]);
 
   return (
@@ -270,29 +270,33 @@ const PlaylistsPage = () => {
           <FiX size={24} />
         </button>
       </div>
-
-      <div className="playlistsPage__header">
-        <div className="playlistsPage__header__left">
-          <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
-          <button 
-            className="playlistsPage__play-playlist" 
-            onClick={handlePlayPlaylist}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
-        <div className="playlistsPage__header__actions">
-          {isPlaylistLoaded && (
-            <>
-              <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
-                Clear filter
+      
+      {/* Mostrar tracks cuando hay filtro */}
+      {(genreParam || moodParam || yearParam || seasonParam || countryParam) && !isLoading && (
+        <div className="playlistsPage__header">
+          <div className="playlistsPage__header__left">
+            <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
+              <button 
+                className="playlistsPage__play-playlist" 
+                onClick={handlePlayPlaylist}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+                </svg>
               </button>
-            </>
-          )}
+          </div>
+          
+          <div className="playlistsPage__header__actions">
+            {isPlaylistLoaded && (
+              <>
+                <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
+                  Clear filter
+                </button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {isLoading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
@@ -361,7 +365,7 @@ const PlaylistsPage = () => {
           </section>
 
           <section className="playlistsPage__section">
-            <h2>Years</h2>
+            <h2>Countries</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
               spaceBetween={24}
@@ -375,14 +379,14 @@ const PlaylistsPage = () => {
               }}
               className="playlistsPage__carousel"
             >
-              {years.map((yearObj, index) => (
-                <SwiperSlide key={yearObj.year} className="playlistsPage__slide">
+              {countries.map((countryObj, index) => (
+                <SwiperSlide key={countryObj.country} className="playlistsPage__slide">
                   <div 
                     className={`card card--color-${(index % 12) + 1}`}
-                    onClick={() => handleYearClick(yearObj.year)}
+                    onClick={() => handleCountryClick(countryObj.country)}
                   >
                     <div className="info">
-                      <h3>{yearObj.year}</h3>
+                      <h3>{countryObj.country}</h3>
                     </div>
                   </div>
                 </SwiperSlide>
@@ -421,7 +425,7 @@ const PlaylistsPage = () => {
           </section>
 
           <section className="playlistsPage__section">
-            <h2>Countries</h2>
+            <h2>Years</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
               spaceBetween={24}
@@ -435,14 +439,14 @@ const PlaylistsPage = () => {
               }}
               className="playlistsPage__carousel"
             >
-              {countries.map((countryObj, index) => (
-                <SwiperSlide key={countryObj.country} className="playlistsPage__slide">
+              {years.map((yearObj, index) => (
+                <SwiperSlide key={yearObj.year} className="playlistsPage__slide">
                   <div 
                     className={`card card--color-${(index % 12) + 1}`}
-                    onClick={() => handleCountryClick(countryObj.country)}
+                    onClick={() => handleYearClick(yearObj.year)}
                   >
                     <div className="info">
-                      <h3>{countryObj.country}</h3>
+                      <h3>{yearObj.year}</h3>
                     </div>
                   </div>
                 </SwiperSlide>

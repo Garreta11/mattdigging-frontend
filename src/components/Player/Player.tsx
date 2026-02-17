@@ -1,7 +1,7 @@
 import './Player.scss';
 import { useState, useEffect, useRef } from 'react'
 import { fetchTracks, Track } from '../../services/api';
-import { StorageAudio } from '../../pages/Admin/components/StorageAudio';
+import AudioStorage from '../AudioStorage/AudioStorage';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
 import { useAppContext } from '../../context/AppContext';
 
@@ -23,6 +23,8 @@ const Player = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsDisabled, setControlsDisabled] = useState(true);
+  // New: tracks whether the current audio source is loaded and ready
+  const [isAudioReady, setIsAudioReady] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
@@ -107,93 +109,99 @@ const Player = () => {
   }, [track, playerTrackList, currentTrackIndex, playedIndices]);
 
   // --------------------------------
-  // RESET DURATION WHEN TRACK CHANGES
+  // RESET WHEN TRACK CHANGES — mark audio as not ready until it loads
   // --------------------------------
   useEffect(() => {
     setDuration(0);
     setCurrentTime(0);
+    setIsAudioReady(false); // <-- reset readiness on every track change
   }, [currentTrack]);
 
   // --------------------------------
   // AUDIO EVENTS + SYNC PLAYING STATE
   // --------------------------------
   useEffect(() => {
-    const audio = audioRef.current;
-    
-    if (!audio || !currentTrack) {
-      return;
-    }
+    if (!currentTrack) return;
 
-    const updateDuration = () => {
-      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-        setDuration(audio.duration);
+    // audioRef.current may be null on first render if AudioStorage hasn't
+    // mounted yet. Poll briefly to wait for it before attaching listeners.
+    let pollAttempts = 0;
+    let cleanupFn: (() => void) | null = null;
+
+    const setup = () => {
+      const audio = audioRef.current;
+
+      if (!audio) {
+        // Ref not populated yet — retry up to 10 times every 50ms
+        if (pollAttempts < 10) {
+          pollAttempts++;
+          setTimeout(setup, 50);
+        }
+        return;
       }
-    };
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      // Fallback: actualizar duración si aún no se ha establecido
-      if (duration === 0 && audio.duration) {
-        updateDuration();
+      const markReady = () => {
+        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+          setDuration(audio.duration);
+        }
+        setIsAudioReady(true);
+      };
+
+      const updateDuration = () => {
+        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+          setDuration(audio.duration);
+        }
+      };
+
+      const handleTimeUpdate = () => {
+        setCurrentTime(audio.currentTime);
+        if (duration === 0 && audio.duration) updateDuration();
+      };
+
+      const handleLoadedMetadata = () => updateDuration();
+      const handleLoadedData    = () => updateDuration();
+      const handleCanPlay       = () => markReady();
+      const handleDurationChange = () => updateDuration();
+      const handleEnded         = () => playNextTrack();
+      const handlePlay          = () => { setIsPlaying(true); updateDuration(); };
+      const handlePause         = () => setIsPlaying(false);
+
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener('loadeddata', handleLoadedData);
+      audio.addEventListener('canplay', handleCanPlay);
+      audio.addEventListener('durationchange', handleDurationChange);
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+
+      setIsPlaying(!audio.paused);
+
+      // If canplay already fired before we attached the listener (common with
+      // cached audio or fast networks), readyState will already be >= 2.
+      // HAVE_CURRENT_DATA (2) is enough to know duration is available.
+      if (audio.readyState >= 2) {
+        markReady();
       }
+
+      cleanupFn = () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('loadeddata', handleLoadedData);
+        audio.removeEventListener('canplay', handleCanPlay);
+        audio.removeEventListener('durationchange', handleDurationChange);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+      };
     };
 
-    const handleLoadedMetadata = () => {
-      updateDuration();
-    };
-
-    const handleLoadedData = () => {
-      updateDuration();
-    };
-
-    const handleCanPlay = () => {
-      updateDuration();
-    };
-
-    const handleDurationChange = () => {
-      updateDuration();
-    };
-
-    const handleEnded = () => playNextTrack();
-    
-    const handlePlay = () => {
-      setIsPlaying(true);
-      updateDuration();
-    };
-
-    const handlePause = () => {
-      setIsPlaying(false);
-    };
-
-    // Añadir múltiples listeners para asegurar que capturamos la duración
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('loadeddata', handleLoadedData);
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('durationchange', handleDurationChange);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-
-    // Sincronizar estado inicial
-    setIsPlaying(!audio.paused);
-    
-    // Intentar obtener la duración inmediatamente si está disponible
-    if (audio.readyState >= 1) { // HAVE_METADATA
-      updateDuration();
-    }
+    setup();
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('loadeddata', handleLoadedData);
-      audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('durationchange', handleDurationChange);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
+      cleanupFn?.();
     };
-  }, [currentTrack]); // Solo depende de currentTrack
+  }, [currentTrack]);
 
   // --------------------------------
   // PLAY / PAUSE CONTROL
@@ -320,18 +328,23 @@ const Player = () => {
     }
   }, [currentTrack, setTrack]);
 
+  // Whether the player UI should show content vs a skeleton/spinner.
+  // We need a track selected AND the audio to have fired canplay.
+  const isPlayerReady = !!currentTrack && isAudioReady;
+
   return (
     <div className='player'>
-      {/* Siempre renderiza el audio, nunca se desmonta */}
-      <StorageAudio
+      {/* AudioStorage is always rendered so the audio element is never unmounted.
+          It sits outside the loading gate intentionally. */}
+      <AudioStorage
+        ref={audioRef}
         bucket="tracks"
         path={currentTrack ? currentTrack.audio_url : ''}
-        audioRef={audioRef}
         preload="auto"
       />
 
       <div className='player__info'>
-        {currentTrack ? (
+        {isPlayerReady ? (
           <>
             <div className='player__info__text'>
               {playlistName && (
@@ -342,7 +355,11 @@ const Player = () => {
             </div>
           </>
         ) : (
-          <p>Loading...</p>
+          /* Skeleton that mirrors the real layout so there's no layout shift */
+          <div className='player__info__skeleton'>
+            <div className='player__info__skeleton__title' />
+            <div className='player__info__skeleton__artist' />
+          </div>
         )}
       </div>
 
@@ -350,7 +367,7 @@ const Player = () => {
         <div className='player__controls__buttons'>
           <button
             onClick={playPreviousTrack}
-            disabled={controlsDisabled || history.length === 0}
+            disabled={controlsDisabled || history.length === 0 || !isPlayerReady}
             className='player__btn player__btn--prev'
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -361,10 +378,15 @@ const Player = () => {
 
           <button
             onClick={togglePlayPause}
-            disabled={controlsDisabled}
-            className='player__btn player__btn--play'
+            disabled={controlsDisabled || !isPlayerReady}
+            className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
           >
-            {isPlaying ? (
+            {/* Show a subtle spinner while loading, play/pause icons once ready */}
+            {!isPlayerReady ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
+              </svg>
+            ) : isPlaying ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
                 <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
@@ -378,7 +400,7 @@ const Player = () => {
 
           <button
             onClick={playNextTrack}
-            disabled={controlsDisabled}
+            disabled={controlsDisabled || !isPlayerReady}
             className='player__btn player__btn--next'
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -391,9 +413,9 @@ const Player = () => {
         <div className='player__controls__progress'>
           <span className='player__controls__progress__time'>{formatTime(currentTime)}</span>
           <div
-            className={`player__controls__progress__bar${controlsDisabled ? ' player__controls__progress__bar--disabled' : ''}`}
+            className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
             onClick={(e) => {
-              if (controlsDisabled || !audioRef.current || duration === 0) return;
+              if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
               const rect = e.currentTarget.getBoundingClientRect();
               const ratio = (e.clientX - rect.left) / rect.width;
               const newTime = ratio * duration;
