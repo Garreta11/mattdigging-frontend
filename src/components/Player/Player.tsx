@@ -346,6 +346,12 @@ const Player = () => {
       <div className='player__info'>
         {isPlayerReady ? (
           <>
+            <StorageImage
+              path={currentTrack?.cover_url}
+              alt={currentTrack?.title}
+              bucket="covers"
+              className='player__info__cover'
+            />
             <div className='player__info__text'>
               {playlistName && (
                 <p className='player__info__playlist-name'>playlist: {playlistName}</p>

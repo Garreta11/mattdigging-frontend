@@ -2,7 +2,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../../types/user";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
-import { Track } from "../services/api";
+import { Track, Artist } from "../services/api";
+
+
 
 interface AppContextType {
   user: User | null;
@@ -23,6 +25,15 @@ interface AppContextType {
   playlistReady: boolean;
   setPlaylistReady: (ready: boolean) => void;
 
+  modalArtist: Artist | null;
+  setModalArtist: (artist: Artist | null) => void;
+
+  isModalArtistOpen: boolean;
+  setIsModalArtistOpen: (isOpen: boolean) => void;
+
+  isTrackModalOpen: boolean;
+  setIsTrackModalOpen: (isOpen: boolean) => void;
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -35,6 +46,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [playerTrackList, setPlayerTrackList] = useState<Track[]>([]);
   const [playlistName, setPlaylistName] = useState<string | null>(null);
   const [playlistReady, setPlaylistReady] = useState(false);
+  const [modalArtist, setModalArtist] = useState<Artist | null>(null);
+  const [isModalArtistOpen, setIsModalArtistOpen] = useState(false);
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
 
   useEffect(() => {
     // Check active session on mount
@@ -83,7 +97,27 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, setUser, isAuthed, loading, setIsAuthed, track, setTrack, playerTrackList, setPlayerTrackList, playlistName, setPlaylistName, playlistReady, setPlaylistReady }}>
+    <AppContext.Provider value={{
+      user,
+      setUser,
+      isAuthed,
+      loading,
+      setIsAuthed,
+      track,
+      setTrack,
+      playerTrackList,
+      setPlayerTrackList,
+      playlistName,
+      setPlaylistName,
+      playlistReady,
+      setPlaylistReady,
+      modalArtist,
+      setModalArtist,
+      isModalArtistOpen,
+      setIsModalArtistOpen,
+      isTrackModalOpen,
+      setIsTrackModalOpen,
+    }}>
       {children}
     </AppContext.Provider>
   );

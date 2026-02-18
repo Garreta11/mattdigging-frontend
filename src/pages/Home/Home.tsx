@@ -7,7 +7,8 @@ const backgroundImage = '/frame.png';
 const Home = () => {
   return (
     <div className="home" >
-      <div className="home__frame" style={{ backgroundImage: `url(${backgroundImage})` }}>
+      {/* <div className="home__frame" style={{ backgroundImage: `url(${backgroundImage})` }}> */}
+      <div className="home__frame">
         <Room />
       </div>
     </div>

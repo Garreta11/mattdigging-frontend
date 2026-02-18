@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { useAppContext } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
+import SearchInput from '../SearchInput/SearchInput';
 
 const Header = () => {
   const { user } = useAppContext();
@@ -85,59 +86,48 @@ const Header = () => {
     <>
       {user && (
         <header className="header">
+          {/* Logo */}
           <div className="header__logo">
             <Link 
               className="header__link" 
               to="/" 
               onClick={(e) => handleNavigate(e, '/')}
             >
-              <img className="header__logo__image" src="/svg/logo.svg" alt="Matt Digging" />
+              <img className="header__logo__image" src="/svg/logo-color.svg" alt="Matt Digging" />
             </Link>
           </div>
 
+          {/* SearchInput Component */}
+          <SearchInput />
+
           {/* Desktop Navigation */}
           <nav className="header__links header__links--desktop">
-            <Link
-              className={`header__links__item ${isActive('/artists') ? 'selected' : ''}`}
-              to="/artists"
-              onClick={(e) => handleNavigate(e, '/artists')}
-            >
-              Artists
-            </Link>
+            <div className={`header__links__item ${isActive('/artists') ? 'selected' : ''}`}>
+              <Link
+                to="/artists"
+                onClick={(e) => handleNavigate(e, '/artists')}
+              >
+                Artists
+              </Link>
+            </div>
 
-            <Link
-              className={`header__links__item ${isActive('/playlists') ? 'selected' : ''}`}
-              to="/playlists"
-              onClick={(e) => handleNavigate(e, '/playlists')}
-            >
-              Playlists
-            </Link>
+            <div className={`header__links__item ${isActive('/selections') ? 'selected' : ''}`}>
+              <Link
+                to="/selections"
+                onClick={(e) => handleNavigate(e, '/selections')}
+              >
+                Weekly Selections
+              </Link>
+            </div>
 
-            <Link
-              className={`header__links__item ${isActive('/search') ? 'selected' : ''}`}
-              to="/search"
-              onClick={(e) => handleNavigate(e, '/search')}
-            >
-              Search
-            </Link>
-
-            <Link
-              className={`header__links__item ${isActive('/selections') ? 'selected' : ''}`}
-              to="/selections"
-              onClick={(e) => handleNavigate(e, '/selections')}
-            >
-              Selections
-            </Link>
-
-            <Link
-              className={`header__links__item ${isActive('/about') ? 'selected' : ''}`}
-              to="/about"
-              onClick={(e) => handleNavigate(e, '/about')}
-            >
-              About
-            </Link>
-
-            {/* <UserInfo /> */}
+            <div className={`header__links__item ${isActive('/about') ? 'selected' : ''}`}>
+              <Link
+                to="/about"
+                onClick={(e) => handleNavigate(e, '/about')}
+              >
+                About
+              </Link>
+            </div>
           </nav>
 
           {/* Mobile Burger Button */}

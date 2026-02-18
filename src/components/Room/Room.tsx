@@ -1,16 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './Room.scss';
 import Output from './Output';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAppContext } from '../../context/AppContext';
 import { useStorageUrl } from '../../pages/Admin/hooks/useStorageUrl';
-import TrackModal from '../TrackModal/TrackModal';
-import { Track } from '../../services/api';
 
 const Room: React.FC = () => {
-  const { track } = useAppContext();
+  const { track, setIsTrackModalOpen, isTrackModalOpen } = useAppContext();
   const isMobile = useIsMobile();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const roomRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<Output | null>(null);
@@ -44,7 +41,8 @@ const Room: React.FC = () => {
       onChestClick: () => {
       },
       onTrackCoverClick: () => {
-        setIsModalOpen(true);
+        setIsTrackModalOpen(true);
+        console.log(track )
       }
     });
   
@@ -52,7 +50,7 @@ const Room: React.FC = () => {
       outputRef.current?.dispose();
       outputRef.current = null;
     };
-  }, []);
+  }, [track]);
   
   // Actualizar isMobile cuando cambia
   useEffect(() => {
@@ -64,18 +62,13 @@ const Room: React.FC = () => {
   // Deshabilitar interacciones cuando el modal está abierto
   useEffect(() => {
     if (outputRef.current) {
-      outputRef.current.setInteractionsEnabled(!isModalOpen);
+      outputRef.current.setInteractionsEnabled(!isTrackModalOpen);
     }
-  }, [isModalOpen]);
+  }, [isTrackModalOpen]);
   
   return (
     <>
       <div className="room" ref={roomRef} />
-      <TrackModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        track={track as Track}
-      />
     </>
   );
 };

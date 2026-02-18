@@ -274,6 +274,18 @@ const PlaylistsPage = () => {
       {/* Mostrar tracks cuando hay filtro */}
       {(genreParam || moodParam || yearParam || seasonParam || countryParam) && !isLoading && (
         <div className="playlistsPage__header">
+          <div className="playlistsPage__header__actions">
+            {isPlaylistLoaded && (
+              <>
+                <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
+                  <svg width="34" height="11" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.204244 4.65981C-0.069123 4.93318 -0.069123 5.37639 0.204244 5.64976L4.65902 10.1045C4.93238 10.3779 5.3756 10.3779 5.64897 10.1045C5.92233 9.83117 5.92233 9.38795 5.64897 9.11458L1.68917 5.15479L5.64897 1.19499C5.92233 0.92162 5.92233 0.478405 5.64897 0.205038C5.3756 -0.0683293 4.93238 -0.0683293 4.65902 0.205038L0.204244 4.65981ZM33.8867 5.15479V4.45479H0.699219V5.15479V5.85479H33.8867V5.15479Z" fill="var(--color-white)"/>
+                  </svg>
+
+                </button>
+              </>
+            )}
+          </div>
           <div className="playlistsPage__header__left">
             <h1 className="playlistsPage__header__title" dangerouslySetInnerHTML={{ __html: getPageTitle }} />
               <button 
@@ -284,16 +296,6 @@ const PlaylistsPage = () => {
                   <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
                 </svg>
               </button>
-          </div>
-          
-          <div className="playlistsPage__header__actions">
-            {isPlaylistLoaded && (
-              <>
-                <button className="playlistsPage__clear-filter" onClick={handleClearFilter}>
-                  Clear filter
-                </button>
-              </>
-            )}
           </div>
         </div>
       )}
@@ -308,7 +310,7 @@ const PlaylistsPage = () => {
             <h2>Genres</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
-              spaceBetween={24}
+              spaceBetween={10}
               slidesPerView="auto"
               freeMode={true}
               navigation
@@ -326,6 +328,7 @@ const PlaylistsPage = () => {
                     onClick={() => handleGenreClick(genre.slug)}
                   >
                     <div className="info">
+                      <img src="/svg/logo.svg" alt={genre.name} />
                       <h3>{genre.name}</h3>
                     </div>
                   </div>
@@ -338,7 +341,7 @@ const PlaylistsPage = () => {
             <h2>Moods</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
-              spaceBetween={24}
+              spaceBetween={10}
               slidesPerView="auto"
               freeMode={true}
               navigation
@@ -356,6 +359,7 @@ const PlaylistsPage = () => {
                     onClick={() => handleMoodClick(mood.slug)}
                   >
                     <div className="info">
+                      <img src="/svg/logo.svg" alt={mood.name} />
                       <h3>{mood.name}</h3>
                     </div>
                   </div>
@@ -368,7 +372,7 @@ const PlaylistsPage = () => {
             <h2>Countries</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
-              spaceBetween={24}
+              spaceBetween={10}
               slidesPerView="auto"
               freeMode={true}
               navigation
@@ -386,6 +390,7 @@ const PlaylistsPage = () => {
                     onClick={() => handleCountryClick(countryObj.country)}
                   >
                     <div className="info">
+                      <img src="/svg/logo.svg" alt={countryObj.country} />
                       <h3>{countryObj.country}</h3>
                     </div>
                   </div>
@@ -398,7 +403,7 @@ const PlaylistsPage = () => {
             <h2>Seasons</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
-              spaceBetween={24}
+              spaceBetween={10}
               slidesPerView="auto"
               freeMode={true}
               navigation
@@ -416,6 +421,7 @@ const PlaylistsPage = () => {
                     onClick={() => handleSeasonClick(season.slug)}
                   >
                     <div className="info">
+                      <img src="/svg/logo.svg" alt={season.name} />
                       <h3>{season.name}</h3>
                     </div>
                   </div>
@@ -428,7 +434,7 @@ const PlaylistsPage = () => {
             <h2>Years</h2>
             <Swiper
               modules={[Navigation, FreeMode, Mousewheel]}
-              spaceBetween={24}
+              spaceBetween={10}
               slidesPerView="auto"
               freeMode={true}
               navigation
@@ -446,6 +452,7 @@ const PlaylistsPage = () => {
                     onClick={() => handleYearClick(yearObj.year)}
                   >
                     <div className="info">
+                      <img src="/svg/logo.svg" alt={yearObj.year.toString()} />
                       <h3>{yearObj.year}</h3>
                     </div>
                   </div>

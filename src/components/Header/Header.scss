@@ -1,77 +1,104 @@
 @import '../../_breakpoints.scss';
 
-.header__logo {
+.header {
   position: fixed;
-  top: 1rem;
-  left: 1rem;
+  top: 0;
+  left: 0;
+  width: 100%;
   z-index: 1000;
-  mix-blend-mode: difference;
-  
-  .header__logo__image {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    transition: all 0.3s ease;
 
-    @include respond-to(md) {
-      width: 50px;
-      height: 50px;
-    }
+  padding: var(--space-5) var(--space-4);
 
-    &:hover {
-      transform: rotate(-45deg);
-    }
-  }
-  
-  a {
-    font-size: 2rem;
-    font-weight: 700;
-    -webkit-text-stroke: 0.5px var(--primary-color);
-    line-height: 1;
-    color: var(--primary-color);
-    text-transform: lowercase;
-    
-    @include respond-to(md) {
-      font-size: 1rem;
-    }
-  }
-}
-
-.header__links {
-  position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
   display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-  mix-blend-mode: difference;
+  align-items: center;
+  justify-content: space-between;
 
-  // Hide desktop menu on mobile
-  &--desktop {
-    @include respond-to(md) {
-      display: none;
-    }
-  }
+  background-color: var(--color-black);
 
   @include respond-to(md) {
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: var(--space-4);
   }
 
-  .header__links__item {
-    color: var(--primary-color);
-    text-transform: uppercase;
-    transition: all 0.3s ease;
+  &__logo {
 
-    font-size: 2rem;
+    width: calc(100% / 3);
 
-    &:hover {
-      color: var(--tertiary-color);
+    @include respond-to(md) {
+      width: fit-content;
     }
     
-    &.selected {
-      color: var(--tertiary-color);
+    &__image {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      transition: all 0.3s ease;
+  
+      @include respond-to(md) {
+        width: 50px;
+        height: 50px;
+      }
+  
+      &:hover {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+
+  &__links {
+    width: calc(100% / 3);
+
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    @include respond-to(md) {
+      justify-content: center;
+    }
+
+    // Hide desktop menu on mobile
+    &--desktop {
+      @include respond-to(md) {
+        display: none;
+      }
+    }
+
+    @include respond-to(md) {
+      gap: 0.5rem;
+    }
+
+    &__item {
+      transition: all 0.3s ease;
+      position: relative;
+      a {
+        color: var(--color-white);
+        transition: all 0.3s ease;
+      }
+
+      &:after {
+        content: '';
+        display: block;
+        width: 0%;
+        height: 1px;
+        background-color: var(--color-yellow);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        transition: all 0.3s ease;
+      }
+
+      &:hover {
+        &:after {
+          width: 100%;
+        }
+      }
+      
+      &.selected {
+        a {
+          color: var(--color-green);
+        }
+      }
     }
   }
 }
@@ -92,7 +119,7 @@
     color: var(--primary-color);
     padding: 0.5rem;
     transition: transform 0.3s ease;
-    mix-blend-mode: difference;
+    /* mix-blend-mode: difference; */
 
     &:hover {
       transform: scale(1.1);

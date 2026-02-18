@@ -13,6 +13,8 @@
   gap: 1rem;
   pointer-events: none;
 
+  display: none;
+
   @include respond-to(md) {
     display: none;
   }

@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import './TrackModal.scss';
-import { Track } from '../../services/api';
+import { Artist, Track } from '../../services/api';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface TrackModalProps {
 
 const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
   const navigate = useNavigate();
+  const { setModalArtist, setIsModalArtistOpen } = useAppContext();
 
   // Cerrar con ESC
   useEffect(() => {
@@ -72,6 +74,12 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
     }, 300);
   };
 
+  const handleArtistClick = (artist: Artist) => {
+    onClose();
+    setModalArtist(artist);
+    setIsModalArtistOpen(true);
+  };
+
   return (
     <div className="track-modal" onClick={onClose}>
       <div className="track-modal__backdrop" />
@@ -98,7 +106,7 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
             <h2 className="track-modal__title">{track.title}</h2>
             
             {track.artist && (
-              <div className="track-modal__artist">
+              <div className="track-modal__artist" onClick={() => handleArtistClick(track.artist)}>
                 {track.artist.photo_url && (
                   <StorageImage 
                     path={track.artist.photo_url}

@@ -2,10 +2,11 @@
   
 .artists {
   display: initial;
-  gap: 2rem;
   padding: 0;
   color: #fff;
-  padding-top: 4rem;
+  
+  /* padding: calc(100px + var(--space-4)) 0; */
+  padding: 100px 0;
 
   @include respond-to(md) {
     padding-top: 5rem;
@@ -35,8 +36,7 @@
   }
 
   &__content {
-    padding: 0 2rem;
-    padding-bottom: 2rem;
+    padding: 0 var(--space-4);
     
     @include respond-to(md) {
       padding: 0 2rem;
@@ -73,11 +73,7 @@
       justify-content: space-between;
       gap: 1rem;
       position: relative;
-      &:hover {
-        .artists__content__artistImage {
-          opacity: 1;
-        }
-      }
+     
     }
 
     &__artistName {
@@ -94,14 +90,17 @@
         color: var(--tertiary-color);
         margin-left: 0.5rem;
       }
+
+      &:hover ~ .artists__content__artistImage {
+        opacity: 1;
+      }
     }
 
     &__artistImage {
       position: absolute;
-      top: -50%;
-      transform: translateY(-50%);
+      top: 0;
       right: 0;
-      width: 70%;
+      width: 50%;
       aspect-ratio: 1/1;
       border-radius: 50%;
       object-fit: cover;
