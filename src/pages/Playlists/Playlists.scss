@@ -1,12 +1,10 @@
 @import '../../_breakpoints.scss';
 .playlistsPage {
-  padding: calc(100px + var(--space-4)) var(--space-8);
-  padding-top: calc(100px + var(--space-4));
-  margin: 0 auto;
-
+  padding: var(--space-16) var(--space-4);
+  background-color: var(--color-black);
+  
   @include respond-to(md) {
-    padding: 1rem;
-    padding-top: 5rem;
+    padding: var(--space-24) var(--space-4);
   }
 
   &__header {
@@ -43,12 +41,19 @@
     }
   }
 
-  &__clear-filter {
+  &__clear-filter-btn {
     padding: 0px;
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    &:hover {
+      gap: var(--space-3);
+    }
   }
 
   &__section {
@@ -74,6 +79,120 @@
         border-radius: 2px;
       }
     }
+  }
+
+  &__filters {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+
+    @include respond-to(md) {
+      flex-direction: column;
+      gap: var(--space-2);
+      width: fit-content;
+    }
+  }
+
+  &__dropdown {
+    position: relative;
+
+    &__trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-2);
+      background: transparent;
+      border: 1px solid var(--color-white);
+      border-radius: 4px;
+      color: var(--color-white);
+      font-size: var(--font-size-md);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+  
+      svg {
+        transition: transform 0.2s;
+        opacity: 0.6;
+      }
+  
+      &:hover {
+        border-color: rgba(var(--color-whitgreene-rgb, 55, 93, 44), 1);
+      }
+    }
+
+    &.is-open .playlistsPage__dropdown__trigger {
+      border-color: var(--color-white);
+  
+      svg {
+        transform: rotate(180deg);
+        opacity: 1;
+      }
+    }
+
+    &.is-active .playlistsPage__dropdown__trigger {
+      background: var(--color-white);
+      color: var(--color-black, #000);
+      border-color: var(--color-white);
+  
+      svg {
+        opacity: 0.5;
+      }
+    }
+  
+    &.is-active.is-open .playlistsPage__dropdown__trigger svg {
+      transform: rotate(180deg);
+    }
+
+    &__menu {
+      position: absolute;
+      z-index: 1;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+      background: var(--color-black);
+      border: 1px solid var(--color-white);
+      border-radius: 6px;
+      list-style: none;
+      margin: 0;
+      padding: 4px 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: dropdownFadeIn 0.15s ease;
+  
+      li {
+        padding: 9px 14px;
+        font-size: var(--font-size-md);
+        color: rgba(var(--color-white-rgb, 255, 255, 255), 0.8);
+        cursor: pointer;
+        transition: all 0.15s ease;
+  
+        &:hover {
+          background: rgba(var(--color-white-rgb, 255, 255, 255), 0.08);
+          color: var(--color-white);
+        }
+  
+        &.is-selected {
+          color: var(--color-white);
+          font-weight: 600;
+          background: rgba(var(--color-white-rgb, 255, 255, 255), 0.1);
+        }
+      }
+  
+      // Custom scrollbar
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(var(--color-white-rgb, 255, 255, 255), 0.2);
+        border-radius: 2px;
+      }
+    }
+
   }
 
   &__carousel {
@@ -291,7 +410,8 @@
   &__tracks {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--space-4);
+    padding-right: var(--space-8);
   }
 
   .error {
@@ -305,7 +425,24 @@
 
   &__play {
     &-playlist {
+      background-color: transparent;
       border: none;
+      padding: 0;
+
+      svg {
+        transition: all 0.3s ease;
+        path {
+          transition: all 0.3s ease;
+        }
+      }
+
+      &:hover {
+        svg {
+          path {
+            fill: var(--color-green);
+          }
+        }
+      }
     }
   }
 }

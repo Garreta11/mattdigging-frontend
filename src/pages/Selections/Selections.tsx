@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Selections.scss";
 import { fetchSelections, Selections } from "../../services/api";
-/* import { FiChevronLeft, FiChevronRight, FiCalendar, FiGrid } from "react-icons/fi"; */
 
 type ViewMode = "calendar" | "list";
 
@@ -13,37 +12,13 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Helper to get week number from date
-const getWeekNumber = (date: Date): number => {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-};
-
-// Helper to get all weeks in a month
-const getWeeksInMonth = (year: number, month: number): number[] => {
-  const weeks: number[] = [];
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  
-  let currentDate = new Date(firstDay);
-  while (currentDate <= lastDay) {
-    const weekNum = getWeekNumber(currentDate);
-    if (!weeks.includes(weekNum)) {
-      weeks.push(weekNum);
-    }
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  
-  return weeks;
-};
-
 const SelectionsPage = () => {
   const [selections, setSelections] = useState<Selections[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
-  const [selectedYear, setSelectedYear] = useState(2026);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // 0-11
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,6 +29,7 @@ const SelectionsPage = () => {
           (selection) => selection.title.toLowerCase() !== "hidden gems"
         );
         setSelections(filteredData);
+        console.log(filteredData);
       } catch (error) {
         console.error("Error fetching selections:", error);
       } finally {
@@ -75,22 +51,31 @@ const SelectionsPage = () => {
     return `Week ${weekNumber}, ${year}`;
   };
 
-  // Get unique years from selections
-  const availableYears = [...new Set(selections.map((s) => s.year))].sort();
+  const handleClose = () => {
+    setIsFadingOut(true);
+    setTimeout(() => navigate('/'), 1000);
+  };
 
-  // Get selections for selected year
-  const yearSelections = selections.filter((s) => s.year === selectedYear);
+  // Group selections by month/year from published_at
+  const selectionsByMonth = selections.reduce((acc, selection) => {
+    const date = new Date(selection.published_at);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(selection);
+    return acc;
+  }, {} as Record<string, Selections[]>);
 
-  // Create a map of week numbers to selections
-  const weekMap = new Map<number, Selections>();
-  yearSelections.forEach((selection) => {
-    weekMap.set(selection.week_number, selection);
-  });
+  // Get unique years available
+  const availableYears = [...new Set(
+    selections.map((s) => new Date(s.published_at).getFullYear())
+  )].sort();
 
-  // Get weeks for the selected month
-  const weeksInMonth = getWeeksInMonth(selectedYear, selectedMonth);
+  // Selections for current selected month/year
+  const currentKey = `${selectedYear}-${selectedMonth}`;
+  const currentMonthSelections = (selectionsByMonth[currentKey] ?? []).sort(
+    (a, b) => new Date(a.published_at).getTime() - new Date(b.published_at).getTime()
+  );
 
-  // Navigation handlers
   const handlePreviousMonth = () => {
     if (selectedMonth === 0) {
       setSelectedMonth(11);
@@ -110,16 +95,12 @@ const SelectionsPage = () => {
   };
 
   const canGoPrevious = () => {
-    if (selectedMonth === 0) {
-      return availableYears.includes(selectedYear - 1);
-    }
+    if (selectedMonth === 0) return availableYears.includes(selectedYear - 1);
     return true;
   };
 
   const canGoNext = () => {
-    if (selectedMonth === 11) {
-      return availableYears.includes(selectedYear + 1);
-    }
+    if (selectedMonth === 11) return availableYears.includes(selectedYear + 1);
     return true;
   };
 
@@ -137,31 +118,28 @@ const SelectionsPage = () => {
   const upcomingSelections = selections.filter((s) => !s.is_published);
 
   return (
-    <div className="selectionsPage main-content">
-      <div className="selectionsPage__header">
-        <div className="selectionsPage__header-content">
-          <h1 className="selectionsPage__title">Music Selections</h1>
-          <p className="selectionsPage__subtitle">
-            Curated collections of hidden gems and rare tracks
-          </p>
-        </div>
+    <div className={`selectionsPage main-content ${isFadingOut ? 'fade-out' : ''}`}>
+      <div className="main-content__close">
+        <button className="main-content__close__button main-content__close__button--reverse" onClick={handleClose}>
+          <svg width="34" height="11" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0.204244 4.65981C-0.069123 4.93318 -0.069123 5.37639 0.204244 5.64976L4.65902 10.1045C4.93238 10.3779 5.3756 10.3779 5.64897 10.1045C5.92233 9.83117 5.92233 9.38795 5.64897 9.11458L1.68917 5.15479L5.64897 1.19499C5.92233 0.92162 5.92233 0.478405 5.64897 0.205038C5.3756 -0.0683293 4.93238 -0.0683293 4.65902 0.205038L0.204244 4.65981ZM33.8867 5.15479V4.45479H0.699219V5.15479V5.85479H33.8867V5.15479Z" fill="var(--color-white)"/>
+          </svg>
+        </button>
+      </div>
 
-        {/* View Toggle */}
-        <div className="selectionsPage__controls">
-          <div className="viewToggle">
+      <div className="selectionsPage__header">
+        <div className="selectionsPage__header__controls">
+          <div className="selectionsPage__header__controls__viewToggle">
             <button
-              className={`viewToggle__button ${viewMode === "calendar" ? "viewToggle__button--active" : ""}`}
+              className={`selectionsPage__header__controls__viewToggle__button selectionsPage__header__controls__viewToggle__button--calendar ${viewMode === "calendar" ? "selectionsPage__header__controls__viewToggle__button--active" : ""}`}
               onClick={() => setViewMode("calendar")}
             >
-              {/* <FiCalendar size={20} /> */}
               Calendar
             </button>
             <button
-              className={`viewToggle__button ${viewMode === "list" ? "viewToggle__button--active" : ""}`}
+              className={`selectionsPage__header__controls__viewToggle__button selectionsPage__header__controls__viewToggle__button--list ${viewMode === "list" ? "selectionsPage__header__controls__viewToggle__button--active" : ""}`}
               onClick={() => setViewMode("list")}
-            >
-              {/* <FiGrid size={20} /> */}
-              
+            >              
               List
             </button>
           </div>
@@ -170,75 +148,79 @@ const SelectionsPage = () => {
 
       {/* Calendar View */}
       {viewMode === "calendar" && (
-        <div className="calendarView">
+        <div className="selectionsPage__calendarView">
           {/* Month/Year Selector */}
-          <div className="calendarView__navigation">
+          <div className="selectionsPage__calendarView__navigation">
             <button
-              className="calendarView__nav-button"
+              className="selectionsPage__calendarView__nav-button"
               onClick={handlePreviousMonth}
               disabled={!canGoPrevious()}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z" fill="currentColor"/>
+                <path d="M16.5303 3.21967C16.2641 2.9534 15.8474 2.9292 15.5538 3.14705L15.4697 3.21967L7.21967 11.4697C6.9534 11.7359 6.9292 12.1526 7.14705 12.4462L7.21967 12.5303L15.4697 20.7803C15.7626 21.0732 16.2374 21.0732 16.5303 20.7803C16.7966 20.5141 16.8208 20.0974 16.6029 19.8038L16.5303 19.7197L8.8107 12L16.5303 4.28033C16.8232 3.98744 16.8232 3.51256 16.5303 3.21967Z" fill="var(--color-white)"/>
               </svg>
             </button>
-            <div className="calendarView__current-date">
-              <h2 className="calendarView__month">{MONTHS[selectedMonth]}</h2>
-              <span className="calendarView__year">{selectedYear}</span>
+            <div className="selectionsPage__calendarView__current-date">
+              <h2 className="selectionsPage__calendarView__month">{MONTHS[selectedMonth]}</h2>
+              <span className="selectionsPage__calendarView__year">{selectedYear}</span>
             </div>
             <button
-              className="calendarView__nav-button"
+              className="selectionsPage__calendarView__nav-button"
               onClick={handleNextMonth}
               disabled={!canGoNext()}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/>
+                <path d="M7.4697 20.7803C7.7359 21.0466 8.1526 21.0708 8.4462 20.853L8.5303 20.7803L16.7803 12.5303C17.0466 12.2641 17.0708 11.8474 16.853 11.5538L16.7803 11.4697L8.5303 3.2197C8.2374 2.9268 7.7626 2.9268 7.4697 3.2197C7.2034 3.4859 7.1792 3.9026 7.3971 4.1962L7.4697 4.2803L15.1893 12L7.4697 19.7197C7.1768 20.0126 7.1768 20.4874 7.4697 20.7803Z" fill="var(--color-white)"/>
               </svg>
             </button>
           </div>
 
           {/* Calendar Grid */}
-          <div className="calendarView__grid">
-            {weeksInMonth.map((weekNumber) => {
-              const selection = weekMap.get(weekNumber);
-              const hasSelection = !!selection;
-              const isPublished = selection?.is_published;
+          <div className="selectionsPage__calendarView__grid">
+            {currentMonthSelections.length === 0 && (
+              <div className="selectionsPage__calendarView__weekCell">
+                <div className="selectionsPage__calendarView__weekCell__empty">No selections this month.</div>
+              </div>
+            )}
+            {currentMonthSelections.map((selection) => {
+              const isPublished = selection.is_published;
+              const startDate = new Date(selection.published_at);
+              const endDate = new Date(selection.published_at);
+              endDate.setDate(endDate.getDate() + 6);
 
               return (
                 <div
-                  key={weekNumber}
-                  className={`weekCell ${hasSelection ? "weekCell--has-selection" : ""} ${
-                    isPublished ? "weekCell--published" : ""
-                  } ${hasSelection && !isPublished ? "weekCell--upcoming" : ""}`}
-                  onClick={() => selection && handleSelectionClick(selection)}
+                  key={selection.title}
+                  className={`selectionsPage__calendarView__weekCell selectionsPage__calendarView__weekCell--has-selection ${
+                    isPublished
+                      ? "selectionsPage__calendarView__weekCell--published"
+                      : "selectionsPage__calendarView__weekCell--upcoming"
+                  }`}
+                  onClick={() => handleSelectionClick(selection)}
                 >
-                  <div className="weekCell__number">Week {weekNumber}</div>
-                  {selection && (
-                    <>
-                      <div className="weekCell__title">{selection.title}</div>
-                      {isPublished && (
-                        <div className="weekCell__badge">Published</div>
+                  <div className="selectionsPage__calendarView__weekCell__content">
+                    <div className="selectionsPage__calendarView__weekCell__content__header">
+                      <div className="selectionsPage__calendarView__weekCell__title">
+                        {selection.title}
+                        <span className="selectionsPage__calendarView__weekCell__title__date">
+                          ·{" "}
+                          {startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} -{" "}
+                          {endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </span>
+                      </div>
+                      {isPublished ? (
+                        <div className="selectionsPage__calendarView__weekCell__badge selectionsPage__calendarView__weekCell__badge--published">Published</div>
+                      ) : (
+                        <div className="selectionsPage__calendarView__weekCell__badge selectionsPage__calendarView__weekCell__badge--upcoming">Coming Soon</div>
                       )}
-                      {!isPublished && (
-                        <div className="weekCell__badge weekCell__badge--upcoming">
-                          Coming Soon
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {!hasSelection && (
-                    <div className="weekCell__empty">No selection</div>
-                  )}
+                    </div>
+                    <div className="selectionsPage__calendarView__weekCell__content__body">
+                      <p className="selectionsPage__calendarView__weekCell__content__body__description">{selection.description}</p>
+                    </div>
+                  </div>
                 </div>
               );
             })}
-          </div>
-
-          {/* Info text */}
-          <div className="calendarView__info">
-            <p>
-              Showing {weeksInMonth.length} weeks in {MONTHS[selectedMonth]} {selectedYear}
-            </p>
           </div>
         </div>
       )}
@@ -246,73 +228,56 @@ const SelectionsPage = () => {
       {/* List View */}
       {viewMode === "list" && (
         <>
-          {/* Published Selections */}
           {publishedSelections.length > 0 && (
-            <section className="selectionsPage__section">
-              <h2 className="selectionsPage__section-title">Available Now</h2>
-              <div className="selectionsPage__grid">
-                {publishedSelections.map((selection) => (
-                  <div
+            <section className="selectionsPage__listView">
+              <h2 className="selectionsPage__listView__title">Available Now</h2>
+              <div className="selectionsPage__listView__grid">
+                {publishedSelections.map((selection) => {
+                  const startDate = new Date(selection.published_at);
+                  const endDate = new Date(selection.published_at);
+                  endDate.setDate(endDate.getDate() + 6);
+                  return (
+                    <div
                     key={selection.title}
-                    className="selectionCard selectionCard--published"
+                    className="selectionsPage__listView__card selectionsPage__listView__card--published"
                     onClick={() => handleSelectionClick(selection)}
                   >
-                    <div className="selectionCard__header">
-                      <h3 className="selectionCard__title">{selection.title}</h3>
-                      <span className="selectionCard__badge selectionCard__badge--published">
-                        Published
-                      </span>
-                    </div>
-
-                    <div className="selectionCard__meta">
-                      <span className="selectionCard__week">
-                        {formatWeekYear(selection.week_number, selection.year)}
-                      </span>
-                      {selection.published_at && (
-                        <span className="selectionCard__date">
-                          {new Date(selection.published_at).toLocaleDateString()}
+                    <div className="selectionsPage__listView__card__header">
+                      <h3 className="selectionsPage__listView__card__header__title">
+                      {selection.title}
+                        <span className="selectionsPage__listView__card__header__title__date">
+                          ·{" "}
+                          {startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} -{" "}
+                          {endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </span>
-                      )}
+                      </h3>
+                      <span className="selectionsPage__listView__card__header__badge selectionsPage__listView__card__header__badge--published">Published</span>
                     </div>
-
                     {selection.description && (
-                      <p className="selectionCard__description">
-                        {selection.description}
-                      </p>
+                      <p className="selectionsPage__listView__card__description">{selection.description}</p>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
 
-          {/* Upcoming Selections */}
           {upcomingSelections.length > 0 && (
-            <section className="selectionsPage__section">
-              <h2 className="selectionsPage__section-title">Coming Soon</h2>
-              <div className="selectionsPage__grid">
+            <section className="selectionsPage__listView">
+              <h2 className="selectionsPage__listView__title">Coming Soon</h2>
+              <div className="selectionsPage__listView__grid">
                 {upcomingSelections.map((selection) => (
-                  <div
-                    key={selection.title}
-                    className="selectionCard selectionCard--upcoming"
-                  >
-                    <div className="selectionCard__header">
-                      <h3 className="selectionCard__title">{selection.title}</h3>
-                      <span className="selectionCard__badge selectionCard__badge--upcoming">
-                        Upcoming
-                      </span>
+                  <div key={selection.title} className="selectionsPage__listView__card selectionsPage__listView__card--upcoming">
+                    <div className="selectionsPage__listView__card__header">
+                      <h3 className="selectionsPage__listView__card__title">{selection.title}</h3>
+                      <span className="selectionsPage__listView__card__badge selectionsPage__listView__card__badge--upcoming">Coming Soon</span>
                     </div>
-
-                    <div className="selectionCard__meta">
-                      <span className="selectionCard__week">
-                        {formatWeekYear(selection.week_number, selection.year)}
-                      </span>
+                    <div className="selectionsPage__listView__card__meta">
+                      <span className="selectionsPage__listView__card__week">{formatWeekYear(selection.week_number, selection.year)}</span>
                     </div>
-
                     {selection.description && (
-                      <p className="selectionCard__description">
-                        {selection.description}
-                      </p>
+                      <p className="selectionsPage__listView__card__description">{selection.description}</p>
                     )}
                   </div>
                 ))}
@@ -323,7 +288,7 @@ const SelectionsPage = () => {
       )}
 
       {selections.length === 0 && !isLoading && (
-        <div className="selectionsPage__empty">
+        <div className="selectionsPage__listView__empty">
           <p>No selections available yet.</p>
         </div>
       )}

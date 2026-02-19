@@ -91,7 +91,6 @@ export default class Output {
   // The halo is a slightly larger plane rendered with a transparent radial-gradient
   // shader that pulses over time.
   setupGlowHalo() {
-    console.log("setupGlowHalo");
     // Shader: soft radial glow with a breathing pulse
     const glowVS = `
       varying vec2 vUv;

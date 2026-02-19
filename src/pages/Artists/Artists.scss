@@ -1,15 +1,12 @@
 @import '../../_breakpoints.scss';
-  
+
 .artists {
   display: initial;
-  padding: 0;
-  color: #fff;
-  
-  /* padding: calc(100px + var(--space-4)) 0; */
-  padding: 100px 0;
+  background-color: var(--color-black);
+  padding: var(--space-16) var(--space-4);
 
   @include respond-to(md) {
-    padding-top: 5rem;
+    padding-top: var(--space-24);
   }
 
   &__header {
@@ -17,6 +14,7 @@
     justify-content: flex-start;
     align-items: center;
     padding: 0 2rem;
+
     &__description {
       width: 65%;
       font-size: 2rem;
@@ -28,6 +26,7 @@
       padding: 1rem 2rem;
       height: fit-content;
       min-height: 30%;
+
       &__description {
         width: 80%;
         font-size: 1.5rem;
@@ -35,9 +34,42 @@
     }
   }
 
+  &__alphabet {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    z-index: 100;
+
+    &__letter {
+      font-size: var(--font-size-sm);
+      font-weight: 700;
+      line-height: 1;
+      transition: color 0.2s ease;
+      color: var(--color-white);
+
+      &--active {
+        cursor: pointer;
+
+        &:hover {
+          color: var(--color-green);
+        }
+      }
+
+      &--disabled {
+        opacity: 0.2;
+        cursor: default;
+      }
+    }
+  }
+
   &__content {
+    position: relative;
     padding: 0 var(--space-4);
-    
+
     @include respond-to(md) {
       padding: 0 2rem;
       padding-bottom: 2rem;
@@ -67,17 +99,51 @@
       }
     }
 
+    &__artistsList {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: left;
+
+      &:has(.artists__content__artistName:hover) {
+        .artists__content__artistName {
+          opacity: 0.5;
+          transition: opacity 0.3s ease;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+
+    &__letterGroup {
+      width: 100%;
+
+      &__label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-white);
+        opacity: 0.3;
+        margin-bottom: 0.5rem;
+        margin-top: 1.5rem;
+        letter-spacing: 0.1em;
+      }
+    }
+
     &__artistItem {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       gap: 1rem;
       position: relative;
-     
+      transition: opacity 0.3s ease;
     }
 
     &__artistName {
-      font-size: 1rem;
+      position: relative;
+      font-size: var(--font-size-lg);
       display: inline-flex;
       align-items: center;
       gap: 1rem;
@@ -86,9 +152,25 @@
       cursor: pointer;
       transition: all 0.3s ease;
       color: var(--primary-color);
+
+      &::after {
+        content: "";
+        display: block;
+        width: 0;
+        height: 2px;
+        background-color: var(--color-white);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        transition: all 0.3s ease;
+      }
+
       &:hover {
-        color: var(--tertiary-color);
-        margin-left: 0.5rem;
+        color: var(--color-white);
+
+        &::after {
+          width: 100%;
+        }
       }
 
       &:hover ~ .artists__content__artistImage {
@@ -99,8 +181,9 @@
     &__artistImage {
       position: absolute;
       top: 0;
-      right: 0;
-      width: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
       aspect-ratio: 1/1;
       border-radius: 50%;
       object-fit: cover;
@@ -108,104 +191,12 @@
       transition: all 0.3s ease;
       z-index: -1;
     }
-
-    .artistsLayout {
-      .artistsList__container {
-        display: flex;
-        flex-direction: row;
-        gap: 2rem;
-        @include respond-to(md) {
-          position: relative;
-        }
-      }
-  
-      .artistsList {
-        width: calc(100% - 300px);
-        display: inline-block;
-        position: relative;
-        z-index: 1;
-        @include respond-to(md) {
-          width: 100%;
-        }
-  
-        .artistName {
-          font-size: 2rem;
-          display: inline-flex;
-          align-items: center;
-          gap: 1rem;
-          width: fit-content;
-          font-weight: 700;
-          color: transparent;
-          transition: all 0.3s ease;
-          -webkit-text-stroke: 0.5px var(--primary-color);
-          margin-right: 1rem;
-          
-          @include respond-to(md) {
-            font-size: 1.5rem;
-          }
-
-          &:hover {
-            color: var(--secondary-color);
-            -webkit-text-stroke: 0.5px var(--secondary-color);
-          }
-
-          &.dots {
-            font-size: 3rem;
-            font-weight: 700;
-            color: transparent;
-            -webkit-text-stroke: 0.5px var(--primary-color);
-            &:hover {
-              color: transparent;
-              -webkit-text-stroke: 0.5px var(--primary-color);
-            }
-          }
-        }
-      }
-  
-      .artistsPreview {
-        position: sticky;
-        top: calc(50% - 150px);
-        right: 0;
-        width: 300px;
-        height: 300px;
-        aspect-ratio: 1/1;
-        border-radius: var(--border-radius-circle);
-        overflow: hidden;
-        @include respond-to(md) {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 100%;
-          aspect-ratio: 1/1;
-        }
-  
-        .previewImage {
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          transition: all 0.3s ease;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-    }
-
-    .notice {
-      margin-top: 2rem;
-      font-size: 1rem;
-      color: #ccc;
-    }
   }
 }
 
 @keyframes fadeInModal {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUpModal {

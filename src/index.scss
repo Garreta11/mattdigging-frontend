@@ -4,8 +4,8 @@
 :root {
   // colors
   --color-black: #0A1111;
-  --color-white: #F5F1E8;
-  --color-green: #375D2C;
+  --color-white: #f5f1e8;
+  --color-green: #375d2c;
   --color-yellow: #FFF2A3;
 
 
@@ -78,7 +78,7 @@ h1, h2, h3, h4, h5, h6 {
 
 // Links
 a {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-family: 'Website', sans-serif;
   text-decoration: none;
   color: transparent;
@@ -87,6 +87,7 @@ a {
 
 // Buttons
 button {
+  font-family: 'Website', sans-serif;
   background-color: var(--color-green);
   border: none;
   cursor: pointer;
@@ -173,6 +174,7 @@ input {
       }
 
       &--reverse {
+        padding: 0;
         transform: rotate(180deg);
       }
     }

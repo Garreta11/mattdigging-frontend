@@ -10,7 +10,7 @@ $breakpoint-xl: 1440px;  // large desktops
   @if $breakpoint == sm {
     @media (max-width: #{$breakpoint-sm}) { @content; }
   } @else if $breakpoint == md {
-    @media (max-width: #{$breakpoint-md}) { @content; }
+    @media (max-width: #{$breakpoint-lg}) { @content; }
   } @else if $breakpoint == lg {
     @media (max-width: #{$breakpoint-lg}) { @content; }
   } @else if $breakpoint == xl {

@@ -1,17 +1,17 @@
 .track-item {
   display: grid;
   grid-template-columns: 80px 1fr auto;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: center;
-  padding: 12px;
+  padding: var(--space-4);
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &--playing {
-    background: rgba(29, 185, 84, 0.1); // Verde suave
-    border-left: 3px solid var(--primary-color, #1db954);
+    background: rgba(55, 93, 44, 0.3); // Verde suave
+    border-left: 3px solid var(--color-yellow);
     
     .trackItem__info h3 {
       color: var(--primary-color, #1db954);
@@ -19,7 +19,7 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(55, 93, 44, 0.3);
     transform: translateY(-2px);
   }
 

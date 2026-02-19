@@ -1,6 +1,6 @@
 import './SearchInput.scss';
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import {
   searchArtists,
@@ -17,7 +17,9 @@ interface SearchResults {
 
 const SearchInput = () => {
   const { setModalArtist, setIsModalArtistOpen, setTrack } = useAppContext();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults>({
     artists: [],
@@ -95,7 +97,26 @@ const SearchInput = () => {
   };
 
   const handlePlaylistsClick = () => {
-    navigate('/playlists');
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.classList.add('fade-out');
+      
+      // Wait for animation to complete before navigating
+      setTimeout(() => {
+        navigate('/playlists');
+        // Remove fade-out and add fade-in after navigation
+        setTimeout(() => {
+          mainContent.classList.remove('fade-out');
+          mainContent.classList.add('fade-in');
+          // Remove fade-in class after animation completes
+          setTimeout(() => {
+            mainContent.classList.remove('fade-in');
+          }, 300);
+        }, 50);
+      }, 1000); // Match this with your CSS animation duration
+    } else {
+      navigate('/playlists');
+    }
     setQuery("");
     setResults({ artists: [], tracks: [] });
   };
@@ -115,7 +136,7 @@ const SearchInput = () => {
         </div>
 
         <div className="search__input__playlists" onClick={() => handlePlaylistsClick()}>
-          <svg className="search__input__playlists__icon" width="33" height="23" viewBox="0 0 33 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className={`search__input__playlists__icon${location.pathname === '/playlists' ? ' search__input__playlists__icon--active' : ''}`} width="26.12" height="18" viewBox="0 0 33 23" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M25.3458 0H6.79231C5.80574 0 4.99854 0.807208 4.99854 1.79377V20.3472C4.99854 21.3338 5.80574 22.141 6.79231 22.141H25.3458C26.3323 22.141 27.1395 21.3338 27.1395 20.3472V1.79377C27.1395 0.807208 26.3323 0 25.3458 0ZM25.9437 20.3535C25.9437 20.6824 25.6746 20.9515 25.3458 20.9515H6.79231C6.46345 20.9515 6.19438 20.6824 6.19438 20.3535V1.80009C6.19438 1.47123 6.46345 1.20216 6.79231 1.20216H25.3458C25.6746 1.20216 25.9437 1.47123 25.9437 1.80009V20.3535Z" fill="#F5F1E8"/>
             <path d="M18.7383 9.40565L15.061 7.57001C14.481 7.27703 13.7994 7.30692 13.2433 7.65372C12.6873 7.99453 12.3584 8.59245 12.3584 9.24418V12.9214C12.3584 13.5732 12.6873 14.1651 13.2433 14.5119C13.5423 14.6972 13.8831 14.7929 14.2239 14.7929C14.5109 14.7929 14.7979 14.7271 15.061 14.5956L18.7383 12.76C19.372 12.4431 19.7727 11.8033 19.7727 11.0917C19.7727 10.3802 19.3781 9.74045 18.7383 9.42352V9.40565ZM18.2061 11.6718L14.5289 13.5074C14.3136 13.6151 14.0804 13.6031 13.8771 13.4775C13.6739 13.352 13.5602 13.1427 13.5602 12.9035V9.22628C13.5602 8.98711 13.6739 8.77783 13.8771 8.65227C13.9848 8.5865 14.1103 8.55063 14.2299 8.55063C14.3316 8.55063 14.4332 8.57454 14.5289 8.62238L18.2061 10.458C18.4393 10.5716 18.5768 10.7988 18.5768 11.0559C18.5768 11.313 18.4393 11.5402 18.2061 11.6539L18.2061 11.6718Z" fill="#F5F1E8"/>
             <path d="M1.86552 2.78661H3.17499C3.50385 2.78661 3.77291 2.51754 3.77291 2.18868C3.77291 1.85982 3.50385 1.59076 3.17499 1.59076H1.86552C0.837094 1.59076 0 2.42785 0 3.45628V18.6855C0 19.7139 0.837094 20.551 1.86552 20.551H3.17499C3.50385 20.551 3.77291 20.2819 3.77291 19.9531C3.77291 19.6242 3.50385 19.3551 3.17499 19.3551H1.86552C1.49481 19.3551 1.19585 19.0562 1.19585 18.6855V3.45628C1.19585 3.08557 1.49481 2.78661 1.86552 2.78661Z" fill="#F5F1E8"/>
@@ -123,7 +144,7 @@ const SearchInput = () => {
           </svg>
 
           <div className="search__input__playlists__tooltip">
-            <p>Playlists</p>
+            <p>Discover</p>
           </div>
 
         </div>
