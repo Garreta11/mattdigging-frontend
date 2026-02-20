@@ -7,6 +7,8 @@
   --color-white: #f5f1e8;
   --color-green: #375d2c;
   --color-yellow: #FFF2A3;
+  --color-blue: #009FB7;
+  --color-pink: #D991BA;
 
 
   // spacing scale
@@ -33,7 +35,7 @@
   --space-52: 26rem;   // 416px
 
   // font sizes
-  --font-size-xs: 0.5rem;   // 8px
+  --font-size-xs: 0.7rem;   // 12px
   --font-size-sm: 0.875rem;  // 14px
   --font-size-md: 1rem;      // 16px
   --font-size-lg: 1.25rem;   // 20px
@@ -74,6 +76,8 @@ p {
 
 h1, h2, h3, h4, h5, h6 {
   -webkit-text-stroke: 0.5px var(--color-white);
+  letter-spacing: .045em;
+  font-weight: 400;
 }
 
 // Links

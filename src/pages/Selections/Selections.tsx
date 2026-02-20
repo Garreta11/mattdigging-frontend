@@ -200,14 +200,14 @@ const SelectionsPage = () => {
                 >
                   <div className="selectionsPage__calendarView__weekCell__content">
                     <div className="selectionsPage__calendarView__weekCell__content__header">
-                      <div className="selectionsPage__calendarView__weekCell__title">
+                      <h3 className="selectionsPage__calendarView__weekCell__title">
                         {selection.title}
                         <span className="selectionsPage__calendarView__weekCell__title__date">
                           ·{" "}
                           {startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} -{" "}
                           {endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </span>
-                      </div>
+                      </h3>
                       {isPublished ? (
                         <div className="selectionsPage__calendarView__weekCell__badge selectionsPage__calendarView__weekCell__badge--published">Published</div>
                       ) : (
@@ -270,7 +270,7 @@ const SelectionsPage = () => {
                 {upcomingSelections.map((selection) => (
                   <div key={selection.title} className="selectionsPage__listView__card selectionsPage__listView__card--upcoming">
                     <div className="selectionsPage__listView__card__header">
-                      <h3 className="selectionsPage__listView__card__title">{selection.title}</h3>
+                      <h3 className="selectionsPage__listView__card__header__title">{selection.title}</h3>
                       <span className="selectionsPage__listView__card__badge selectionsPage__listView__card__badge--upcoming">Coming Soon</span>
                     </div>
                     <div className="selectionsPage__listView__card__meta">

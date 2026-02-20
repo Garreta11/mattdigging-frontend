@@ -125,17 +125,17 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
 
             <div className="track-modal__details">
               {track.album_name && (
-                <div className="track-modal__detail">
-                  <span className="track-modal__detail-label">Album</span>
-                  <span className="track-modal__detail-value">{track.album_name}</span>
+                <div className="track-modal__details__detail">
+                  <span className="track-modal__details__detail-label">Album</span>
+                  <span className="track-modal__details__detail-value">{track.album_name}</span>
                 </div>
               )}
 
               {track.country && (
-                <div className="track-modal__detail track-modal__detail--clickable">
-                  <span className="track-modal__detail-label">Country</span>
+                <div className="track-modal__details__detail track-modal__details__detail--clickable">
+                  <span className="track-modal__details__detail-label">Country</span>
                   <span 
-                    className="track-modal__detail-value track-modal__detail-value--link"
+                    className="track-modal__details__detail-value track-modal__details__detail-value--link"
                     onClick={() => handleCountryClick(track.country!)}
                   >
                     {track.country}
@@ -144,10 +144,10 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
               )}
 
               {track.year && (
-                <div className="track-modal__detail track-modal__detail--clickable">
-                  <span className="track-modal__detail-label">Year</span>
+                <div className="track-modal__details__detail track-modal__details__detail--clickable">
+                  <span className="track-modal__details__detail-label">Year</span>
                   <span 
-                    className="track-modal__detail-value track-modal__detail-value--link"
+                    className="track-modal__details__detail-value track-modal__details__detail-value--link"
                     onClick={() => handleYearClick(track.year!)}
                   >
                     {track.year}
@@ -156,10 +156,10 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
               )}
 
               {track.season && (
-                <div className="track-modal__detail track-modal__detail--clickable">
-                  <span className="track-modal__detail-label">Season</span>
+                <div className="track-modal__details__detail track-modal__details__detail--clickable">
+                  <span className="track-modal__details__detail-label">Season</span>
                   <span 
-                    className="track-modal__detail-value track-modal__detail-value--link"
+                    className="track-modal__details__detail-value track-modal__details__detail-value--link"
                     onClick={() => handleSeasonClick(track.season!)}
                   >
                     {track.season}

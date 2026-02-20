@@ -169,7 +169,7 @@ const SearchInput = () => {
             {/* Artists */}
             {results.artists.length > 0 && (
               <div className="search__results__content__group">
-                <h2>Artists</h2>
+                <h2 className="search__results__content__group__title">Artists</h2>
                 <ul className="search__results__content__artists">
                   {results.artists.map((artist) => (
                     <li
@@ -197,7 +197,7 @@ const SearchInput = () => {
             {/* Tracks */}
             {results.tracks.length > 0 && (
               <div className="search__results__content__group">
-                <h2>Tracks</h2>
+                <h2 className="search__results__content__group__title">Tracks</h2>
                 <ul className="search__results__content__tracks">
                   {results.tracks.map((track) => (
                     <li

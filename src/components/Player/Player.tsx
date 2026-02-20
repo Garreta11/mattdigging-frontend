@@ -23,6 +23,7 @@ const Player = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsDisabled, setControlsDisabled] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   // New: tracks whether the current audio source is loaded and ready
   const [isAudioReady, setIsAudioReady] = useState(false);
 
@@ -40,6 +41,7 @@ const Player = () => {
 
     const loadTracks = async () => {
       const data = await fetchTracks();
+      console.log('data', data)
       setPlayerTrackList(data);
 
       if (data.length > 0) {
@@ -71,6 +73,7 @@ const Player = () => {
   useEffect(() => {
     if (currentTrackIndex !== null && playerTrackList.length > 0) {
       const track = playerTrackList[currentTrackIndex];
+      console.log('track', track)
       setCurrentTrack(track);
       setControlsDisabled(false);
     } else {
@@ -304,9 +307,11 @@ const Player = () => {
   // --------------------------------
   // SEEK
   // --------------------------------
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseFloat(e.target.value);
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    const newTime = ratio * duration;
     audioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
   };
@@ -427,6 +432,23 @@ const Player = () => {
               const newTime = ratio * duration;
               audioRef.current.currentTime = newTime;
               setCurrentTime(newTime);
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onMouseUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            onMouseMove={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isDragging) {
+                handleSeek(e);
+              }
             }}
           >
             <div className='player__controls__progress__track'>

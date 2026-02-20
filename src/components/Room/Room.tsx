@@ -42,7 +42,7 @@ const Room: React.FC = () => {
       },
       onTrackCoverClick: () => {
         setIsTrackModalOpen(true);
-        console.log(track )
+        console.log(track)
       }
     });
   

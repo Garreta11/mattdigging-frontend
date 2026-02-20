@@ -1,8 +1,9 @@
 "use client";
 
 import "./ArtistModal.scss";
+import { useAppContext } from "../../context/AppContext";
 import { FiX } from "react-icons/fi";
-import { Artist } from "../../services/api";
+import { Artist, Track } from "../../services/api";
 import { StorageImage } from "../../pages/Admin/components/StorageImage";
 
 interface ArtistModalProps {
@@ -12,10 +13,17 @@ interface ArtistModalProps {
 }
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
+  const { setIsTrackModalOpen, setTrack } = useAppContext();
   if (!isOpen || !artist) return null;
+
 
   const tracks = artist.tracks || [];
   const hasTracks = tracks.length > 0;
+
+  const handleTrackClick = (track: Track) => {
+    setTrack(track);
+    onClose();
+  };
 
   return (
     <div className="modal" onClick={onClose}>
@@ -23,9 +31,6 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
         className="modal__content"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal__close" onClick={onClose}>
-          <FiX size={24} />
-        </button>
 
         {artist.photo_url && (
           <div className="modal__image">
@@ -35,31 +40,34 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
               alt={artist.name}
               className="modal__image"
             />
-            <div className="modal__image-overlay" />
+            <button className="modal__close" onClick={onClose}>
+              <FiX size={24} />
+            </button>
+            <div className="modal__image-overlay">
+              <div className="modal__image-overlay__content">
+                <h1 className="modal__image-overlay__content__title">{artist.name}</h1>
+                {artist.bio && <div className="modal__image-overlay__content__info">
+                  <p className="modal__image-overlay__content__info__bio">{artist.bio}</p>
+                  {artist.country && <p className="modal__image-overlay__content__info__country">{artist.country}</p>}
+                </div>
+                }
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="modal__info">
-          <div className="modal__header">
-            <h1 className="modal__name">{artist.name}</h1>
-            {artist.country && (
-              <p className="modal__country">{artist.country}</p>
-            )}
-          </div>
-
-          {artist.bio && <p className="modal__bio">{artist.bio}</p>}
-
-          {hasTracks && (
-            <div className="modal__tracks">
-              <h2 className="modal__tracks-title">
-                {/* <FiHeadphones size={20} /> */}
-                Tracks ({tracks.length})
-              </h2>
-              <div className="modal__tracks-list">
-                {tracks.map((track) => (
-                  <div key={track.id} className="track-card">
+        {hasTracks && (
+          <div className="modal__tracks">
+            <h2 className="modal__tracks-title">
+              {/* <FiHeadphones size={20} /> */}
+              Tracks ({tracks.length})
+            </h2>
+            <div className="modal__tracks-list">
+              {tracks.map((track) => (
+                <div key={track.id} className="modal__tracks-list__item" onClick={() => handleTrackClick(track)}>
+                  <div className="modal__tracks-list__item__content">
                     {track.cover_url && (
-                      <div className="track-card__cover">
+                      <div className="modal__tracks-list__item__cover">
                         <StorageImage
                           bucket="covers"
                           path={track.cover_url}
@@ -67,37 +75,40 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
                         />
                       </div>
                     )}
-                    <div className="track-card__info">
-                      <h3 className="track-card__title">{track.title}</h3>
-                      <div className="track-card__meta">
-                        {track.album_name && (
-                          <span className="track-card__album">
-                            {/* <FiCircle size={14} /> */}
-                            {track.album_name}
-                          </span>
-                        )}
-                        {track.year && (
-                          <span className="track-card__year">
-                            {/* <FiClock size={14} /> */}
-                            {track.year}
-                          </span>
-                        )}
+                    <div className="modal__tracks-list__item__info">
+                      <div className="modal__tracks-list__item__meta-container">
+                        <h3 className="modal__tracks-list__item__title">{track.title}</h3>
+                        <div className="modal__tracks-list__item__meta">
+                          {track.album_name && (
+                            <span className="modal__tracks-list__item__album">
+                              {track.album_name}
+                            </span>
+                          )}
+                          {track.year && (
+                            <span className="modal__tracks-list__item__year">
+                              {track.year}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {track.description && (
-                        <p className="track-card__description">
+                        <p className="modal__tracks-list__item__description">
                           {track.description}
                         </p>
                       )}
+                      
                     </div>
-                    {track.is_free && (
-                      <span className="track-card__badge">Free</span>
-                    )}
                   </div>
-                ))}
-              </div>
+                  <div className="modal__tracks-list__item__play">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -31,7 +31,6 @@
           border: none;
           background: transparent;
           font-size: 16px;
-          font-weight: 500;
           color: var(--color-white);
           cursor: pointer;
           transition: all 0.3s;
@@ -80,6 +79,7 @@
 
   &__calendarView {
     padding-right: var(--space-8);
+
     &__navigation {
       display: flex;
       align-items: center;
@@ -98,15 +98,14 @@
   
     &__month {
       font-size: var(--font-size-xl);
-      font-weight: 700;
       margin: 0;
       text-align: center;
     }
   
     &__year {
-      font-size: 18px;
-      font-weight: 500;
-      color: #666;
+      font-size: var(--font-size-md);
+      color: var(--color-white);
+      opacity: 0.6;
     }
   
     &__nav-button {
@@ -129,14 +128,14 @@
     &__grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
-      margin-bottom: 24px;
+      margin-bottom: var(--space-6);
     }
   
     &__info {
       text-align: center;
-      padding: 16px;
-      color: #666;
-      font-size: 14px;
+      padding: var(--space-4);
+      color: var(--color-white);
+      opacity: 0.6;
       font-style: italic;
   
       p {
@@ -150,7 +149,7 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
-      border-bottom: 1px solid var(--color-white);
+      border-bottom: 1px solid rgba(245, 241, 232, 0.2);
       transition: all 0.3s;
       position: relative;
     
@@ -178,7 +177,6 @@
 
           &__description {
             font-size: var(--font-size-sm);
-            font-weight: 400;
             color: var(--color-white);
             opacity: 0.6;
             font-style: italic;
@@ -189,7 +187,6 @@
     
       &__title {
         font-size: var(--font-size-lg);
-        font-weight: 600;
         color: var(--color-white);
         text-transform: uppercase;
         flex: 1;
@@ -201,11 +198,11 @@
         &__date {
           text-transform: none;
           font-size: var(--font-size-sm);
-          font-weight: 600;
           color: var(--color-white);
           opacity: 0.6;
           letter-spacing: 0.5px;
           transition: all 0.3s ease;
+          -webkit-text-stroke: 0px var(--color-white);
         }
       }
     
@@ -214,7 +211,6 @@
         padding: var(--space-1) var(--space-3);
         border-radius: var(--border-radius);
         font-size: var(--font-size-sm);
-        font-weight: 600;
         background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
         color: var(--color-white);
         width: fit-content;
@@ -228,7 +224,6 @@
       &__empty {
         opacity: 0.4;
         font-size: var(--font-size-sm);
-        font-weight: 400;
         color: var(--color-white);
         font-style: italic;
       }
@@ -238,27 +233,28 @@
       }
     
       &--published {
+
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+        @for $i from 1 through 52 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.02}s;
+          }
+        }
         
         &:hover {
-          background-color: var(--color-white);
-
-          & .selectionsPage__calendarView__weekCell__title {
-            color: var(--color-black) !important;
-            -webkit-text-stroke: 0.5px var(--color-black) !important;
-          }
-
-          & .selectionsPage__calendarView__weekCell__title__date {
-            color: var(--color-black) !important;
-          }
-          
-          & .selectionsPage__calendarView__weekCell__content__body__description {
-            color: var(--color-black) !important;
-          }
+          background-color: rgba(245, 241, 232, 0.2);
         }
       }
     
       &--upcoming {
-        opacity: 0.6;
+        animation: fadeInUpUpcoming 0.5s ease-out;
+        animation-fill-mode: both;
+        @for $i from 1 through 52 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.02}s;
+          }
+        }
         position: relative;
         cursor: inherit;
     
@@ -288,7 +284,6 @@
 
     &__title {
       font-size: var(--font-size-xl);
-      font-weight: 700;
       margin-bottom: var(--space-4);
     }
 
@@ -308,26 +303,29 @@
       transition: all 0.3s ease;
 
       &--published {
-        cursor: pointer;
-        opacity: 1;
-
-        &:hover {
-          background-color: var(--color-white);
-          color: var(--color-black) !important;
-
-          & .selectionsPage__listView__card__header__title {
-            color: var(--color-black) !important;
-            -webkit-text-stroke: 0.5px var(--color-black) !important;
-          }
-
-          & .selectionsPage__listView__card__header__title__date {
-            color: var(--color-black) !important;
-          }
-
-          & .selectionsPage__listView__card__description {
-            color: var(--color-black) !important;
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+        @for $i from 1 through 52 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.02}s;
           }
         }
+        cursor: pointer;
+
+        &:hover {
+          background-color: rgba(245, 241, 232, 0.2);
+        }
+      }
+
+      &--upcoming {
+        animation: fadeInUpUpcoming 0.5s ease-out;
+        animation-fill-mode: both;
+        @for $i from 1 through 52 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.02}s;
+          }
+        }
+        cursor: inherit;
       }
 
       &__header {
@@ -339,7 +337,6 @@
 
         &__title {
           font-size: var(--font-size-lg);
-          font-weight: 600;
           color: var(--color-white);
           text-transform: uppercase;
           flex: 1;
@@ -351,7 +348,6 @@
           &__date {
             text-transform: none;
             font-size: var(--font-size-sm);
-            font-weight: 600;
             color: var(--color-white);
             opacity: 0.6;
             letter-spacing: 0.5px;
@@ -363,7 +359,6 @@
 
         &__badge {
           font-size: var(--font-size-sm);
-          font-weight: 600;
           color: var(--color-white);
           background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
           padding: var(--space-1) var(--space-3);
@@ -374,7 +369,6 @@
       &__description {
         width: 80%;
         font-size: var(--font-size-sm);
-        font-weight: 400;
         color: var(--color-white);
         opacity: 0.6;
         font-style: italic;
@@ -487,14 +481,18 @@
   }
 }
 
-.weekCell,
-.selectionCard {
-  animation: fadeInUp 0.5s ease-out;
-  animation-fill-mode: both;
-
-  @for $i from 1 through 52 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.02}s;
-    }
+@keyframes fadeInUpUpcoming {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+}
+
+.selectionsPage__calendarView__weekCell,
+.selectionsPage__listView__card {
+  
 }
