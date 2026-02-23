@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './TrackModal.scss';
 import { Artist, Track } from '../../services/api';
-import { StorageImage } from '../../pages/Admin/components/StorageImage';
+import ImageStorage from '../ImageStorage/ImageStorage';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 
@@ -94,7 +94,7 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
         <div className="track-modal__body">
           {track.cover_url && (
             <div className="track-modal__cover">
-              <StorageImage 
+              <ImageStorage 
                 path={track.cover_url} 
                 alt={track.title}
                 bucket="covers"
@@ -108,7 +108,7 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
             {track.artist && (
               <div className="track-modal__artist" onClick={() => handleArtistClick(track.artist)}>
                 {track.artist.photo_url && (
-                  <StorageImage 
+                  <ImageStorage 
                     path={track.artist.photo_url}
                     alt={track.artist.name}
                     bucket="artist_photos"

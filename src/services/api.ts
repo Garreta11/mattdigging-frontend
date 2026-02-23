@@ -56,6 +56,24 @@ export interface Track {
   track_moods?: Array<{ mood: Mood }>;
 }
 
+export interface SelectionTrack {
+  tracks: {
+    id: string;
+    title: string;
+    artist_id: string;
+    album_name?: string;
+    year?: number;
+    decade?: string;
+    country?: string;
+    season?: string;
+    audio_url: string;
+    cover_url?: string;
+    description?: string;
+    is_free?: boolean;
+    created_at?: string;
+  };
+}
+
 export interface Selections {
   title: string;
   week_number: number;
@@ -64,7 +82,7 @@ export interface Selections {
   cover_url: string;
   is_published: boolean;
   published_at: string;
-  tracks?: Track[];
+  selection_tracks?: SelectionTrack[];
 }
 
 /* =========================

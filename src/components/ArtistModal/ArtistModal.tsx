@@ -4,7 +4,7 @@ import "./ArtistModal.scss";
 import { useAppContext } from "../../context/AppContext";
 import { FiX } from "react-icons/fi";
 import { Artist, Track } from "../../services/api";
-import { StorageImage } from "../../pages/Admin/components/StorageImage";
+import ImageStorage from "../ImageStorage/ImageStorage";
 
 interface ArtistModalProps {
   artist: Artist;
@@ -34,7 +34,7 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
 
         {artist.photo_url && (
           <div className="modal__image">
-            <StorageImage
+            <ImageStorage
               bucket="artist_photos"
               path={artist.photo_url}
               alt={artist.name}
@@ -68,7 +68,7 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
                   <div className="modal__tracks-list__item__content">
                     {track.cover_url && (
                       <div className="modal__tracks-list__item__cover">
-                        <StorageImage
+                        <ImageStorage
                           bucket="covers"
                           path={track.cover_url}
                           alt={track.title}

@@ -55,6 +55,7 @@ const Room: React.FC = () => {
   // Actualizar isMobile cuando cambia
   useEffect(() => {
     if (outputRef.current) {
+      console.log('isMobile', isMobile)
       outputRef.current.setIsMobile(isMobile);
     }
   }, [isMobile]);

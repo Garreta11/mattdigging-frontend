@@ -60,7 +60,7 @@ const About = () => {
               Much love,
               </p>
               <h3>
-              Matti / Mattmosphere
+              Matti / mattmosphere
               </h3>
             </div>
           </div>

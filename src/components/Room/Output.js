@@ -323,10 +323,8 @@ export default class Output {
 
   async loadChestFrames() {
     if (this.isMobile) {
-      const keyFrames = [0, 1, 2, Math.floor(this.CHEST_COUNT / 2), this.CHEST_COUNT - 1];
-      for (const i of keyFrames) {
-        await this.loadFrame(i);
-      }
+      // On mobile: only load frame 0, no animation
+      await this.loadFrame(0);
       this.chestLoaded = true;
       if (this.chestFrames[0]) {
         this.material.uniforms.tChest.value = this.chestFrames[0];
@@ -510,6 +508,15 @@ export default class Output {
 
   updateChest(dt) {
     if (!this.chestLoaded) return;
+
+    // On mobile: static frame 0, no hover interaction
+    if (this.isMobile) {
+      if (this.chestFrames[0]) {
+        this.material.uniforms.tChest.value = this.chestFrames[0];
+      }
+      return;
+    }
+
 
     const hoverChest = this.hoveringChest();
     const hoverCover = this.hoveringTrackCover();

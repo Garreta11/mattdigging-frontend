@@ -13,7 +13,7 @@ const ImageStorage = ({ bucket, path, alt, className, localFile }: StorageImageP
 
   if (!url) return null;
 
-  return <img src={url} alt={alt} className={className} />;
+  return <img src={url} alt={alt} className={className} loading="lazy" />;
 };
 
 export default ImageStorage;

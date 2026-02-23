@@ -7,6 +7,39 @@ import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import ArtistModal from "../../components/ArtistModal/ArtistModal";
 
+const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="artists__content__artistItem">
+      <p className="artists__content__artistName" onClick={onClick}>{artist.name}</p>
+      {visible && (
+        <ImageStorage
+          bucket="artist_photos"
+          path={artist.photo_url}
+          alt={artist.name}
+          className="artists__content__artistImage"
+        />
+      )}
+    </div>
+  );
+};
+
 const Artists = () => {
   const { user, modalArtist, setModalArtist, isModalArtistOpen, setIsModalArtistOpen } = useAppContext();
   const isMember = user?.isMember;
@@ -102,15 +135,11 @@ const Artists = () => {
               <div key={letter} id={`artist-letter-${letter}`} className="artists__content__letterGroup">
                 <span className="artists__content__letterGroup__label">{letter}</span>
                 {groupedArtists[letter].map((artist) => (
-                  <div key={artist.id} className="artists__content__artistItem">
-                    <p className="artists__content__artistName" onClick={() => handleClick(artist)}>{artist.name}</p>
-                    <ImageStorage
-                      bucket="artist_photos"
-                      path={artist.photo_url}
-                      alt={artist.name}
-                      className="artists__content__artistImage"
-                    />
-                  </div>
+                  <ArtistItem
+                    key={artist.id}
+                    artist={artist}
+                    onClick={() => handleClick(artist)}
+                  />
                 ))}
               </div>
             ))}

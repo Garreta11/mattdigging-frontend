@@ -2,7 +2,7 @@ import './Player.scss';
 import { useState, useEffect, useRef } from 'react'
 import { fetchTracks, Track } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
-import { StorageImage } from '../../pages/Admin/components/StorageImage';
+import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
 
 const formatTime = (seconds: number): string => {
@@ -351,7 +351,7 @@ const Player = () => {
       <div className='player__info'>
         {isPlayerReady ? (
           <>
-            <StorageImage
+            <ImageStorage
               path={currentTrack?.cover_url}
               alt={currentTrack?.title}
               bucket="covers"

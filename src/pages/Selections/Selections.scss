@@ -147,8 +147,8 @@
       background: transparent;
       padding: var(--space-4);
       display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
+      flex-direction: row;
+      gap: var(--space-4);
       border-bottom: 1px solid rgba(245, 241, 232, 0.2);
       transition: all 0.3s;
       position: relative;
@@ -214,6 +214,7 @@
         background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
         color: var(--color-white);
         width: fit-content;
+        height: fit-content;
     
         &--upcoming {
           background: var(--color-white);
@@ -296,8 +297,8 @@
       background: transparent;
       padding: var(--space-4);
       display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
+      flex-direction: row;
+      gap: var(--space-4);
       border-bottom: 1px solid rgba(245, 241, 232, 0.2);
       opacity: 0.2;
       transition: all 0.3s ease;
@@ -330,7 +331,7 @@
 
       &__header {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: var(--space-2);
         justify-content: space-between;
         width: 100%;
@@ -344,6 +345,8 @@
           align-items: center;
           gap: var(--space-2);
           transition: all 0.3s ease;
+
+          
 
           &__date {
             text-transform: none;
@@ -363,6 +366,8 @@
           background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
           padding: var(--space-1) var(--space-3);
           border-radius: var(--border-radius);
+          width: fit-content;
+          height: fit-content;
         }
       }
 
