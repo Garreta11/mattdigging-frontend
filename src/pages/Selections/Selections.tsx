@@ -75,6 +75,8 @@ const SelectionCover = ({ coverUrls, size = 80 }: SelectionCoverProps) => {
 
     const draw = async () => {
       ctx.clearRect(0, 0, size, size);
+      ctx.fillStyle = "#FFF2A3";
+      ctx.fillRect(0, 0, size, size);
 
       const results = await Promise.allSettled(
         validUrls.map((path) => loadImage(getPublicUrl(path)))
@@ -84,7 +86,7 @@ const SelectionCover = ({ coverUrls, size = 80 }: SelectionCoverProps) => {
       const centerY      = size / 2;
       const centerRadius = size * 0.32;
       const sideRadius   = size * 0.22;
-      const sideOffset   = size * 0.28;
+      const sideOffset   = size * 0.25;
 
       if (results[1]?.status === "fulfilled") {
         ctx.globalAlpha = 0.7;
@@ -113,7 +115,7 @@ const SelectionCover = ({ coverUrls, size = 80 }: SelectionCoverProps) => {
     <canvas
       ref={canvasRef}
       // CSS size stays the same — only the buffer is scaled up
-      style={{ width: size, height: size, display: "block", flexShrink: 0 }}
+      style={{ width: size, height: size, display: "block", flexShrink: 0, borderRadius: "8px" }}
     />
   );
 };
@@ -222,8 +224,6 @@ const SelectionsPage = () => {
 
   const publishedSelections = selections.filter((s) => s.is_published);
   const upcomingSelections = selections.filter((s) => !s.is_published);
-
-  console.log(publishedSelections);
 
   return (
     <div className={`selectionsPage main-content ${isFadingOut ? "fade-out" : ""}`}>
