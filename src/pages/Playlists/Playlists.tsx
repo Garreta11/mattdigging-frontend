@@ -7,6 +7,7 @@ import { fetchGenres, fetchMoods, fetchTracks, Genre, Mood, Track, fetchYears, f
 import TrackItem from '../../components/TrackItem/TrackItem';
 import TrackModal from '../../components/TrackModal/TrackModal';
 import { useAppContext } from '../../context/AppContext';
+import Loader from "../../components/Loader/Loader";
 
 interface Season {
   slug: string;
@@ -389,7 +390,7 @@ const PlaylistsPage = () => {
         </div>
       )}
 
-      {isLoading && <p>Loading...</p>}
+      {isLoading && <Loader />}
       {error && <p className="error">{error}</p>}
 
       {/* Tracks list */}

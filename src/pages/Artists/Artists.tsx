@@ -100,6 +100,7 @@ const Artists = () => {
   };
 
   const handleClick = (artist: Artist) => {
+    console.log(artist);
     setModalArtist(artist);
     setIsModalArtistOpen(true);
   };

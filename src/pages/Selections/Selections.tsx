@@ -8,6 +8,7 @@ import { supabase } from "../../lib/supabase";
 import { useSearchParams } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import TrackItem from "../../components/TrackItem/TrackItem";
+import Loader from "../../components/Loader/Loader";
 
 
 type ViewMode = "calendar" | "list";
@@ -262,11 +263,7 @@ const SelectionsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="selectionsPage">
-        <div className="selectionsPage__loading">
-          <p>Loading selections...</p>
-        </div>
-      </div>
+      <Loader />
     );
   }
 
