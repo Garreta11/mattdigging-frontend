@@ -4,6 +4,8 @@
   background-color: var(--color-black);
   
   @include respond-to(md) {
+    z-index: 100;
+    background-color: transparent;
     padding: var(--space-24) var(--space-4);
   }
 
@@ -87,9 +89,12 @@
     margin-bottom: var(--space-4);
 
     @include respond-to(md) {
-      flex-direction: column;
+      /* flex-direction: column; */
       gap: var(--space-2);
-      width: fit-content;
+      /* width: fit-content; */
+
+      display: inline-flex;
+      flex-wrap: wrap;
     }
   }
 

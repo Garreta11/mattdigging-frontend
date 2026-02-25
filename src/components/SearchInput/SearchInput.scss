@@ -142,7 +142,10 @@
       }
 
       &__artists,
-      &__tracks {
+      &__tracks,
+      &__countries,
+      &__genres,
+      &__moods {
         display: flex;
         flex-direction: column;
         list-style: none;
@@ -225,6 +228,67 @@
 
           }
 
+        }
+      }
+
+      &__countries {
+        &__item {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: var(--space-4);
+          transition: all 0.3s ease;
+
+          @include respond-to(md) {
+            padding: var(--space-2);
+          }
+
+          &:hover {
+            background-color: rgba(245, 241, 232, 0.2);
+          }
+
+        }
+      }
+
+      &__genres {
+        &__item {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: var(--space-4);
+          transition: all 0.3s ease;
+
+          @include respond-to(md) {
+            padding: var(--space-2);
+          }
+
+          &:hover {
+            background-color: rgba(245, 241, 232, 0.2);
+          }
+        }
+      }
+      
+      &__moods {
+        &__item {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: var(--space-4);
+          transition: all 0.3s ease;
+
+          @include respond-to(md) {
+            padding: var(--space-2);
+          }
+
+          &:hover {
+            background-color: rgba(245, 241, 232, 0.2);
+          }
         }
       }
     }

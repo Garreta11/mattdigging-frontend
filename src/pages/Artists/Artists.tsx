@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
-import ArtistModal from "../../components/ArtistModal/ArtistModal";
 
 const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -105,11 +104,6 @@ const Artists = () => {
     setIsModalArtistOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalArtistOpen(false);
-    setModalArtist(null);
-  };
-
   const handleClose = () => {
     setIsFadingOut(true);
     setTimeout(() => {
@@ -130,6 +124,19 @@ const Artists = () => {
 
       {!isMember ? (
         <div className="artists__content">
+          <div className="artists__mobile__alphabet">
+            <nav className="artists__mobile__alphabet__letters">
+              {alphabet.map((letter) => (
+                <span
+                  key={letter}
+                  className={`artists__alphabet__letter ${availableLetters.includes(letter) ? "artists__alphabet__letter--active" : "artists__alphabet__letter--disabled"}`}
+                  onClick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
+                >
+                  {letter}
+                </span>
+              ))}
+            </nav>
+          </div>
           <div className="artists__content__artistsList">
             {availableLetters.map((letter) => (
               <div key={letter} id={`artist-letter-${letter}`} className="artists__content__letterGroup">

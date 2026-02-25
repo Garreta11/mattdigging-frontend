@@ -130,9 +130,11 @@ input {
     height: 100%;
     transition: all 1s ease;
 
-    /* &--page {
-      transform: translateX(-50%);
-    } */
+    &--page {
+      @include respond-to(md) {
+        background-color: var(--color-black);
+      }
+    }
   }
 }
 

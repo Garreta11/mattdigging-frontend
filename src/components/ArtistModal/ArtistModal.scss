@@ -1,17 +1,31 @@
+@import '../../_breakpoints.scss';
+
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(10, 17, 17, 0.3);
-  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: var(--space-4);
-  animation: fadeInModal 0.3s ease-in-out;
+  
+
+  &__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 17, 17, 0.3);
+    backdrop-filter: blur(5px);
+    
+    @include respond-to(md) {
+      background: rgba(245, 241, 232, 0.3);
+    }
+  }
 
   &__content {
     background: var(--color-black);
@@ -22,6 +36,15 @@
     overflow-y: auto;
     position: relative;
     animation: slideUpModal 0.3s ease-in-out;
+
+    @include respond-to(md) {
+      position: fixed;
+      bottom: 0;
+      max-height: 80dvh;
+      border-radius: var(--border-radius-small);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
 
     /* Custom scrollbar */
     &::-webkit-scrollbar {
@@ -99,6 +122,10 @@
       justify-content: flex-end;
       padding: var(--space-2) var(--space-6);
       z-index: 10000;
+      
+      @include respond-to(md) {
+        padding: var(--space-2);
+      }
 
       &__content {
         width: 100%;
@@ -134,10 +161,18 @@
     
     margin-top: var(--space-6);
 
+    @include respond-to(md) {
+      padding: var(--space-2);
+    }
+
     &-title {
       color: var(--color-white);
       margin-bottom: var(--space-4);
       padding: 0 var(--space-10);
+
+      @include respond-to(md) {
+        padding: 0;
+      }
     }
 
     &-list {
@@ -154,7 +189,11 @@
         position: relative;
         overflow: hidden;
         cursor: pointer;
-      
+
+        @include respond-to(md) {
+          padding: var(--space-2);
+        }
+
         &:hover {
           background-color: rgba(245, 241, 232, 0.2);
         }

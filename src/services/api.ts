@@ -75,6 +75,7 @@ export interface SelectionTrack {
 }
 
 export interface Selections {
+  id: string;
   title: string;
   week_number: number;
   year: number;
@@ -133,6 +134,12 @@ export const fetchSelections = async (): Promise<Selections[]> => {
   return response.json();
 };
 
+export const fetchTracksBySelection = async (selectionId: string): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/by-selection/${selectionId}`);
+  if (!response.ok) throw new Error("Failed to fetch selection tracks");
+  return response.json();
+};
+
 /* =========================
    SEARCH FUNCTIONS
 ========================= */
@@ -158,5 +165,31 @@ export const searchTracks = async (
 
   if (!response.ok) throw new Error("Failed to search tracks");
 
+  return response.json();
+};
+
+export const searchCountries = async (
+  query: string
+): Promise<Country[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/tracks/countries/search?q=${encodeURIComponent(query)}`
+  );
+  if (!response.ok) throw new Error("Failed to search countries");
+  return response.json();
+};
+
+export const searchGenres = async (query: string): Promise<Genre[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/tracks/genres/search?q=${encodeURIComponent(query)}`
+  );
+  if (!response.ok) throw new Error("Failed to search genres");
+  return response.json();
+};
+
+export const searchMoods = async (query: string): Promise<Mood[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/tracks/moods/search?q=${encodeURIComponent(query)}`
+  );
+  if (!response.ok) throw new Error("Failed to search moods");
   return response.json();
 };

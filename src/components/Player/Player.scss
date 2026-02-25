@@ -32,6 +32,7 @@
   z-index: 100;
 
   @include respond-to(md) {
+    padding: var(--space-2) var(--space-4);
     width: 95dvw;
     flex-direction: column;
     gap: 0;
@@ -43,12 +44,13 @@
 
     @include respond-to(md) {
       width: 100%;
+      display: none;
     }
     
     &__buttons {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: var(--space-2);
       justify-content: center;
     }
 
@@ -117,13 +119,17 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     transition: all 0.2s ease;
     color: currentColor;
+
+    @include respond-to(md) {
+      padding: var(--space-1);
+    }
 
     &:hover:not(:disabled) {
       background: rgba(0, 0, 0, 0.1);
@@ -168,6 +174,8 @@
     @include respond-to(md) {
       width: 100%;
       justify-content: center;
+
+      display: none;
     }
 
     &__cover {
@@ -240,4 +248,70 @@
       color: #999;
     }
   }
+
+  &__mobile {
+    display: none;
+    width: 100%;
+
+    @include respond-to(md) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      &__info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+        width: 100%;
+
+        &__cover {
+          width: 40px;
+          height: 40px;
+          object-fit: cover;
+          border-radius: 0.25rem;
+        }
+
+        &__playlist-name {
+          font-size: var(--font-size-sm);
+          color: var(--color-green);
+        }
+
+        &__text {
+          min-width: 0; // critical for flex children to shrink
+        
+          h3 {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 1rem;
+        
+            span {
+              display: inline-block;
+              animation: marquee 6s ease-in-out infinite alternate;
+            }
+          }
+        }
+      }
+
+      &__buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  10%  { transform: translateX(0); } // pause at start
+  90%  { transform: translateX(var(--marquee-offset)); }
+  100% { transform: translateX(var(--marquee-offset)); } // pause at end
 }

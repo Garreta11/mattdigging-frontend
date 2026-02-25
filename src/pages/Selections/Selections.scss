@@ -382,6 +382,48 @@
     }
     
   }
+
+  &__selectionView {
+
+    &__clear-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: transparent;
+      border: none;
+      color: var(--color-white);
+      font-size: var(--font-size-sm);
+    }
+
+    &__header {
+      display: flex;
+      gap: var(--space-4);
+      align-items: center;
+      width: 100%;
+      margin-bottom: var(--space-4);
+
+      &__play-playlist {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        background: transparent;
+        border: none;
+        color: var(--color-white);
+        font-size: var(--font-size-sm);
+
+        path {
+          transition: all 0.3s ease;
+        }
+
+        &:hover {
+          path {
+            fill: var(--color-green);
+          }
+        }
+      }
+    }
+
+  }
 }
 
 /* Mobile responsive */

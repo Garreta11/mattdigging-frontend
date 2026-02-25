@@ -187,7 +187,6 @@
       transition: all 0.3s ease;
       display: block;
       text-align: left;
-      text-transform: uppercase;
 
       &:hover,
       &:active {
@@ -207,6 +206,10 @@
       margin-top: 2rem;
       padding-top: 2rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    &__logout {
+      border-radius: var(--border-radius);
     }
   }
 }

@@ -31,6 +31,7 @@ const Player = () => {
   const hasInitialized = useRef(false);
   const previousTrackId = useRef<number | null>(null);
   const isManualTrackChange = useRef(false);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   // --------------------------------
   // LOAD TRACKS INITIAL (solo una vez al montar)
@@ -245,6 +246,19 @@ const Player = () => {
       audio.removeEventListener("canplay", handleCanPlay);
     };
   }, [currentTrack, isPlaying]);
+
+  useEffect(() => {
+    const span = titleRef.current;
+    if (!span) return;
+    const parent = span.parentElement!;
+    const overflow = span.scrollWidth - parent.clientWidth;
+    if (overflow > 0) {
+      span.style.setProperty("--marquee-offset", `-${overflow}px`);
+    } else {
+      span.style.removeProperty("--marquee-offset");
+      span.style.animation = "none";
+    }
+  }, [currentTrack?.title]);
 
   // --------------------------------
   // RANDOM LOGIC
@@ -463,6 +477,122 @@ const Player = () => {
             </div>
           </div>
           <span className='player__controls__progress__time'>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      <div className='player__mobile'>
+        <div className='player__mobile__content'>
+          <div className='player__mobile__content__info'>
+            {isPlayerReady ? (
+              <>
+                <ImageStorage
+                  path={currentTrack?.cover_url}
+                  alt={currentTrack?.title}
+                  bucket="covers"
+                  className='player__mobile__content__info__cover'
+                />
+                <div className='player__mobile__content__info__text'>
+                  {playlistName && (
+                    <p className='player__mobile__content__info__playlist-name'>playlist: {playlistName}</p>
+                  )}
+                  <h3 ref={titleRef}><span>{currentTrack.title}</span></h3>
+                  <p>{currentTrack?.artist?.name}</p>
+                </div>
+              </>
+            ) : (
+              /* Skeleton that mirrors the real layout so there's no layout shift */
+              <div className='player__info__skeleton'>
+                <div className='player__info__skeleton__title' />
+                <div className='player__info__skeleton__artist' />
+              </div>
+            )}
+          </div>
+          <div className='player__mobile__content__buttons'>
+            <button
+              onClick={playPreviousTrack}
+              disabled={controlsDisabled || history.length === 0 || !isPlayerReady}
+              className='player__btn player__btn--prev'
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M9.5 12L18 6V18L9.5 12Z" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <button
+              onClick={togglePlayPause}
+              disabled={controlsDisabled || !isPlayerReady}
+              className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
+            >
+              {/* Show a subtle spinner while loading, play/pause icons once ready */}
+              {!isPlayerReady ? (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
+                </svg>
+              ) : isPlaying ? (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                  <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                </svg>
+              ) : (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+                </svg>
+              )}
+            </button>
+
+            <button
+              onClick={playNextTrack}
+              disabled={controlsDisabled || !isPlayerReady}
+              className='player__btn player__btn--next'
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M14.5 12L6 18V6L14.5 12Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className='player__mobile__progress'>
+          <div
+            className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
+            onClick={(e) => {
+              if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const ratio = (e.clientX - rect.left) / rect.width;
+              const newTime = ratio * duration;
+              audioRef.current.currentTime = newTime;
+              setCurrentTime(newTime);
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onMouseUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            onMouseMove={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isDragging) {
+                handleSeek(e);
+              }
+            }}
+          >
+            <div className='player__controls__progress__track'>
+              <div
+                className='player__controls__progress__fill'
+                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
+              <div
+                className='player__controls__progress__thumb'
+                style={{ left: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

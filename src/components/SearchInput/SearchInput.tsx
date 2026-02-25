@@ -5,14 +5,23 @@ import { useAppContext } from "../../context/AppContext";
 import {
   searchArtists,
   searchTracks,
+  searchCountries,
+  searchGenres,
+  searchMoods,
   Track,
   Artist,
+  Country,
+  Genre,
+  Mood,
 } from "../../services/api";
 import ImageStorage from "../ImageStorage/ImageStorage";
 
 interface SearchResults {
   artists: Artist[];
   tracks: Track[];
+  countries: Country[];
+  genres: Genre[];
+  moods: Mood[];
 }
 
 const SearchInput = () => {
@@ -24,6 +33,9 @@ const SearchInput = () => {
   const [results, setResults] = useState<SearchResults>({
     artists: [],
     tracks: [],
+    countries: [],
+    genres: [],
+    moods: [],
   });
   const [isLoading, setIsLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -35,7 +47,7 @@ const SearchInput = () => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setQuery("");
-        setResults({ artists: [], tracks: [] });
+        setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
       }
     };
 
@@ -48,7 +60,7 @@ const SearchInput = () => {
   ========================= */
   useEffect(() => {
     if (!query.trim()) {
-      setResults({ artists: [], tracks: [] });
+      setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
       return;
     }
 
@@ -66,17 +78,20 @@ const SearchInput = () => {
   ========================= */
   const performSearch = async (searchQuery: string) => {
     try {
-      const [artists, tracks] = await Promise.all([
+      const [artists, tracks, countries, genres, moods] = await Promise.all([
         searchArtists(searchQuery),
         searchTracks(searchQuery),
+        searchCountries(searchQuery),
+        searchGenres(searchQuery),
+        searchMoods(searchQuery),
       ]);
 
-      console.log(artists, tracks);
+      console.log(artists, tracks, countries, genres, moods);
 
-      setResults({ artists, tracks });
+      setResults({ artists, tracks, countries, genres, moods });
     } catch (error) {
       console.error("Search error:", error);
-      setResults({ artists: [], tracks: [] });
+      setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
     }
   };
 
@@ -87,13 +102,13 @@ const SearchInput = () => {
     setModalArtist(artist);
     setIsModalArtistOpen(true);
     setQuery("");
-    setResults({ artists: [], tracks: [] });
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
   };
 
   const handleTrackClick = (track: Track) => {
     setTrack(track);
     setQuery("");
-    setResults({ artists: [], tracks: [] });
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
   };
 
   const handlePlaylistsClick = () => {
@@ -118,11 +133,29 @@ const SearchInput = () => {
       navigate('/playlists');
     }
     setQuery("");
-    setResults({ artists: [], tracks: [] });
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
+  };
+
+  const handleCountryClick = (country: Country) => {
+    navigate(`/playlists?country=${encodeURIComponent(country.country)}`);
+    setQuery("");
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
+  };
+
+  const handleGenreClick = (genre: Genre) => {
+    navigate(`/playlists?genre=${encodeURIComponent(genre.name)}`);
+    setQuery("");
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
+  };
+
+  const handleMoodClick = (mood: Mood) => {
+    navigate(`/playlists?mood=${encodeURIComponent(mood.name)}`);
+    setQuery("");
+    setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
   };
 
   const hasResults =
-    results.artists.length > 0 || results.tracks.length > 0;
+    results.artists.length > 0 || results.tracks.length > 0 || results.countries.length > 0 || results.genres.length > 0 || results.moods.length > 0;
 
   return (
     <div className="search" ref={searchRef}>
@@ -226,6 +259,60 @@ const SearchInput = () => {
                           <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
                         </svg>
                       </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Countries */}
+            {results.countries.length > 0 && (
+              <div className="search__results__content__group">
+                <h2 className="search__results__content__group__title">Countries</h2>
+                <ul className="search__results__content__countries">
+                  {results.countries.map((country) => (
+                    <li
+                      key={country.country}
+                      className="search__results__content__countries__item"
+                      onClick={() => handleCountryClick(country)}
+                    >
+                      <h3>{country.country}</h3>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Genres */}
+            {results.genres.length > 0 && (
+              <div className="search__results__content__group">
+                <h2 className="search__results__content__group__title">Genres</h2>
+                <ul className="search__results__content__genres">
+                  {results.genres.map((genre) => (
+                    <li
+                      key={genre.id}
+                      className="search__results__content__genres__item"
+                      onClick={() => handleGenreClick(genre)}
+                    >
+                      <h3>{genre.name}</h3>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Moods */}
+            {results.moods.length > 0 && (
+              <div className="search__results__content__group">
+                <h2 className="search__results__content__group__title">Moods</h2>
+                <ul className="search__results__content__moods">
+                  {results.moods.map((mood) => (
+                    <li
+                      key={mood.id}
+                      className="search__results__content__moods__item"
+                      onClick={() => handleMoodClick(mood)}
+                    >
+                      <h3>{mood.name}</h3>
                     </li>
                   ))}
                 </ul>

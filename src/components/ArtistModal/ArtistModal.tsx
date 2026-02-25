@@ -27,6 +27,7 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
 
   return (
     <div className="modal" onClick={onClose}>
+      <div className="modal__backdrop" />
       <div
         className="modal__content"
         onClick={(e) => e.stopPropagation()}

@@ -3,10 +3,43 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: var(--space-4);
   height: 100vh;
   width: 100vw;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 17, 17, 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  &__form {
+    position: relative;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    width: 100%;
+    max-width: 400px;
+    padding: var(--space-6) var(--space-4);
+    background: rgba(10, 17, 17, 0.5);
+    border-radius: var(--border-radius-small);
+
+    &__inputs {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    &__button {
+      border-radius: var(--border-radius);
+    }
+  }
 }

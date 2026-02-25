@@ -160,27 +160,11 @@ const Header = () => {
               </Link>
 
               <Link
-                className={`header__mobile-menu__item ${isActive('/playlists') ? 'selected' : ''}`}
-                to="/playlists"
-                onClick={(e) => handleNavigate(e, '/playlists')}
-              >
-                Playlists
-              </Link>
-
-              <Link
-                className={`header__mobile-menu__item ${isActive('/search') ? 'selected' : ''}`}
-                to="/search"
-                onClick={(e) => handleNavigate(e, '/search')}
-              >
-                Search
-              </Link>
-
-              <Link
                 className={`header__mobile-menu__item ${isActive('/selections') ? 'selected' : ''}`}
                 to="/selections"
                 onClick={(e) => handleNavigate(e, '/selections')}
               >
-                Selections
+                Weekly Selections
               </Link>
 
               <Link
