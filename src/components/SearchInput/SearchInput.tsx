@@ -198,7 +198,7 @@ const SearchInput = () => {
         )}
         
         {query && !isLoading && hasResults && (
-          <div className="search__results__content">
+          <div className="search__results__content" data-lenis-prevent>
             {/* Artists */}
             {results.artists.length > 0 && (
               <div className="search__results__content__group">

@@ -117,18 +117,17 @@ input {
 // Layout
 .main {
   display: flex;
-  // flex-direction: column;
   width: 100dvw;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
 
   &__wrapper {
-    position: relative;
+    position: sticky;
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
     transition: all 1s ease;
+    height: 100dvh;
+    top: 0;
 
     &--page {
       @include respond-to(md) {

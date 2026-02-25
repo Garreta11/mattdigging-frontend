@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
+import Lenis from '@studio-freight/lenis';
 
 // Pages
 import Home from './pages/Home/Home';
@@ -22,7 +23,6 @@ import Footer from './components/Footer/Footer';
 import MainWrapper from './components/MainWrapper/MainWrapper';
 import Modals from './components/Modals/Modals';
 
-
 // Utils
 import { AppProvider } from './context/AppContext';
 import reportWebVitals from './reportWebVitals';
@@ -32,15 +32,33 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-root.render(
-  <React.StrictMode>
+function App() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      smoothWheel: true,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
+  return (
     <AppProvider>
       <Router>
         <Routes>
           {/* Public route for email confirmation */}
           <Route path="/auth/confirm" element={<AuthConfirm />} />
 
-          {/* Admin route - separate layout without Home background */}
+          {/* Admin route - separate layout */}
           <Route
             path="/admin"
             element={
@@ -60,9 +78,8 @@ root.render(
                   <MainWrapper>
                     <Home />
                   </MainWrapper>
-                  
-                  <Player />
 
+                  <Player />
                   <Modals />
 
                   <Routes>
@@ -83,6 +100,12 @@ root.render(
         </Routes>
       </Router>
     </AppProvider>
+  );
+}
+
+root.render(
+  <React.StrictMode>
+    <App />
   </React.StrictMode>
 );
 

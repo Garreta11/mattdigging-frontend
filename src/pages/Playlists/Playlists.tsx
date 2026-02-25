@@ -236,7 +236,7 @@ const PlaylistsPage = () => {
 
             </button>
             {openDropdown === 'genre' && (
-              <ul className="playlistsPage__dropdown__menu">
+              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
                 {genres.map(genre => (
                   <li
                     key={genre.id}
@@ -262,7 +262,7 @@ const PlaylistsPage = () => {
               </svg>
             </button>
             {openDropdown === 'mood' && (
-              <ul className="playlistsPage__dropdown__menu">
+              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
                 {moods.map(mood => (
                   <li
                     key={mood.id}
@@ -288,7 +288,7 @@ const PlaylistsPage = () => {
               </svg>
             </button>
             {openDropdown === 'country' && (
-              <ul className="playlistsPage__dropdown__menu">
+              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
                 {countries.map(c => (
                   <li
                     key={c.country}
@@ -314,7 +314,7 @@ const PlaylistsPage = () => {
               </svg>
             </button>
             {openDropdown === 'season' && (
-              <ul className="playlistsPage__dropdown__menu">
+              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
                 {SEASONS.map(season => (
                   <li
                     key={season.slug}
@@ -340,7 +340,7 @@ const PlaylistsPage = () => {
               </svg>
             </button>
             {openDropdown === 'year' && (
-              <ul className="playlistsPage__dropdown__menu">
+              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
                 {years.map(y => (
                   <li
                     key={y.year}
