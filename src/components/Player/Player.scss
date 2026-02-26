@@ -141,19 +141,36 @@
       cursor: not-allowed;
     }
 
-    &--play {
-      width: 48px;
-      height: 48px;
-      
-      svg {
-        width: 32px;
-        height: 32px;
-      }
-    }
-
     svg {
       width: 24px;
       height: 24px;
+    }
+
+    &--play {
+      svg {
+        width: 32px !important;
+        height: 32px !important;
+      }
+    }
+
+    &--shuffle {
+      svg {
+        width: 16px !important;
+        height: 16px !important;
+
+        path {
+          opacity: 0.4;
+        }
+      }
+
+      &--active {
+        svg {
+          path {
+            opacity: 1;
+            fill: var(--color-green);
+          }
+        }
+      }
     }
 
     &--loading {
