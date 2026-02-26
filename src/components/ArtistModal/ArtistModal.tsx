@@ -16,9 +16,7 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
   const { setIsTrackModalOpen, setTrack } = useAppContext();
   if (!isOpen || !artist) return null;
 
-
   const tracks = artist.tracks || [];
-  console.log(tracks);
   const hasTracks = tracks.length > 0;
 
   const handleTrackClick = (track: Track) => {

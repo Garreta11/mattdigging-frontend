@@ -4,6 +4,7 @@
   display: initial;
   background-color: var(--color-black);
   padding: var(--space-16) var(--space-4);
+  padding-bottom: var(--space-20);
 
   @include respond-to(md) {
     padding-top: var(--space-24);

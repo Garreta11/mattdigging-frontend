@@ -215,12 +215,29 @@
       font-size: 1.2rem;
     }
 
-    p {
+    &__artist-name {
       opacity: 0.6;
+      width: fit-content;
+      cursor: pointer;
+
+      &::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 1px;
+        background-color: var(--color-white);
+        transition: width 0.3s ease;
+      }
+
+      &:hover {
+        &::after {
+          width: 100%;
+        }
+      }
     }
 
     &__playlist-name {
-      color: var(--color-green);
+      color: var(--color-yellow);
       font-weight: 400;
       text-transform: lowercase;
       /* font-style: italic; */

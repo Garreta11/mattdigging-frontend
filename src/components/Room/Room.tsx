@@ -63,7 +63,7 @@ const Room: React.FC = () => {
       outputRef.current?.dispose();
       outputRef.current = null;
     };
-  }, [track]);
+  }, []);
   
   // Actualizar isMobile cuando cambia
   useEffect(() => {

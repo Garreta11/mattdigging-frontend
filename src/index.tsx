@@ -28,13 +28,15 @@ import { AppProvider } from './context/AppContext';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+export let lenis: Lenis;
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 function App() {
   useEffect(() => {
-    const lenis = new Lenis({
+    lenis = new Lenis({
       duration: 1.2,
       smoothWheel: true,
     });

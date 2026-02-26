@@ -1,9 +1,10 @@
 import './Player.scss';
 import { useState, useEffect, useRef } from 'react'
-import { fetchTracks, Track } from '../../services/api';
+import { fetchTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds)) return '0:00';
@@ -13,7 +14,9 @@ const formatTime = (seconds: number): string => {
 };
 
 const Player = () => {
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlistName } = useAppContext();
+  const navigate = useNavigate();
+
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlistName, setModalArtist, setIsModalArtistOpen } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -25,7 +28,7 @@ const Player = () => {
   const [controlsDisabled, setControlsDisabled] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
-  const [isShuffleMode, setIsShuffleMode] = useState(false);
+  const [isShuffleMode, setIsShuffleMode] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
@@ -42,7 +45,6 @@ const Player = () => {
 
     const loadTracks = async () => {
       const data = await fetchTracks();
-      console.log('data', data)
       setPlayerTrackList(data);
 
       if (data.length > 0) {
@@ -259,6 +261,23 @@ const Player = () => {
   }, [currentTrack?.title]);
 
   // --------------------------------
+  // Actualizar el track en el contexto cuando cambie currentTrack
+  // --------------------------------
+  useEffect(() => {
+    if (currentTrack) {
+      if (isManualTrackChange.current) {
+        isManualTrackChange.current = false;
+        return;
+      }
+      
+      if (currentTrack.id !== previousTrackId.current) {
+        previousTrackId.current = currentTrack.id;
+        setTrack(currentTrack);
+      }
+    }
+  }, [currentTrack, setTrack]);
+
+  // --------------------------------
   // RANDOM LOGIC
   // --------------------------------
   const getRandomUnplayedIndex = (): number | null => {
@@ -361,22 +380,10 @@ const Player = () => {
     });
   };
 
-  // --------------------------------
-  // Actualizar el track en el contexto cuando cambie currentTrack
-  // --------------------------------
-  useEffect(() => {
-    if (currentTrack) {
-      if (isManualTrackChange.current) {
-        isManualTrackChange.current = false;
-        return;
-      }
-      
-      if (currentTrack.id !== previousTrackId.current) {
-        previousTrackId.current = currentTrack.id;
-        setTrack(currentTrack);
-      }
-    }
-  }, [currentTrack, setTrack]);
+  const handleArtistClick = (artist: Artist) => {
+    setModalArtist(artist);
+    setIsModalArtistOpen(true);
+  };
 
   // Whether the player UI should show content vs a skeleton/spinner.
   // We need a track selected AND the audio to have fired canplay.
@@ -407,7 +414,7 @@ const Player = () => {
                 <p className='player__info__playlist-name'>{playlistName}</p>
               )}
               <h3>{currentTrack.title}</h3>
-              <p>{currentTrack?.artist?.name}</p>
+              <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}>{currentTrack?.artist?.name}</p>
             </div>
           </>
         ) : (
@@ -422,22 +429,17 @@ const Player = () => {
       <div className='player__controls'>
         <div className='player__controls__buttons'>
           {/* Shuffle button */}
-          
-          
-          {playlistName && (
-            <button
-              onClick={toggleShuffle}
-              disabled={controlsDisabled || !isPlayerReady}
-              className={`player__btn player__btn--shuffle ${
-                isShuffleMode ? 'player__btn--shuffle--active' : ''
-              }`}
-            >
-              <svg width="27" height="24" viewBox="0 0 75 66" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M57.0552 1.15066C58.4927 -0.341536 60.8638 -0.388434 62.3599 1.0452L73.0119 11.2752C73.7502 11.9822 74.1642 12.9588 74.1642 13.9822C74.1642 15.0017 73.7501 15.9783 73.0119 16.6853L62.3599 26.9153C60.8638 28.3528 58.4927 28.302 57.0552 26.8098C55.6216 25.3176 55.6685 22.9426 57.1646 21.509L61.0982 17.7317H52.3716C49.7544 17.7317 47.27 18.9036 45.6099 20.927L35.7779 32.896L45.6959 44.919C47.3561 46.9346 49.8326 48.0987 52.4459 48.0987H61.1295L57.2076 44.3175C55.7154 42.88 55.6724 40.505 57.1099 39.0128C58.5474 37.5245 60.9224 37.4816 62.4146 38.9191L73.0196 49.1491C73.7501 49.8561 74.1641 50.8327 74.1641 51.8483C74.1641 52.8678 73.7501 53.8405 73.0196 54.5475L62.4146 64.7815C60.9224 66.219 58.5474 66.176 57.1099 64.6838C55.6724 63.1955 55.7154 60.8205 57.2076 59.383L61.1295 55.5978H52.4459C47.5943 55.5978 42.9967 53.4298 39.9109 49.6876L14.6059 19.0116C12.9457 16.996 10.4692 15.8319 7.85588 15.8319H3.75038C1.67618 15.8319 0.000380516 14.1522 0.000380516 12.0819C0.000380516 10.0077 1.67618 8.33192 3.75038 8.33192H7.85588C12.7075 8.33192 17.3051 10.4999 20.3909 14.2421L30.9139 27.0001L39.8123 16.1641C42.8982 12.4063 47.5076 10.2305 52.3713 10.2305H61.0979L57.1643 6.45322C55.6682 5.01962 55.6213 2.64462 57.0549 1.14852L57.0552 1.15066ZM20.9222 39.1667L25.7855 45.0612L20.4417 51.5651C17.3558 55.3229 12.7503 57.4987 7.8867 57.4987H3.75C1.6758 57.4987 0 55.8229 0 53.7487C0 51.6784 1.6758 49.9987 3.75 49.9987H7.8867C10.5039 49.9987 12.9844 48.8268 14.6484 46.8034L20.9222 39.1667Z" fill="var(--color-white)"/>
-              </svg>
-
-            </button>
-          )}
+          <button
+            onClick={toggleShuffle}
+            disabled={controlsDisabled || !isPlayerReady}
+            className={`player__btn player__btn--shuffle ${
+              isShuffleMode ? 'player__btn--shuffle--active' : ''
+            }`}
+          >
+            <svg width="27" height="24" viewBox="0 0 75 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M57.0552 1.15066C58.4927 -0.341536 60.8638 -0.388434 62.3599 1.0452L73.0119 11.2752C73.7502 11.9822 74.1642 12.9588 74.1642 13.9822C74.1642 15.0017 73.7501 15.9783 73.0119 16.6853L62.3599 26.9153C60.8638 28.3528 58.4927 28.302 57.0552 26.8098C55.6216 25.3176 55.6685 22.9426 57.1646 21.509L61.0982 17.7317H52.3716C49.7544 17.7317 47.27 18.9036 45.6099 20.927L35.7779 32.896L45.6959 44.919C47.3561 46.9346 49.8326 48.0987 52.4459 48.0987H61.1295L57.2076 44.3175C55.7154 42.88 55.6724 40.505 57.1099 39.0128C58.5474 37.5245 60.9224 37.4816 62.4146 38.9191L73.0196 49.1491C73.7501 49.8561 74.1641 50.8327 74.1641 51.8483C74.1641 52.8678 73.7501 53.8405 73.0196 54.5475L62.4146 64.7815C60.9224 66.219 58.5474 66.176 57.1099 64.6838C55.6724 63.1955 55.7154 60.8205 57.2076 59.383L61.1295 55.5978H52.4459C47.5943 55.5978 42.9967 53.4298 39.9109 49.6876L14.6059 19.0116C12.9457 16.996 10.4692 15.8319 7.85588 15.8319H3.75038C1.67618 15.8319 0.000380516 14.1522 0.000380516 12.0819C0.000380516 10.0077 1.67618 8.33192 3.75038 8.33192H7.85588C12.7075 8.33192 17.3051 10.4999 20.3909 14.2421L30.9139 27.0001L39.8123 16.1641C42.8982 12.4063 47.5076 10.2305 52.3713 10.2305H61.0979L57.1643 6.45322C55.6682 5.01962 55.6213 2.64462 57.0549 1.14852L57.0552 1.15066ZM20.9222 39.1667L25.7855 45.0612L20.4417 51.5651C17.3558 55.3229 12.7503 57.4987 7.8867 57.4987H3.75C1.6758 57.4987 0 55.8229 0 53.7487C0 51.6784 1.6758 49.9987 3.75 49.9987H7.8867C10.5039 49.9987 12.9844 48.8268 14.6484 46.8034L20.9222 39.1667Z" fill="var(--color-white)"/>
+            </svg>
+          </button>
 
           {/* Previous button */}
           <button

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
+import { lenis } from '../../index';
 
 const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -89,13 +90,9 @@ const Artists = () => {
 
   const scrollToLetter = (letter: string) => {
     const el = document.getElementById(`artist-letter-${letter}`);
-    if (el) {
-      const offset = 0;
-      const parent = el.closest('.main-content') as HTMLElement;
-      if (parent) {
-        const top = el.offsetTop - parent.offsetTop - offset;
-        parent.scrollTo({ top, behavior: "smooth" });
-      }
+    if (el && lenis) {
+      lenis.scrollTo(el, { offset: -100, immediate: false }); 
+      // offset adjusts for padding or header
     }
   };
 
