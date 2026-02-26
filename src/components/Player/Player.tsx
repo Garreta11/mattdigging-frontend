@@ -16,7 +16,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlistName, setModalArtist, setIsModalArtistOpen } = useAppContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlistName, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -385,6 +385,28 @@ const Player = () => {
     setIsModalArtistOpen(true);
   };
 
+  const handleFullscreen = (_isFullscreen: boolean) => {
+    
+  
+    const el = document.querySelector('.main-content');
+    if (el) {
+      el.classList.add('fade-out');
+    
+      const onAnimationEnd = () => {
+        el.removeEventListener('animationend', onAnimationEnd);
+        navigate('/');
+      };    
+      el.addEventListener('animationend', onAnimationEnd);
+      setTimeout(() => {
+        setIsFullscreen(_isFullscreen);
+      }, 1000);
+    } else {
+      setIsFullscreen(_isFullscreen);
+    }
+  
+  };
+
+
   // Whether the player UI should show content vs a skeleton/spinner.
   // We need a track selected AND the audio to have fired canplay.
   const isPlayerReady = !!currentTrack && isAudioReady;
@@ -399,6 +421,19 @@ const Player = () => {
         path={currentTrack ? currentTrack.audio_url : ''}
         preload="auto"
       />
+
+      <div className='player__fullscreen' onClick={() => handleFullscreen(!isFullscreen)}>
+        {isFullscreen ? (
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.5 0.75C5.5 0.33579 5.16421 0 4.75 0C4.33579 0 4 0.33579 4 0.75V3.25C4 3.66421 3.66421 4 3.25 4H0.75C0.33579 4 0 4.33579 0 4.75C0 5.16421 0.33579 5.5 0.75 5.5H3.25C4.49264 5.5 5.5 4.49264 5.5 3.25V0.75ZM5.5 17.25C5.5 17.6642 5.16421 18 4.75 18C4.33579 18 4 17.6642 4 17.25V14.75C4 14.3358 3.66421 14 3.25 14H0.75C0.33579 14 0 13.6642 0 13.25C0 12.8358 0.33579 12.5 0.75 12.5H3.25C4.49264 12.5 5.5 13.5074 5.5 14.75V17.25ZM13.25 0C12.8358 0 12.5 0.33579 12.5 0.75V3.25C12.5 4.49264 13.5074 5.5 14.75 5.5H17.25C17.6642 5.5 18 5.16421 18 4.75C18 4.33579 17.6642 4 17.25 4H14.75C14.3358 4 14 3.66421 14 3.25V0.75C14 0.33579 13.6642 0 13.25 0ZM12.5 17.25C12.5 17.6642 12.8358 18 13.25 18C13.6642 18 14 17.6642 14 17.25V14.75C14 14.3358 14.3358 14 14.75 14H17.25C17.6642 14 18 13.6642 18 13.25C18 12.8358 17.6642 12.5 17.25 12.5H14.75C13.5074 12.5 12.5 13.5074 12.5 14.75V17.25Z" fill="var(--color-white)"/>
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 2.75C1.5 2.05964 2.05964 1.5 2.75 1.5H4.75C5.16421 1.5 5.5 1.16421 5.5 0.75C5.5 0.33579 5.16421 0 4.75 0H2.75C1.23122 0 0 1.23122 0 2.75V4.75C0 5.16421 0.33579 5.5 0.75 5.5C1.16421 5.5 1.5 5.16421 1.5 4.75V2.75ZM1.5 15.25C1.5 15.9404 2.05964 16.5 2.75 16.5H4.75C5.16421 16.5 5.5 16.8358 5.5 17.25C5.5 17.6642 5.16421 18 4.75 18H2.75C1.23122 18 0 16.7688 0 15.25V13.25C0 12.8358 0.33579 12.5 0.75 12.5C1.16421 12.5 1.5 12.8358 1.5 13.25V15.25ZM15.25 1.5C15.9404 1.5 16.5 2.05964 16.5 2.75V4.75C16.5 5.16421 16.8358 5.5 17.25 5.5C17.6642 5.5 18 5.16421 18 4.75V2.75C18 1.23122 16.7688 0 15.25 0H13.25C12.8358 0 12.5 0.33579 12.5 0.75C12.5 1.16421 12.8358 1.5 13.25 1.5H15.25ZM16.5 15.25C16.5 15.9404 15.9404 16.5 15.25 16.5H13.25C12.8358 16.5 12.5 16.8358 12.5 17.25C12.5 17.6642 12.8358 18 13.25 18H15.25C16.7688 18 18 16.7688 18 15.25V13.25C18 12.8358 17.6642 12.5 17.25 12.5C16.8358 12.5 16.5 12.8358 16.5 13.25V15.25Z" fill="var(--color-white)"/>
+          </svg>
+        )}
+      </div>
+
 
       <div className='player__info'>
         {isPlayerReady ? (

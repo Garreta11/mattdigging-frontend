@@ -54,8 +54,7 @@ export default class Output {
     this.setCamera();
     this.setupVideo();
     this.setupMaterial();
-    // this.setTrackCover();
-    // this.setupDebugOverlay();
+    //this.setupDebugOverlay();
     this.loadChestFrames();
     
     this.updateViewport();
@@ -75,6 +74,11 @@ export default class Output {
     window.addEventListener('click', this.onClick);
     window.addEventListener('touchend', this.onTouchEnd);
     window.addEventListener('resize', this.onResize);
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.onResize();
+    });
+    this.resizeObserver.observe(this.container);
   }
 
   setRenderer() {
@@ -761,14 +765,16 @@ export default class Output {
   }
   
   onResize() {
-    const w = this.container.clientWidth;
-    const h = this.container.clientHeight;
-    if (w === this.lastWidth && h === this.lastHeight) return;
-    this.lastWidth = w;
-    this.lastHeight = h;
-    this.renderer.setSize(w, h);
-    this.updateViewport();
-    this.updateDebugOverlay();
+    clearTimeout(this.resizeTimeout);
+  
+    this.resizeTimeout = setTimeout(() => {
+      const w = this.container.clientWidth;
+      const h = this.container.clientHeight;
+  
+      this.renderer.setSize(w, h);
+      this.updateViewport();
+      this.updateDebugOverlay();
+    }, 300); // match your CSS transition duration
   }
 
   setIsMobile(value) {
@@ -784,7 +790,7 @@ export default class Output {
     this.updateGlow(dt);       // ← advance the glow shader clock
     this.renderer.render(this.scene, this.camera);
 
-    this.updateDebugOverlay();
+    // this.updateDebugOverlay();
     
     this.animationId = requestAnimationFrame(this.animate.bind(this));
   }
@@ -825,6 +831,10 @@ export default class Output {
     
     if (this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 }

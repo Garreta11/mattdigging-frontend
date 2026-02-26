@@ -86,8 +86,6 @@ const SearchInput = () => {
         searchMoods(searchQuery),
       ]);
 
-      console.log(artists, tracks, countries, genres, moods);
-
       setResults({ artists, tracks, countries, genres, moods });
     } catch (error) {
       console.error("Search error:", error);

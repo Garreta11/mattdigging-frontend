@@ -7,7 +7,7 @@ import { useStorageUrl } from '../../pages/Admin/hooks/useStorageUrl';
 import { useNavigate } from 'react-router-dom';
 
 const Room: React.FC = () => {
-  const { track, setIsTrackModalOpen, isTrackModalOpen } = useAppContext();
+  const { track, setIsTrackModalOpen, isTrackModalOpen, setIsFullscreen } = useAppContext();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const roomRef = useRef<HTMLDivElement>(null);
@@ -44,15 +44,19 @@ const Room: React.FC = () => {
       container: roomRef.current,
       onChestClick: () => {
         navigate('/playlists?genre=hidden-gems');
+        setIsFullscreen(false);
       },
       onTrackCoverClick: () => {
         setIsTrackModalOpen(true);
+        setIsFullscreen(false);
       },
       onLampClick: () => {
         navigate('/playlists?mood=lava-lamp');
+        setIsFullscreen(false);
       },
       onShelfClick: () => {
         navigate('/selections');
+        setIsFullscreen(false);
       },
       onTipChange: (tip: string) => {
         setTip(tip);

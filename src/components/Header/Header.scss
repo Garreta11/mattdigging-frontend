@@ -15,6 +15,10 @@
 
   background-color: var(--color-black);
 
+  &--fullscreen {
+    display: none;
+  }
+
   @include respond-to(md) {
     flex-direction: column;
     gap: var(--space-4);

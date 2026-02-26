@@ -38,6 +38,22 @@
     gap: 0;
   }
 
+  &__fullscreen {
+    cursor: pointer;
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    transition: all 0.3s ease;
+
+    @include respond-to(md) {
+      display: none;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
   &__controls {
 
     width: 50%;

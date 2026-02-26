@@ -36,7 +36,7 @@ const root = ReactDOM.createRoot(
 
 function App() {
   useEffect(() => {
-    lenis = new Lenis({
+    const lenis = new Lenis({
       duration: 1.2,
       smoothWheel: true,
     });

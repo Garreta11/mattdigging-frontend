@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import SearchInput from '../SearchInput/SearchInput';
 
 const Header = () => {
-  const { user } = useAppContext();
+  const { user, isFullscreen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -85,7 +85,7 @@ const Header = () => {
   return (
     <>
       {user && (
-        <header className="header">
+        <header className={`header ${isFullscreen ? 'header--fullscreen' : ''}`}>
           {/* Logo */}
           <div className="header__logo">
             <Link 
