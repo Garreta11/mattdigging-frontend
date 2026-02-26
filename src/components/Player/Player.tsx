@@ -74,7 +74,6 @@ const Player = () => {
   useEffect(() => {
     if (currentTrackIndex !== null && playerTrackList.length > 0) {
       const track = playerTrackList[currentTrackIndex];
-      console.log('track', track)
       setCurrentTrack(track);
       setControlsDisabled(false);
     } else {
@@ -216,7 +215,6 @@ const Player = () => {
 
     if (isPlaying) {
       audio.play().catch((err) => {
-        console.error('Error playing audio:', err);
         setIsPlaying(false);
       });
     } else {
