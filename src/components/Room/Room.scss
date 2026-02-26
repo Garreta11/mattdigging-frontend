@@ -15,4 +15,34 @@
     justify-content: center;
     align-items: center;
   }
+
+  &__tip {
+    position: absolute;
+    top: 0;
+    left: var(--space-4);
+    pointer-events: none; // so it doesn't block clicks
+    transform: translate(0, 0);
+    z-index: 1000;
+
+    background-color: var(--color-white);
+    color: var(--color-black);
+    padding: var(--space-2);
+    border-radius: var(--border-radius-super-small);
+    animation: fadeInTip 0.3s ease forwards;
+    transition: opacity 0.3s ease;
+
+    &__text {
+      color: var(--color-black);
+    }
+
+  }
+}
+
+@keyframes fadeInTip {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.6;
+  }
 }

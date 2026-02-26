@@ -406,7 +406,7 @@ const Player = () => {
             />
             <div className='player__info__text'>
               {playlistName && (
-                <p className='player__info__playlist-name'>playlist: {playlistName}</p>
+                <p className='player__info__playlist-name'>{playlistName}</p>
               )}
               <h3>{currentTrack.title}</h3>
               <p>{currentTrack?.artist?.name}</p>

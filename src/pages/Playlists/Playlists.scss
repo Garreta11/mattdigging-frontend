@@ -83,7 +83,7 @@
 
   &__filters {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: var(--space-4);
     margin-bottom: var(--space-4);
 
@@ -148,10 +148,12 @@
     }
 
     &__menu {
-      position: absolute;
+      position: relative;
       z-index: 1;
-      top: calc(100% + 6px);
-      left: 0;
+      /* top: calc(100% + 6px);
+      left: 0; */
+      top: 6px;
+      left: 0px;
       min-width: 180px;
       max-height: 260px;
       overflow-y: auto;

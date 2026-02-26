@@ -1,17 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Room.scss';
 import Output from './Output';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAppContext } from '../../context/AppContext';
 import { useStorageUrl } from '../../pages/Admin/hooks/useStorageUrl';
+import { useNavigate } from 'react-router-dom';
 
 const Room: React.FC = () => {
   const { track, setIsTrackModalOpen, isTrackModalOpen } = useAppContext();
   const isMobile = useIsMobile();
-
+  const navigate = useNavigate();
   const roomRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<Output | null>(null);
   const trackRef = useRef(track);
+  
+  const [tip, setTip] = useState<string>('');
+  const tipRef = useRef<HTMLDivElement>(null);
 
   // Obtener la URL del cover en el nivel superior del componente
   const coverUrl = useStorageUrl("covers", track?.cover_url || null, null);
@@ -39,10 +43,19 @@ const Room: React.FC = () => {
     outputRef.current = new Output({
       container: roomRef.current,
       onChestClick: () => {
+        navigate('/playlists?genre=hidden-gems');
       },
       onTrackCoverClick: () => {
         setIsTrackModalOpen(true);
-        console.log(track)
+      },
+      onLampClick: () => {
+        navigate('/playlists?mood=lava-lamp');
+      },
+      onShelfClick: () => {
+        navigate('/selections');
+      },
+      onTipChange: (tip: string) => {
+        setTip(tip);
       }
     });
   
@@ -66,11 +79,34 @@ const Room: React.FC = () => {
       outputRef.current.setInteractionsEnabled(!isTrackModalOpen);
     }
   }, [isTrackModalOpen]);
+
+  // Make tip follow the mouse
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!tipRef.current || !roomRef.current) return;
+
+      const rect = roomRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      tipRef.current.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    document.body?.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.body?.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
   
   return (
-    <>
-      <div className="room" ref={roomRef} />
-    </>
+    <div className="room" ref={roomRef}>
+      {tip !== '' && (
+        <div className="room__tip" ref={tipRef}>
+          <p className="room__tip__text">{tip}</p>
+        </div>
+      )}
+    </div>
   );
 };
 

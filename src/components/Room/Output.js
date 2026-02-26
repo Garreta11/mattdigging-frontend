@@ -4,8 +4,13 @@ export default class Output {
   constructor(_options = {}) {
     // Options
     this.container = _options.container;
+
     this.onChestClick = _options.onChestClick || null;
     this.onTrackCoverClick = _options.onTrackCoverClick || null;
+    this.onLampClick = _options.onLampClick || null;
+    this.onShelfClick = _options.onShelfClick || null;
+
+    this.onTipChange = _options.onTipChange || null;
 
     // Config
     this.BASE_VIDEO_URL = "/base.mp4";
@@ -18,7 +23,9 @@ export default class Output {
     // Chest zone (normalized inside square viewport)
     this.CHEST_ZONE = { x0: 0.2, x1: 0.56, y0: 0, y1: 0.38 };
     this.TRACK_COVER_ZONE = { x0: 0.6, x1: 0.9, y0: 0.5, y1: 0.8 };
-    
+    this.LAMP_ZONE = { x0: 0.9, x1: 0.95, y0: 0.4, y1: 0.6 };
+    this.SHELF_ZONE = { x0: 0.15, x1: 0.55, y0: 0.4, y1: 0.88 };
+
     // Interaction feel
     this.HOVER_DELAY = 0.10;
     this.OPEN_EASE = 0.035;
@@ -476,6 +483,12 @@ export default class Output {
     if (this.hoveringTrackCover()) {
       this.handleTrackCoverClick();
     }
+    if (this.hoveringLamp()) {
+      this.handleLampClick();
+    }
+    if (this.hoveringShelf()) {
+      this.handleShelfClick();
+    }
   }
 
   handleChestClick() {
@@ -487,6 +500,18 @@ export default class Output {
   handleTrackCoverClick() {
     if (this.onTrackCoverClick && typeof this.onTrackCoverClick === 'function') {
       this.onTrackCoverClick();
+    }
+  }
+
+  handleLampClick() {
+    if (this.onLampClick && typeof this.onLampClick === 'function') {
+      this.onLampClick();
+    }
+  }
+
+  handleShelfClick() {
+    if (this.onShelfClick && typeof this.onShelfClick === 'function') {
+      this.onShelfClick();
     }
   }
 
@@ -506,7 +531,23 @@ export default class Output {
            this.mouseSquare.y > z.y0 && this.mouseSquare.y < z.y1;
   }
 
-  updateChest(dt) {
+  hoveringLamp() {
+    if (!this.interactionsEnabled) return false;
+    if (this.mouseSquare.x < 0) return false;
+    const z = this.LAMP_ZONE;
+    return this.mouseSquare.x > z.x0 && this.mouseSquare.x < z.x1 &&
+           this.mouseSquare.y > z.y0 && this.mouseSquare.y < z.y1;
+  }
+
+  hoveringShelf() {
+    if (!this.interactionsEnabled) return false;
+    if (this.mouseSquare.x < 0) return false;
+    const z = this.SHELF_ZONE;
+    return this.mouseSquare.x > z.x0 && this.mouseSquare.x < z.x1 &&
+           this.mouseSquare.y > z.y0 && this.mouseSquare.y < z.y1;
+  }
+
+  updateInteractions(dt) {
     if (!this.chestLoaded) return;
 
     // On mobile: static frame 0, no hover interaction
@@ -520,8 +561,25 @@ export default class Output {
 
     const hoverChest = this.hoveringChest();
     const hoverCover = this.hoveringTrackCover();
+    const hoverLamp = this.hoveringLamp();
+    const hoverShelf = this.hoveringShelf();
 
-    if (hoverChest || hoverCover) {
+    let tip = '';
+    if (hoverChest) {
+      tip = 'Hidden Gems';
+    }
+    if (hoverCover) {
+      tip = 'More info';
+    }
+    if (hoverLamp) {
+      tip = 'Lava lamp';
+    }
+    if (hoverShelf) {
+      tip = 'Weekly Selections';
+    }
+    this.onTipChange(tip);
+    
+    if (hoverChest || hoverCover || hoverLamp || hoverShelf) {
       document.body.style.cursor = 'pointer';
     } else {
       document.body.style.cursor = 'auto';
@@ -534,10 +592,12 @@ export default class Output {
         this.preloadNearbyFrames(Math.round(this.chestCtl.frame), 10);
       }
     }
+
     if (!hoverChest && this.wasHovering) {
       this.chestCtl.state = "release";
       this.chestCtl.target = 0;
     }
+
     this.wasHovering = hoverChest;
 
     if (this.chestCtl.state === "pre") {
@@ -612,7 +672,8 @@ export default class Output {
     ctx.strokeStyle = 'cyan';
     ctx.lineWidth = 2;
     ctx.strokeRect(this.viewport.x, this.viewport.y, this.viewport.size, this.viewport.size);
-    
+
+    /* CHEST */
     const chestZone = this.CHEST_ZONE;
     const chestZoneX = this.viewport.x + chestZone.x0 * this.viewport.size;
     const chestZoneY = this.viewport.y + (1 - chestZone.y1) * this.viewport.size;
@@ -628,6 +689,7 @@ export default class Output {
     ctx.font = '12px monospace';
     ctx.fillText('CHEST', chestZoneX + 5, chestZoneY + 15);
     
+    /* TRACK COVER */
     const coverZone = this.TRACK_COVER_ZONE;
     const coverZoneX = this.viewport.x + coverZone.x0 * this.viewport.size;
     const coverZoneY = this.viewport.y + (1 - coverZone.y1) * this.viewport.size;
@@ -642,6 +704,38 @@ export default class Output {
     ctx.fillStyle = 'white';
     ctx.font = '12px monospace';
     ctx.fillText('COVER', coverZoneX + 5, coverZoneY + 15);
+
+    /* LAMP */
+    const lampZone = this.LAMP_ZONE;
+    const lampZoneX = this.viewport.x + lampZone.x0 * this.viewport.size;
+    const lampZoneY = this.viewport.y + (1 - lampZone.y1) * this.viewport.size;
+    const lampZoneW = (lampZone.x1 - lampZone.x0) * this.viewport.size;
+    const lampZoneH = (lampZone.y1 - lampZone.y0) * this.viewport.size;
+    
+    ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+    ctx.fillRect(lampZoneX, lampZoneY, lampZoneW, lampZoneH);
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(lampZoneX, lampZoneY, lampZoneW, lampZoneH);
+    ctx.fillStyle = 'white';
+    ctx.font = '12px monospace';
+    ctx.fillText('LAMP', lampZoneX + 5, lampZoneY + 15);
+
+    /* SHELF */
+    const shelfZone = this.SHELF_ZONE;
+    const shelfZoneX = this.viewport.x + shelfZone.x0 * this.viewport.size;
+    const shelfZoneY = this.viewport.y + (1 - shelfZone.y1) * this.viewport.size;
+    const shelfZoneW = (shelfZone.x1 - shelfZone.x0) * this.viewport.size;
+    const shelfZoneH = (shelfZone.y1 - shelfZone.y0) * this.viewport.size;
+    
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+    ctx.fillRect(shelfZoneX, shelfZoneY, shelfZoneW, shelfZoneH);
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(shelfZoneX, shelfZoneY, shelfZoneW, shelfZoneH);
+    ctx.fillStyle = 'white';
+    ctx.font = '12px monospace';
+    ctx.fillText('SHELF', shelfZoneX + 5, shelfZoneY + 15);
     
     if (this.mouseSquare.x >= 0) {
       const mouseX = this.viewport.x + this.mouseSquare.x * this.viewport.size;
@@ -661,6 +755,7 @@ export default class Output {
       ctx.fillText(`Mouse: (${this.mouseSquare.x.toFixed(3)}, ${this.mouseSquare.y.toFixed(3)})`, 10, 20);
       ctx.fillText(`Hovering Chest: ${this.hoveringChest()}`, 10, 40);
       ctx.fillText(`Hovering Cover: ${this.hoveringTrackCover()}`, 10, 60);
+      ctx.fillText(`Hovering Lamp: ${this.hoveringLamp()}`, 10, 100);
       ctx.fillText(`Frame: ${Math.round(this.chestCtl.frame)}`, 10, 80);
     }
   }
@@ -685,7 +780,7 @@ export default class Output {
     const dt = (now - this.lastTime) / 1000;
     this.lastTime = now;
 
-    this.updateChest(dt);
+    this.updateInteractions(dt);
     this.updateGlow(dt);       // ← advance the glow shader clock
     this.renderer.render(this.scene, this.camera);
 
