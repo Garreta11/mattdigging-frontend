@@ -86,6 +86,11 @@ export interface Selections {
   selection_tracks?: SelectionTrack[];
 }
 
+export type Playlist = {
+  name: string;
+  url: string;
+};
+
 /* =========================
    BASIC FETCHERS
 ========================= */

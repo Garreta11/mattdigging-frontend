@@ -130,7 +130,7 @@ const getSelectionCovers = (selection: Selections) => selection.selection_tracks
 
 // ─── SelectionsPage ───────────────────────────────────────────────────────────
 const SelectionsPage = () => {
-  const { setPlayerTrackList, setPlaylistName, setTrack } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack } = useAppContext();
   const { track: currentTrack } = useAppContext();
   const [searchParams] = useSearchParams();
   const selectionParam = searchParams.get("selection");
@@ -241,12 +241,12 @@ const SelectionsPage = () => {
   const handlePlaySelection = () => {
     if (tracks.length > 0) {
       setPlayerTrackList(tracks);
-      setPlaylistName(activeSelection?.title ?? null);
+      setPlaylist({ name: activeSelection?.title ?? '', url: `/selections?selection=${activeSelection?.id}` });
     }
   };
 
   const handleTrackClick = (track: Track) => {
-    setPlaylistName(activeSelection?.title ?? null);
+    setPlaylist({ name: activeSelection?.title ?? '', url: `/selections?selection=${activeSelection?.id}` });
     setPlayerTrackList(tracks);
     setTrack(track);
   };

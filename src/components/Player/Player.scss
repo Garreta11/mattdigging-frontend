@@ -31,6 +31,13 @@
 
   z-index: 100;
 
+  transition: all 0.3s ease;
+
+  &--fullscreen {
+    width: 100dvw;
+    bottom: 0;
+  }
+
   @include respond-to(md) {
     padding: var(--space-2) var(--space-4);
     width: 95dvw;
@@ -253,10 +260,27 @@
     }
 
     &__playlist-name {
+      font-size: var(--font-size-sm);
       color: var(--color-yellow);
-      font-weight: 400;
-      text-transform: lowercase;
-      /* font-style: italic; */
+      cursor: pointer;
+      width: fit-content;
+
+      &::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 1px;
+        background-color: var(--color-yellow);
+        transition: width 0.3s ease;
+      }
+
+      &:hover {
+        &::after {
+          width: 100%;
+        }
+      }
+      
+      
     }
 
     &__skeleton {

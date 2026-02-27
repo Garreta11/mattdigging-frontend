@@ -24,7 +24,7 @@ const SEASONS: Season[] = [
 type DropdownKey = 'genre' | 'mood' | 'country' | 'season' | 'year' | null;
 
 const PlaylistsPage = () => {
-  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylistName } = useAppContext();
+  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist } = useAppContext();
   
   const [genres, setGenres] = useState<Genre[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
@@ -148,17 +148,17 @@ const PlaylistsPage = () => {
   const handleTrackClick = async (track: Track) => {
     if (genreParam) {
       const genre = genres.find(g => g.slug === genreParam);
-      setPlaylistName(genre?.name || null);
+      setPlaylist({ name: genre?.name || '', url: `/playlists?genre=${genre?.slug}` });
     } else if (moodParam) {
       const mood = moods.find(m => m.slug === moodParam);
-      setPlaylistName(mood?.name || null);
+      setPlaylist({ name: mood?.name || '', url: `/playlists?mood=${mood?.slug}` });
     } else if (yearParam) {
-      setPlaylistName(yearParam);
+      setPlaylist({ name: yearParam, url: `/playlists?year=${yearParam}` });
     } else if (seasonParam) {
       const season = SEASONS.find(s => s.slug === seasonParam);
-      setPlaylistName(season?.name || null);
+      setPlaylist({ name: season?.name || '', url: `/playlists?season=${season?.slug}` });
     } else if (countryParam) {
-      setPlaylistName(countryParam);
+      setPlaylist({ name: countryParam, url: `/playlists?country=${countryParam}` });
     }
   
     setPlayerTrackList(tracks);
@@ -171,17 +171,17 @@ const PlaylistsPage = () => {
       setPlayerTrackList(tracks);
       if (genreParam) {
         const genre = genres.find(g => g.slug === genreParam);
-        setPlaylistName(genre?.name || null);
+        setPlaylist({ name: genre?.name || '', url: `/playlists?genre=${genre?.slug}` });
       } else if (moodParam) {
         const mood = moods.find(m => m.slug === moodParam);
-        setPlaylistName(mood?.name || null);
+        setPlaylist({ name: mood?.name || '', url: `/playlists?mood=${mood?.slug}` });
       } else if (yearParam) {
-        setPlaylistName(yearParam);
+        setPlaylist({ name: yearParam, url: `/playlists?year=${yearParam}` });
       } else if (seasonParam) {
         const season = SEASONS.find(s => s.slug === seasonParam);
-        setPlaylistName(season?.name || null);
+        setPlaylist({ name: season?.name || '', url: `/playlists?season=${season?.slug}` });
       } else if (countryParam) {
-        setPlaylistName(countryParam);
+        setPlaylist({ name: countryParam, url: `/playlists?country=${countryParam}` });
       }
     }
   };

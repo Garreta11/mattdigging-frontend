@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../../types/user";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
-import { Track, Artist } from "../services/api";
+import { Track, Artist, Playlist } from "../services/api";
 
 
 
@@ -19,8 +19,8 @@ interface AppContextType {
   playerTrackList: Track[];
   setPlayerTrackList: (trackList: Track[]) => void;
 
-  playlistName: string | null;
-  setPlaylistName: (name: string | null) => void;
+  playlist: Playlist | null;
+  setPlaylist: (playlist: Playlist | null) => void;
 
   playlistReady: boolean;
   setPlaylistReady: (ready: boolean) => void;
@@ -47,7 +47,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [track, setTrack] = useState<Track | null>(null);
   const [playerTrackList, setPlayerTrackList] = useState<Track[]>([]);
-  const [playlistName, setPlaylistName] = useState<string | null>(null);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [playlistReady, setPlaylistReady] = useState(false);
   const [modalArtist, setModalArtist] = useState<Artist | null>(null);
   const [isModalArtistOpen, setIsModalArtistOpen] = useState(false);
@@ -111,8 +111,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setTrack,
       playerTrackList,
       setPlayerTrackList,
-      playlistName,
-      setPlaylistName,
+      playlist,
+      setPlaylist,
       playlistReady,
       setPlaylistReady,
       modalArtist,
