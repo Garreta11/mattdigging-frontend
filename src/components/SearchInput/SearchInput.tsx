@@ -141,13 +141,13 @@ const SearchInput = () => {
   };
 
   const handleGenreClick = (genre: Genre) => {
-    navigate(`/playlists?genre=${encodeURIComponent(genre.name)}`);
+    navigate(`/playlists?genre=${encodeURIComponent(genre.slug)}`);
     setQuery("");
     setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
   };
 
   const handleMoodClick = (mood: Mood) => {
-    navigate(`/playlists?mood=${encodeURIComponent(mood.name)}`);
+    navigate(`/playlists?mood=${encodeURIComponent(mood.slug)}`);
     setQuery("");
     setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
   };

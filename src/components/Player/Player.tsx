@@ -63,9 +63,14 @@ const Player = () => {
   useEffect(() => {
     if (!hasInitialized.current || playerTrackList.length === 0) return;
     
-    const randomIndex = Math.floor(Math.random() * playerTrackList.length);
-    setCurrentTrackIndex(randomIndex);
-    setPlayedIndices([randomIndex]);
+    if (isShuffleMode) {
+      const randomIndex = Math.floor(Math.random() * playerTrackList.length);
+      setCurrentTrackIndex(randomIndex);
+      setPlayedIndices([randomIndex]);
+    } else {
+      setCurrentTrackIndex(0);
+      setPlayedIndices([0]);
+    }
     setHistory([]);
     setIsPlaying(false);
   }, [playerTrackList]);

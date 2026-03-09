@@ -43,7 +43,7 @@ const Room: React.FC = () => {
     outputRef.current = new Output({
       container: roomRef.current,
       onChestClick: () => {
-        navigate('/playlists?genre=hidden-gems');
+        navigate('/hidden-gems');
         setIsFullscreen(false);
       },
       onTrackCoverClick: () => {

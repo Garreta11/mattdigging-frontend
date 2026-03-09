@@ -42,7 +42,11 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
   const handleGenreClick = (slug: string) => {
     onClose();
     setTimeout(() => {
-      navigate(`/playlists?genre=${slug}`);
+      if (slug === 'hidden-gems') {
+        navigate('/hidden-gems');
+      } else {
+        navigate(`/playlists?genre=${slug}`);
+      }
     }, 300);
   };
 
