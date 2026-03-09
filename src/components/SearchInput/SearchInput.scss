@@ -8,6 +8,10 @@
   @include respond-to(md) {
     width: 100%;
   }
+
+  &--fullscreen {
+    display: none;
+  }
   
   &__input {
     display: flex;

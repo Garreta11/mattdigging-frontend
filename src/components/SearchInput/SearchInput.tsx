@@ -25,7 +25,7 @@ interface SearchResults {
 }
 
 const SearchInput = () => {
-  const { setModalArtist, setIsModalArtistOpen, setTrack } = useAppContext();
+  const { setModalArtist, setIsModalArtistOpen, setTrack, isFullscreen } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -156,7 +156,7 @@ const SearchInput = () => {
     results.artists.length > 0 || results.tracks.length > 0 || results.countries.length > 0 || results.genres.length > 0 || results.moods.length > 0;
 
   return (
-    <div className="search" ref={searchRef} >
+    <div className={`search ${isFullscreen ? 'search--fullscreen' : ''}`} ref={searchRef} >
       <div className="search__input">
         <div className="search__input__content">
           <svg className="search__input__content__icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">

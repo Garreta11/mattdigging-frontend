@@ -15,6 +15,7 @@ import AuthConfirm from './pages/AuthConfirm/AuthConfirm';
 import Member from './pages/Member/Member';
 import Admin from './pages/Admin/Admin';
 import RequireAuth from './components/RequireAuth/RequireAuth';
+import HiddenGems from './pages/HiddenGems/HiddenGems';
 
 // Components
 import Player from './components/Player/Player';
@@ -26,7 +27,7 @@ import Modals from './components/Modals/Modals';
 // Utils
 import { AppProvider } from './context/AppContext';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 export let lenis: Lenis;
 
@@ -35,7 +36,11 @@ const root = ReactDOM.createRoot(
 );
 
 function App() {
+  const location = useLocation();
+
   useEffect(() => {
+    if (location.pathname === '/admin') return;
+
     const lenis = new Lenis({
       duration: 1.2,
       smoothWheel: true,
@@ -51,63 +56,64 @@ function App() {
     return () => {
       lenis.destroy();
     };
-  }, []);
+  }, [location.pathname]);
 
   return (
-    <AppProvider>
-      <Router>
-        <Routes>
-          {/* Public route for email confirmation */}
-          <Route path="/auth/confirm" element={<AuthConfirm />} />
+    <Routes>
+      {/* Public route for email confirmation */}
+      <Route path="/auth/confirm" element={<AuthConfirm />} />
 
-          {/* Admin route - separate layout */}
-          <Route
-            path="/admin"
-            element={
-              <RequireAuth>
-                <Admin />
-              </RequireAuth>
-            }
-          />
+      {/* Admin route - separate layout */}
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth>
+            <Admin />
+          </RequireAuth>
+        }
+      />
 
-          {/* All other routes with main layout */}
-          <Route
-            path="*"
-            element={
-              <RequireAuth>
-                <Header />
-                <main className="main">
-                  <MainWrapper>
-                    <Home />
-                  </MainWrapper>
+      {/* All other routes with main layout */}
+      <Route
+        path="*"
+        element={
+          <RequireAuth>
+            <Header />
+            <main className="main">
+              <MainWrapper>
+                <Home />
+              </MainWrapper>
 
-                  <Player />
-                  <Modals />
+              <Player />
+              <Modals />
 
-                  <Routes>
-                    <Route path="/" element={<></>} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/artists" element={<Artists />} />
-                    <Route path="/join" element={<Join />} />
-                    <Route path="/playlists" element={<Playlists />} />
-                    <Route path="/selections" element={<Selections />} />
-                    <Route path="/play" element={<Play />} />
-                    <Route path="/member" element={<Member />} />
-                  </Routes>
-                </main>
-                <Footer />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </Router>
-    </AppProvider>
+              <Routes>
+                <Route path="/" element={<></>} />
+                <Route path="/hidden-gems" element={<HiddenGems />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/artists" element={<Artists />} />
+                <Route path="/join" element={<Join />} />
+                <Route path="/playlists" element={<Playlists />} />
+                <Route path="/selections" element={<Selections />} />
+                <Route path="/play" element={<Play />} />
+                <Route path="/member" element={<Member />} />
+              </Routes>
+            </main>
+            <Footer />
+          </RequireAuth>
+        }
+      />
+    </Routes>
   );
 }
 
 root.render(
   <React.StrictMode>
-    <App />
+    <AppProvider>
+      <Router>
+        <App />
+      </Router>
+    </AppProvider>
   </React.StrictMode>
 );
 

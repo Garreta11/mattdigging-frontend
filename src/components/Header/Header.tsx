@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import SearchInput from '../SearchInput/SearchInput';
 
 const Header = () => {
-  const { user, isFullscreen } = useAppContext();
+  const { user, isFullscreen, setIsFullscreen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -91,7 +91,11 @@ const Header = () => {
             <Link 
               className="header__link" 
               to="/" 
-              onClick={(e) => handleNavigate(e, '/')}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsFullscreen(false);
+                handleNavigate(e, '/');
+              }}
             >
               <img className="header__logo__image" src="/svg/logo-color.svg" alt="Matt Digging" />
             </Link>
@@ -101,7 +105,7 @@ const Header = () => {
           <SearchInput />
 
           {/* Desktop Navigation */}
-          <nav className="header__links header__links--desktop">
+          <nav className={`header__links header__links--desktop ${isFullscreen ? 'header__links--fullscreen' : ''}`}>
             <div className={`header__links__item ${isActive('/artists') ? 'selected' : ''}`}>
               <Link
                 to="/artists"

@@ -407,6 +407,7 @@ const SelectionsPage = () => {
                               <span className="selectionsPage__listView__card__header__title__date">
                                 · {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} -{" "}
                                 {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                                , {selection.year}
                               </span>
                             </h3>
                             {selection.description && (

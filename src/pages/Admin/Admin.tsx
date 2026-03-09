@@ -18,35 +18,42 @@ const Admin = () => {
   const api = useAdminApi();
 
   const refreshArtists = React.useCallback(async () => {
-    const data = await api.refreshArtists();
-    setArtists(data);
-  }, [api]);
+    setArtists(await api.refreshArtists());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshTracks = React.useCallback(async () => {
-    const data = await api.refreshTracks();
-    setTracks(data);
-  }, [api]);
+    setTracks(await api.refreshTracks());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshTags = React.useCallback(async () => {
     const data = await api.refreshTags();
     setGenres(data.genres);
     setMoods(data.moods);
-  }, [api]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshSelections = React.useCallback(async () => {
-    const data = await api.refreshSelections();
-    setSelections(data);
-  }, [api]);
+    setSelections(await api.refreshSelections());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     (async () => {
       try {
-        await Promise.all([refreshArtists(), refreshTracks(), refreshTags(), refreshSelections()]);
+        const [artistData, trackData, tagData, selectionData] = await Promise.all([
+          api.refreshArtists(),
+          api.refreshTracks(),
+          api.refreshTags(),
+          api.refreshSelections(),
+        ]);
+        setArtists(artistData);
+        setTracks(trackData);
+        setGenres(tagData.genres);
+        setMoods(tagData.moods);
+        setSelections(selectionData);
       } catch (err) {
         setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Failed to load data' });
       }
     })();
-  }, [refreshArtists, refreshTracks, refreshTags, refreshSelections]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function renderStatus() {
     if (!status) return null;
