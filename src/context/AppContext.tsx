@@ -4,8 +4,6 @@ import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { Track, Artist, Playlist } from "../services/api";
 
-
-
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -36,7 +34,6 @@ interface AppContextType {
 
   isFullscreen: boolean;
   setIsFullscreen: (isFullscreen: boolean) => void;
-
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -69,8 +66,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     initializeAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", _event, session?.user?.email);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.email);
+
+      // On sign out, clear state immediately without waiting for any server call
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthed(false);
+        setLoading(false);
+        return;
+      }
+
       updateUserState(session);
     });
 

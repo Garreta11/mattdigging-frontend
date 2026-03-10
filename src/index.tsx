@@ -68,6 +68,7 @@ function App() {
 
       {/* Public route for password reset */}
       <Route path="/auth/reset-password" element={<ResetPassword />} />
+      <Route path="/terms" element={<Terms />} />
 
       {/* Admin route - separate layout */}
       <Route
@@ -105,7 +106,7 @@ function App() {
                 <Route path="/selections" element={<Selections />} />
                 <Route path="/play" element={<Play />} />
                 <Route path="/member" element={<Member />} />
-                <Route path="/terms" element={<Terms />} />
+                
               </Routes>
             </main>
             <Footer />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Terms.scss';
 
 type Lang = 'en' | 'de';
@@ -183,6 +184,12 @@ const Terms: React.FC = () => {
 
   return (
     <div className="terms">
+      <div className="terms__nav">
+        <Link to="/" className="terms__nav__logo">
+          <img src="/svg/logo-color.svg" alt="Matt Digging" />
+        </Link>
+      </div>
+
       <div className="terms__header">
         <div className="terms__header__top">
           <p className="terms__label">{t.label}</p>

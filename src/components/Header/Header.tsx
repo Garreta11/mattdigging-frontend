@@ -13,16 +13,14 @@ const Header = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null); // 👈 ref for the dropdown container
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
   const isActive = (path: string) => location.pathname.startsWith(path);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-
-   // Close dropdown when clicking outside
-   useEffect(() => {
+  // Close dropdown when clicking outside
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsUserDropdownOpen(false);
@@ -31,10 +29,9 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  
+
   // Handle navigation with fade-out
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    // Don't do anything if we're already on this page
     if (location.pathname === path) {
       closeSidebar();
       return;
@@ -46,22 +43,17 @@ const Header = () => {
     const mainContent = document.querySelector('.main-content');
     if (mainContent) {
       mainContent.classList.add('fade-out');
-      
-      // Wait for animation to complete before navigating
       setTimeout(() => {
         navigate(path);
-        // Remove fade-out and add fade-in after navigation
         setTimeout(() => {
           mainContent.classList.remove('fade-out');
           mainContent.classList.add('fade-in');
-          // Remove fade-in class after animation completes
           setTimeout(() => {
             mainContent.classList.remove('fade-in');
           }, 300);
         }, 50);
-      }, 1000); // Match this with your CSS animation duration
+      }, 1000);
     } else {
-      // Fallback if main-content doesn't exist
       navigate(path);
     }
   };
@@ -84,15 +76,15 @@ const Header = () => {
   }, [isOpen]);
 
   // Logout
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-            // The auth state listener will handle updating the context
-      // User will automatically be redirected to SignIn by RequireAuth
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+  const handleLogout = () => {
+    // Manually remove all supabase auth keys from localStorage
+    // This bypasses the 403 server error and guarantees the session is cleared
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('sb-'))
+      .forEach((key) => localStorage.removeItem(key));
+
+    // Then call signOut to fire the SIGNED_OUT event through the auth listener
+    supabase.auth.signOut({ scope: 'local' }).catch(() => {});
   };
 
   // Early return AFTER all hooks
@@ -123,54 +115,39 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className={`header__links header__links--desktop ${isFullscreen ? 'header__links--fullscreen' : ''}`}>
             <div className={`header__links__item ${isActive('/artists') ? 'selected' : ''}`}>
-              <Link
-                to="/artists"
-                onClick={(e) => handleNavigate(e, '/artists')}
-              >
+              <Link to="/artists" onClick={(e) => handleNavigate(e, '/artists')}>
                 Artists
               </Link>
             </div>
 
             <div className={`header__links__item ${isActive('/selections') ? 'selected' : ''}`}>
-              <Link
-                to="/selections"
-                onClick={(e) => handleNavigate(e, '/selections')}
-              >
+              <Link to="/selections" onClick={(e) => handleNavigate(e, '/selections')}>
                 Weekly Selections
               </Link>
             </div>
 
             <div className={`header__links__item ${isActive('/about') ? 'selected' : ''}`}>
-              <Link
-                to="/about"
-                onClick={(e) => handleNavigate(e, '/about')}
-              >
+              <Link to="/about" onClick={(e) => handleNavigate(e, '/about')}>
                 About
               </Link>
             </div>
 
-            <div className={`header__links__items header__links__user`}>
+            {/* 👇 ref attached here so clicks inside won't close it */}
+            <div className="header__links__items header__links__user" ref={dropdownRef}>
               <UserInfo onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} />
               {isUserDropdownOpen && (
-                <div className="header__links__user__dropdown" ref={dropdownRef}>
+                <div className="header__links__user__dropdown">
                   <Link
                     to="/terms"
                     className="header__links__user__dropdown__item"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavigate(e, '/terms');
-                      setIsUserDropdownOpen(false);
-                    }}
+                    onClick={(e) => handleNavigate(e, '/terms')}
                   >
                     Terms & Conditions
                   </Link>
                   <div className="header__links__user__dropdown__divider" />
                   <button
                     className="header__links__user__dropdown__item header__links__user__dropdown__item--logout"
-                    onClick={() => {
-                      handleLogout();
-                      setIsUserDropdownOpen(false);
-                    }}
+                    onClick={handleLogout}
                   >
                     Logout
                   </button>
@@ -178,8 +155,6 @@ const Header = () => {
               )}
             </div>
           </nav>
-
-
 
           {/* Mobile Burger Button */}
           <button 
@@ -225,10 +200,6 @@ const Header = () => {
               >
                 About
               </Link>
-
-              {/* <div className="header__mobile-menu__user">
-                <UserInfo />
-              </div> */}
             </div>
 
             <button className="header__mobile-menu__logout" onClick={handleLogout}>

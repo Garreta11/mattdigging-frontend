@@ -147,6 +147,38 @@
       }
     }
 
+    &__checkbox {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: var(--font-size-xs);
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.5;
+
+      input[type='checkbox'] {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        accent-color: #f0ede8;
+        cursor: pointer;
+      }
+
+      a {
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        transition: color 0.2s ease;
+        font-size: var(--font-size-xs);
+
+        &:hover {
+          color: #f0ede8;
+        }
+      }
+    }
+
     &__button {
       border-radius: var(--border-radius);
       margin-top: var(--space-2);

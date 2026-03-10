@@ -1,34 +1,58 @@
-@import '../../_breakpoints.scss';
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&display=swap');
 
 .terms {
   min-height: 100vh;
-  padding: var(--space-16) var(--space-4);
-  padding-bottom: var(--space-20);
+  padding: 0 40px 120px;
   max-width: 1100px;
   margin: 0 auto;
-  color: var(--color-white);
+  color: var(--text-primary, #f0ede8);
 
-  @include respond-to(md) {
-    padding-top: var(--space-24);
+  // ── Top nav with logo ────────────────────────────────────
+  &__nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 0;
+    margin-bottom: 52px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    &__logo {
+      display: flex;
+      align-items: center;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      img {
+        height: 32px;
+        width: auto;
+      }
+    }
   }
 
   // ── Header ──────────────────────────────────────────────
   &__header {
-    margin-bottom: var(--space-10);
-    padding-bottom: var(--space-6);
+    margin-bottom: 80px;
+    padding-bottom: 48px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
-    animation: fadeUpTerms 0.6s ease both;
+    animation: fadeUp 0.6s ease both;
   }
 
   &__header__top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-4);
+    margin-bottom: 16px;
   }
 
   &__label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     opacity: 0.4;
@@ -38,22 +62,23 @@
   &__lang-toggle {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    background: rgba(245, 241, 232, 0.05);
-    border: 1px solid rgba(2245, 241, 232, 0.1);
-    border-radius: var(--border-radius-super-small);
-    padding: var(--space-2);
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 3px;
 
     &__btn {
-      font-size: var(--font-size-xs);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
       letter-spacing: 0.12em;
       background: none;
       border: none;
       cursor: pointer;
       color: inherit;
       opacity: 0.35;
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--border-radius-super-small);
+      padding: 5px 10px;
+      border-radius: 4px;
       transition: opacity 0.2s ease, background 0.2s ease;
 
       &:hover {
@@ -62,14 +87,14 @@
 
       &.active {
         opacity: 1;
-        background: rgba(var(--color-white), 0.1);
+        background: rgba(255, 255, 255, 0.1);
       }
     }
 
     &__sep {
       width: 1px;
       height: 12px;
-      background: rgba(var(--color-white), 0.12);
+      background: rgba(255, 255, 255, 0.12);
     }
   }
 
@@ -78,12 +103,13 @@
     font-size: clamp(40px, 6vw, 72px);
     font-weight: 600;
     line-height: 1.05;
-    margin: 0 0 var(--space-4);
+    margin: 0 0 16px;
     letter-spacing: -0.02em;
   }
 
   &__subtitle {
-    font-size: var(--font-size-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
     opacity: 0.45;
     margin: 0;
   }
@@ -92,7 +118,7 @@
   &__body {
     display: grid;
     grid-template-columns: 220px 1fr;
-    gap: var(--space-6);
+    gap: 60px;
     align-items: start;
 
     @media (max-width: 768px) {
@@ -104,7 +130,7 @@
   &__toc {
     position: sticky;
     top: 100px;
-    animation: fadeUpTerms 0.6s 0.1s ease both;
+    animation: fadeUp 0.6s 0.1s ease both;
 
     @media (max-width: 768px) {
       position: static;
@@ -164,7 +190,7 @@
   }
 
   &__section {
-    animation: fadeUpTerms 0.5s ease both;
+    animation: fadeUp 0.5s ease both;
 
     @for $i from 1 through 8 {
       &:nth-child(#{$i}) {
@@ -225,7 +251,7 @@
   }
 }
 
-@keyframes fadeUpTerms {
+@keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(16px);

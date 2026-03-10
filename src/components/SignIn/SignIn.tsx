@@ -10,11 +10,12 @@ type FormState = {
   email: string;
   password: string;
   confirmPassword: string;
+  termsAccepted: boolean;
 };
 
 const SignIn = () => {
   const [mode, setMode] = useState<Mode>('login');
-  const [form, setForm] = useState<FormState>({ email: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState<FormState>({ email: '', password: '', confirmPassword: '', termsAccepted: false });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ const SignIn = () => {
     setMode(next);
     setError(null);
     setSuccess(null);
-    setForm({ email: '', password: '', confirmPassword: '' });
+    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
   };
 
   // ── Login ────────────────────────────────────────────────
@@ -44,6 +45,9 @@ const SignIn = () => {
 
   // ── Sign Up ──────────────────────────────────────────────
   const handleSignUp = async () => {
+    if (!form.termsAccepted) {
+      throw new Error('Please accept the Terms & Conditions to continue.');
+    }
     if (form.password !== form.confirmPassword) {
       throw new Error("Passwords don't match.");
     }
@@ -56,7 +60,7 @@ const SignIn = () => {
     });
     if (error) throw error;
     setSuccess('Check your email to confirm your account, then log in.');
-    setForm({ email: '', password: '', confirmPassword: '' });
+    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
     setTimeout(() => switchMode('login'), 4000);
   };
 
@@ -67,7 +71,7 @@ const SignIn = () => {
     });
     if (error) throw error;
     setSuccess("We've sent a reset link to your email.");
-    setForm({ email: '', password: '', confirmPassword: '' });
+    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
   };
 
   // ── Submit ───────────────────────────────────────────────
@@ -188,6 +192,26 @@ const SignIn = () => {
                   autoComplete="new-password"
                 />
               </div>
+            )}
+
+            {mode === 'signup' && (
+              <label className="signin__form__checkbox signin__form__field--animate">
+                <input
+                  type="checkbox"
+                  checked={form.termsAccepted}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, termsAccepted: e.target.checked }));
+                    setError(null);
+                  }}
+                  disabled={loading}
+                />
+                <span>
+                  I agree to the{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer">
+                    Terms &amp; Conditions
+                  </a>
+                </span>
+              </label>
             )}
           </div>
 
