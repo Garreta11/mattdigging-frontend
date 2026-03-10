@@ -52,12 +52,13 @@
   }
 
   &__links {
-    width: calc(100% / 3);
-
+    width: 33.3333333333%;
     display: flex;
     gap: var(--space-6);
     align-items: flex-end;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
 
     @include respond-to(md) {
       justify-content: center;
@@ -108,6 +109,26 @@
         a {
           color: var(--color-green);
         }
+      }
+    }
+
+    &__user {
+      cursor: pointer;
+      margin-left: 1rem;
+      position: relative;
+      &__dropdown {
+        position: absolute;
+        top: calc(100% + 1rem);
+        right: 0;
+        min-width: 300px;
+        min-height: 100px;
+        background-color: var(--color-black);
+        border: 1px solid var(--color-white);
+        border-radius: var(--border-radius-super-small);
+        padding: var(--space-2);
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
       }
     }
   }

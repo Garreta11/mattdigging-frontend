@@ -12,10 +12,12 @@ import Playlists from './pages/Playlists/Playlists';
 import Selections from './pages/Selections/Selections';
 import Play from './pages/Play/Play';
 import AuthConfirm from './pages/AuthConfirm/AuthConfirm';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Member from './pages/Member/Member';
 import Admin from './pages/Admin/Admin';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import HiddenGems from './pages/HiddenGems/HiddenGems';
+import Terms from './pages/Terms/Terms';
 
 // Components
 import Player from './components/Player/Player';
@@ -37,6 +39,7 @@ const root = ReactDOM.createRoot(
 
 function App() {
   const location = useLocation();
+  const isTermsPage = location.pathname === '/terms';
 
   useEffect(() => {
     if (location.pathname === '/admin') return;
@@ -63,6 +66,9 @@ function App() {
       {/* Public route for email confirmation */}
       <Route path="/auth/confirm" element={<AuthConfirm />} />
 
+      {/* Public route for password reset */}
+      <Route path="/auth/reset-password" element={<ResetPassword />} />
+
       {/* Admin route - separate layout */}
       <Route
         path="/admin"
@@ -80,12 +86,14 @@ function App() {
           <RequireAuth>
             <Header />
             <main className="main">
-              <MainWrapper>
-                <Home />
-              </MainWrapper>
+              {!isTermsPage && (
+                <MainWrapper>
+                  <Home />
+                </MainWrapper>
+              )}
 
-              <Player />
-              <Modals />
+              {!isTermsPage && <Player />}
+              {!isTermsPage && <Modals />}
 
               <Routes>
                 <Route path="/" element={<></>} />
@@ -97,6 +105,7 @@ function App() {
                 <Route path="/selections" element={<Selections />} />
                 <Route path="/play" element={<Play />} />
                 <Route path="/member" element={<Member />} />
+                <Route path="/terms" element={<Terms />} />
               </Routes>
             </main>
             <Footer />

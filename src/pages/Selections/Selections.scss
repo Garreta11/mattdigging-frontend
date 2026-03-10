@@ -36,11 +36,13 @@
           transition: all 0.3s;
 
           &--calendar {
+            border-radius: 0px;
             border-top-left-radius: var(--border-radius-super-small);
             border-bottom-left-radius: var(--border-radius-super-small);
           }
 
           &--list {
+            border-radius: 0px;
             border-top-right-radius: var(--border-radius-super-small);
             border-bottom-right-radius: var(--border-radius-super-small);
           }

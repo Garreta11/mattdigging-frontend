@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Header.scss';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { useAppContext } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
 import SearchInput from '../SearchInput/SearchInput';
+import UserInfo from '../UserInfo/UserInfo';
 
 const Header = () => {
   const { user, isFullscreen, setIsFullscreen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,6 +18,20 @@ const Header = () => {
   const closeSidebar = () => setIsOpen(false);
   const isActive = (path: string) => location.pathname.startsWith(path);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+
+   // Close dropdown when clicking outside
+   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
   // Handle navigation with fade-out
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     // Don't do anything if we're already on this page
@@ -132,7 +148,38 @@ const Header = () => {
                 About
               </Link>
             </div>
+
+            <div className={`header__links__items header__links__user`}>
+              <UserInfo onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} />
+              {isUserDropdownOpen && (
+                <div className="header__links__user__dropdown" ref={dropdownRef}>
+                  <Link
+                    to="/terms"
+                    className="header__links__user__dropdown__item"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigate(e, '/terms');
+                      setIsUserDropdownOpen(false);
+                    }}
+                  >
+                    Terms & Conditions
+                  </Link>
+                  <div className="header__links__user__dropdown__divider" />
+                  <button
+                    className="header__links__user__dropdown__item header__links__user__dropdown__item--logout"
+                    onClick={() => {
+                      handleLogout();
+                      setIsUserDropdownOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
+
+
 
           {/* Mobile Burger Button */}
           <button 

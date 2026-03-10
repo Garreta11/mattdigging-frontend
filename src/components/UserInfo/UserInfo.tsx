@@ -1,11 +1,18 @@
 import './UserInfo.scss';
 import { useAppContext } from '../../context/AppContext';
-const UserInfo = () => {
-  const { user, setUser, setIsAuthed } = useAppContext();
+
+const UserInfo = ({ onClick }: { onClick: () => void }) => {
+  const { user } = useAppContext();
   return (
-    <div className="userinfo">
-      <img className="userinfo__image" src={user?.image} alt="User" />
-      <p className="userinfo__name">{user?.name}</p>
+    <div className="userinfo" onClick={onClick}>
+      {user?.image ? (
+        <img className="userinfo__image" src={user?.image} alt="User" />
+      ) : (
+        <div className="userinfo__image userinfo__image--default">
+          {user?.email?.charAt(0).toUpperCase()}
+        </div>
+      )}
+      <p className="userinfo__name">{user?.email?.split('@')[0]}</p>
     </div>
   );
 };
