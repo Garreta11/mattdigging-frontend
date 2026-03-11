@@ -90,9 +90,13 @@ const Artists = () => {
 
   const scrollToLetter = (letter: string) => {
     const el = document.getElementById(`artist-letter-${letter}`);
-    if (el && lenis) {
-      lenis.scrollTo(el, { offset: -100, immediate: false }); 
-      // offset adjusts for padding or header
+    if (!el) return;
+  
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -100, immediate: false });
+    } else {
+      const y = el.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
