@@ -220,7 +220,13 @@ const Terms: React.FC = () => {
           <ol className="terms__toc__list">
             {t.sections.map((s) => (
               <li key={s.number}>
-                <a href={`#section-${s.number}`}>
+                <a 
+                  href={`#section-${s.number}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById(`section-${s.number}`)?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   <span className="terms__toc__num">{s.number}</span>
                   {s.title}
                 </a>

@@ -10,12 +10,23 @@ type FormState = {
   email: string;
   password: string;
   confirmPassword: string;
+  displayName: string;
+  username: string;
   termsAccepted: boolean;
+};
+
+const EMPTY_FORM: FormState = {
+  email: '',
+  password: '',
+  confirmPassword: '',
+  displayName: '',
+  username: '',
+  termsAccepted: false,
 };
 
 const SignIn = () => {
   const [mode, setMode] = useState<Mode>('login');
-  const [form, setForm] = useState<FormState>({ email: '', password: '', confirmPassword: '', termsAccepted: false });
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +41,7 @@ const SignIn = () => {
     setMode(next);
     setError(null);
     setSuccess(null);
-    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
+    setForm(EMPTY_FORM);
   };
 
   // ── Login ────────────────────────────────────────────────
@@ -57,10 +68,16 @@ const SignIn = () => {
     const { error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        data: {
+          name: form.displayName,
+          username: form.username,
+        },
+      },
     });
     if (error) throw error;
     setSuccess('Check your email to confirm your account, then log in.');
-    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
+    setForm(EMPTY_FORM);
     setTimeout(() => switchMode('login'), 4000);
   };
 
@@ -71,7 +88,7 @@ const SignIn = () => {
     });
     if (error) throw error;
     setSuccess("We've sent a reset link to your email.");
-    setForm({ email: '', password: '', confirmPassword: '', termsAccepted: false });
+    setForm(EMPTY_FORM);
   };
 
   // ── Submit ───────────────────────────────────────────────
@@ -92,12 +109,13 @@ const SignIn = () => {
   };
 
   const isForgot = mode === 'forgot';
+  const isSignup = mode === 'signup';
 
   return (
     <div className="signin" style={{ backgroundImage: `url(${BACKGROUND_IMAGE})` }}>
       <div className="signin__overlay" />
 
-      <div className="signin__card">
+      <div className={`signin__card ${isSignup ? 'signin__card--wide' : ''}`}>
 
         {/* Mode toggle — hidden on forgot screen */}
         {!isForgot && (
@@ -116,7 +134,7 @@ const SignIn = () => {
             >
               Sign Up
             </button>
-            <div className={`signin__toggle__indicator ${mode === 'signup' ? 'signin__toggle__indicator--right' : ''}`} />
+            <div className={`signin__toggle__indicator ${isSignup ? 'signin__toggle__indicator--right' : ''}`} />
           </div>
         )}
 
@@ -146,9 +164,10 @@ const SignIn = () => {
 
         {/* Form */}
         <form className="signin__form" onSubmit={handleSubmit} noValidate>
-          <div className="signin__form__fields">
+          <div className={`signin__form__fields ${isSignup ? 'signin__form__fields--signup' : ''}`}>
 
-            <div className="signin__form__field">
+            {/* Email — always full width */}
+            <div className="signin__form__field signin__form__field--full">
               <label htmlFor="email">Email</label>
               <input
                 id="email"
@@ -162,13 +181,46 @@ const SignIn = () => {
               />
             </div>
 
+            {/* Display Name — signup only */}
+            {isSignup && (
+              <div className="signin__form__field signin__form__field--animate">
+                <label htmlFor="displayName">Display Name</label>
+                <input
+                  id="displayName"
+                  type="text"
+                  placeholder="Your name"
+                  value={form.displayName}
+                  onChange={update('displayName')}
+                  disabled={loading}
+                  autoComplete="name"
+                />
+              </div>
+            )}
+
+            {/* Username — signup only */}
+            {isSignup && (
+              <div className="signin__form__field signin__form__field--animate">
+                <label htmlFor="username">Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="@yourhandle"
+                  value={form.username}
+                  onChange={update('username')}
+                  disabled={loading}
+                  autoComplete="username"
+                />
+              </div>
+            )}
+
+            {/* Password — login and signup */}
             {!isForgot && (
               <div className="signin__form__field signin__form__field--animate">
                 <label htmlFor="password">Password</label>
                 <input
                   id="password"
                   type="password"
-                  placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
+                  placeholder={isSignup ? 'At least 6 characters' : '••••••••'}
                   value={form.password}
                   onChange={update('password')}
                   disabled={loading}
@@ -178,7 +230,8 @@ const SignIn = () => {
               </div>
             )}
 
-            {mode === 'signup' && (
+            {/* Confirm Password — signup only */}
+            {isSignup && (
               <div className="signin__form__field signin__form__field--animate">
                 <label htmlFor="confirmPassword">Confirm Password</label>
                 <input
@@ -194,8 +247,9 @@ const SignIn = () => {
               </div>
             )}
 
-            {mode === 'signup' && (
-              <label className="signin__form__checkbox signin__form__field--animate">
+            {/* Terms — signup only, full width */}
+            {isSignup && (
+              <label className="signin__form__checkbox signin__form__field--animate signin__form__field--full">
                 <input
                   type="checkbox"
                   checked={form.termsAccepted}

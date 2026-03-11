@@ -138,16 +138,25 @@ const Header = () => {
               {isUserDropdownOpen && (
                 <div className="header__links__user__dropdown">
                   <Link
+                    to="/profile"
+                    className="header__links__user__dropdown__item"
+                    onClick={(e) => {handleNavigate(e, '/profile'); setIsUserDropdownOpen(false);}}
+                  >
+                    Profile
+                  </Link>
+                  <Link
                     to="/terms"
                     className="header__links__user__dropdown__item"
-                    onClick={(e) => handleNavigate(e, '/terms')}
+                    onClick={(e) => {handleNavigate(e, '/terms'); setIsUserDropdownOpen(false);}}
                   >
                     Terms & Conditions
-                  </Link>
+                  </Link>                
+                  
                   <div className="header__links__user__dropdown__divider" />
+                  
                   <button
                     className="header__links__user__dropdown__item header__links__user__dropdown__item--logout"
-                    onClick={handleLogout}
+                    onClick={() => {handleLogout(); setIsUserDropdownOpen(false);}}
                   >
                     Logout
                   </button>

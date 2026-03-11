@@ -5,6 +5,7 @@ import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import FavoriteButton from '../FavoriteButton/FavoriteButton';
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds)) return '0:00';
@@ -32,7 +33,7 @@ const Player = () => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
-  const previousTrackId = useRef<number | null>(null);
+  const previousTrackId = useRef<string | null>(null);
   const isManualTrackChange = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
@@ -441,6 +442,10 @@ const Player = () => {
           </svg>
         )}
       </div>
+
+      {currentTrack && (
+        <FavoriteButton track={currentTrack} />
+      )}
 
 
       <div className='player__info'>

@@ -41,13 +41,11 @@ const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }
 };
 
 const Artists = () => {
-  const { user, modalArtist, setModalArtist, isModalArtistOpen, setIsModalArtistOpen } = useAppContext();
+  const { user, setModalArtist, setIsModalArtistOpen } = useAppContext();
   const isMember = user?.isMember;
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   const navigate = useNavigate();
@@ -64,7 +62,6 @@ const Artists = () => {
         console.log(data);
         setArtists(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load artists');
         console.error('Error loading artists:', err);
       } finally {
         setIsLoading(false);
@@ -74,11 +71,7 @@ const Artists = () => {
     loadArtists();
   }, []);
 
-  const filteredArtists = artists.filter((artist) =>
-    artist.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const groupedArtists = filteredArtists.reduce((acc, artist) => {
+  const groupedArtists = artists.reduce((acc, artist) => {
     const letter = artist.name[0].toUpperCase();
     if (!acc[letter]) acc[letter] = [];
     acc[letter].push(artist);
@@ -112,6 +105,8 @@ const Artists = () => {
       navigate('/');
     }, 1000);
   };
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <section className={`artists main-content ${isFadingOut ? 'fade-out' : ''}`}>

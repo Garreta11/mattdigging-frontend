@@ -18,6 +18,7 @@ import Admin from './pages/Admin/Admin';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import HiddenGems from './pages/HiddenGems/HiddenGems';
 import Terms from './pages/Terms/Terms';
+import Profile from './pages/Profile/Profile';
 
 // Components
 import Player from './components/Player/Player';
@@ -106,7 +107,7 @@ function App() {
                 <Route path="/selections" element={<Selections />} />
                 <Route path="/play" element={<Play />} />
                 <Route path="/member" element={<Member />} />
-                
+                <Route path="/profile" element={<Profile />} />
               </Routes>
             </main>
             <Footer />

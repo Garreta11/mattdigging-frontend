@@ -1,6 +1,6 @@
 .track-item {
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
+  display: flex;
+  justify-content: space-between;
   gap: var(--space-4);
   align-items: center;
   padding: var(--space-4);
@@ -16,6 +16,18 @@
 
   &:hover {
     background: rgba(55, 93, 44, 0.3);
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
   }
 
   &__cover {

@@ -8,19 +8,19 @@ const API_BASE_URL =
 ========================= */
 
 export interface Genre {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
 
 export interface Mood {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
 
 export interface Artist {
-  id: number;
+  id: string;
   name: string;
   slug?: string;
   bio?: string;
@@ -39,10 +39,10 @@ export interface Country {
 }
 
 export interface Track {
-  id: number;
+  id: string;
   title: string;
   artist: Artist;
-  artist_id: number;
+  artist_id: string;
   album_name?: string;
   year?: number;
   decade?: string;
