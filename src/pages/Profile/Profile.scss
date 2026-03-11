@@ -365,7 +365,6 @@
   // ── Responsive ───────────────────────────────────────────
   @include respond-to(md) {
     &__inner {
-      padding: var(--space-6) var(--space-4) var(--space-6);
       gap: var(--space-6);
     }
 

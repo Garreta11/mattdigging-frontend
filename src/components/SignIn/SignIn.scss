@@ -250,7 +250,7 @@
     animation: slideDown 0.25s ease both;
 
     &--error {
-      color: #ff8a80;
+      color: var(--color-red);
       background: rgba(255, 80, 80, 0.08);
       border: 1px solid rgba(255, 80, 80, 0.2);
     }

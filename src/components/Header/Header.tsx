@@ -150,6 +150,18 @@ const Header = () => {
                     onClick={(e) => {handleNavigate(e, '/terms'); setIsUserDropdownOpen(false);}}
                   >
                     Terms & Conditions
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M15.707 0.999999C15.707 0.447715 15.2593 -2.87362e-07 14.707 -5.40243e-07L5.70703 2.60547e-07C5.15475 -7.66277e-08 4.70703 0.447715 4.70703 1C4.70703 1.55228 5.15475 2 5.70703 2L13.707 2L13.707 10C13.707 10.5523 14.1547 11 14.707 11C15.2593 11 15.707 10.5523 15.707 10L15.707 0.999999ZM0.707031 15L1.41414 15.7071L15.4141 1.70711L14.707 1L13.9999 0.292893L-7.55191e-05 14.2929L0.707031 15Z"
+                        fill="var(--color-white)"
+                      />
+                    </svg>
                   </Link>                
                   
                   <div className="header__links__user__dropdown__divider" />

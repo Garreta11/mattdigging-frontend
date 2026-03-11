@@ -8,9 +8,10 @@ interface TrackItemProps {
   track: Track;
   onClick: () => void;
   isPlaying: boolean;
+  index?: number;
 }
 
-const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying }) => {
+const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index }) => {
   return (
     <div
       onClick={onClick}
@@ -18,6 +19,9 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying }) => {
 
     >
       <div className="track-item__left">
+        {index !== undefined && (
+          <p className="track-item__index">{String(index + 1).padStart(2, '0')}</p>
+        )}
         <div className="track-item__cover">
           {track.cover_url ? (
             <StorageImage 

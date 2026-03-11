@@ -43,7 +43,23 @@ const Room: React.FC = () => {
     outputRef.current = new Output({
       container: roomRef.current,
       onChestClick: () => {
-        navigate('/hidden-gems');
+        const path = '/hidden-gems';
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.classList.add('fade-out');
+          setTimeout(() => {
+            navigate(path);
+            setTimeout(() => {
+              mainContent.classList.remove('fade-out');
+              mainContent.classList.add('fade-in');
+              setTimeout(() => {
+                mainContent.classList.remove('fade-in');
+              }, 300);
+            }, 50);
+          }, 1000);
+        } else {
+          navigate(path);
+        }
         setIsFullscreen(false);
       },
       onTrackCoverClick: () => {
@@ -51,11 +67,43 @@ const Room: React.FC = () => {
         setIsFullscreen(false);
       },
       onLampClick: () => {
-        navigate('/playlists?mood=lava-lamp');
+        const path = '/playlists?mood=lava-lamp';
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.classList.add('fade-out');
+          setTimeout(() => {
+            navigate(path);
+            setTimeout(() => {
+              mainContent.classList.remove('fade-out');
+              mainContent.classList.add('fade-in');
+              setTimeout(() => {
+                mainContent.classList.remove('fade-in');
+              }, 300);
+            }, 50);
+          }, 1000);
+        } else {
+          navigate(path);
+        }
         setIsFullscreen(false);
       },
       onShelfClick: () => {
-        navigate('/selections');
+        const path = '/selections';
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.classList.add('fade-out');
+          setTimeout(() => {
+            navigate(path);
+            setTimeout(() => {
+              mainContent.classList.remove('fade-out');
+              mainContent.classList.add('fade-in');
+              setTimeout(() => {
+                mainContent.classList.remove('fade-in');
+              }, 300);
+            }, 50);
+          }, 1000);
+        } else {
+          navigate(path);
+        }
         setIsFullscreen(false);
       },
       onTipChange: (tip: string) => {

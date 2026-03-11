@@ -5,10 +5,12 @@ import { useAppContext } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
 import { useFavorites } from '../../hooks/useFavorites';
 import ImageStorage from '../../components/ImageStorage/ImageStorage';
+import TrackItem from '../../components/TrackItem/TrackItem';
+import { Track } from '../../services/api';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, setUser, setPlayerTrackList, setPlaylist } = useAppContext();
+  const { user, setUser, setPlayerTrackList, setPlaylist, setTrack, track: currentTrack } = useAppContext();
   const { favorites, loading: favoritesLoading, toggleFavorite } = useFavorites();
 
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -79,6 +81,14 @@ const Profile = () => {
       setPlayerTrackList(favorites);
       setPlaylist({ name: 'Favorite Tracks', url: '/favorites' });
     }
+  };
+
+  const handleTrackClick = async (track: Track) => {
+    setPlaylist({ name: 'Favorite Tracks', url: '/favorites' });
+  
+    setPlayerTrackList(favorites);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    setTrack(track);
   };
 
   const initials = user?.name
@@ -198,37 +208,8 @@ const Profile = () => {
             <p className="profile__favorites__empty">No favorites yet. Heart a track to save it here.</p>
           ) : (
             <ul className="profile__favorites__list">
-              {favorites.map((track, i) => (
-                <li key={track.id} className="profile__favorites__item">
-                  <span className="profile__favorites__index">{String(i + 1).padStart(2, '0')}</span>
-
-                  {track.cover_url ? (
-                    <div className="profile__favorites__cover">
-                      <ImageStorage
-                        path={track.cover_url}
-                        alt={track.title}
-                        bucket="covers"
-                      />
-                    </div>
-                  ) : (
-                    <div className="profile__favorites__cover profile__favorites__cover--empty" />
-                  )}
-
-                  <div className="profile__favorites__meta">
-                    <h3 className="profile__favorites__track-title">{track.title}</h3>
-                    <span className="profile__favorites__artist">{track.artist?.name}</span>
-                  </div>
-
-                  <button
-                    className="profile__favorites__remove"
-                    onClick={() => toggleFavorite(track)}
-                    aria-label="Remove from favorites"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </button>
-                </li>
+              {favorites.map((track, index) => (
+                <TrackItem key={track.id} track={track} index={index} onClick={() => handleTrackClick(track)} isPlaying={currentTrack?.id === track.id} />
               ))}
             </ul>
           )}

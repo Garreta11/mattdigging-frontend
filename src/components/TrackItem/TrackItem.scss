@@ -1,13 +1,17 @@
+@import '../../_breakpoints.scss';
+
 .track-item {
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
   align-items: center;
   padding: var(--space-4);
- /*  background: rgba(255, 255, 255, 0.03);
-  border-radius: var(--border-radius-super-small); */
   cursor: pointer;
   transition: all 0.3s ease;
+
+  @include respond-to(md) {
+    padding: var(--space-2);
+  }
 
   &--playing {
     background: rgba(55, 93, 44, 0.3); // Verde suave
@@ -16,6 +20,15 @@
 
   &:hover {
     background: rgba(55, 93, 44, 0.3);
+  }
+
+  &__index {
+    font-size: var(--font-size-sm);
+    color: var(--color-white);
+    opacity: 0.2;
+    font-variant-numeric: tabular-nums;
+    width: 20px;
+    flex-shrink: 0;
   }
 
   &__left {

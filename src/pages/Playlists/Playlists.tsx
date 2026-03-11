@@ -393,9 +393,10 @@ const PlaylistsPage = () => {
           {tracks.length === 0 ? (
             <p>Music coming soon</p>
           ) : (
-            tracks.map(track => (
+            tracks.map((track, index) => (
               <TrackItem
                 key={track.id}
+                index={index}
                 track={track}
                 onClick={() => handleTrackClick(track)}
                 isPlaying={currentTrack?.id === track.id}

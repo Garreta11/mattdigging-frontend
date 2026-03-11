@@ -15,10 +15,10 @@
   }
 
   &--active {
-    color: #fff;
+    color: var(--color-green);
 
     &:hover {
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(55, 93, 44, 0.6);
     }
   }
 }
