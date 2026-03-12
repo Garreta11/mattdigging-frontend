@@ -8,7 +8,7 @@ const content: Record<Lang, { label: string; title: string; subtitle: string; to
   en: {
     label: 'Legal',
     title: 'Terms & Conditions',
-    subtitle: 'mattdigging.com — operated by Mattmosphere',
+    subtitle: 'mattdigging.com — operated by mattmosphere',
     toc: 'Contents',
     sections: [
       {
@@ -93,7 +93,7 @@ const content: Record<Lang, { label: string; title: string; subtitle: string; to
   de: {
     label: 'Rechtliches',
     title: 'AGB',
-    subtitle: 'mattdigging.com — betrieben durch Mattmosphere',
+    subtitle: 'mattdigging.com — betrieben durch mattmosphere',
     toc: 'Inhalt',
     sections: [
       {

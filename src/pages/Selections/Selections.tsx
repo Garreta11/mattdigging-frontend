@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Selections.scss";
 import { fetchSelections, fetchTracksBySelection, Selections, Track } from "../../services/api";
@@ -201,8 +201,12 @@ const SelectionsPage = () => {
 
   const handlePlaySelection = () => {
     if (tracks.length > 0) {
+      setTrack(null);
       setPlayerTrackList(tracks);
       setPlaylist({ name: activeSelection?.title ?? '', url: `/selections?selection=${activeSelection?.id}` });
+      setTimeout(() => {
+        setTrack(tracks[0]);
+      }, 50);
     }
   };
 

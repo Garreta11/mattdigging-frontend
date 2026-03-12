@@ -3,6 +3,8 @@ import './TrackItem.scss';
 import { Track } from '../../services/api';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 interface TrackItemProps {
   track: Track;
@@ -12,6 +14,18 @@ interface TrackItemProps {
 }
 
 const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index }) => {
+  const navigate = useNavigate();
+  const { setTrack, setIsTrackModalOpen } = useAppContext();
+
+  const handleGenreClick = (slug: string) => {
+    navigate(`/playlists?genre=${slug}`);
+  };
+
+  const handleOpenTrackModal = (track: Track) => {
+    setTrack(track);
+    setIsTrackModalOpen(true);
+  };
+
   return (
     <div
       onClick={onClick}
@@ -68,12 +82,12 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
         {track.track_genres && track.track_genres.length > 0 && (
           <div className="track-item__genres">
             {track.track_genres.slice(0, 2).map((tg) => (
-              <span key={tg.genre.id} className="track-item__genre">
+              <span key={tg.genre.id} className="track-item__genre" onClick={() => handleGenreClick(tg.genre.slug)}>
                 {tg.genre.name}
               </span>
             ))}
             {track.track_genres.length > 2 && (
-              <span className="track-item__genre-more">
+              <span className="track-item__genre-more" onClick={() => handleOpenTrackModal(track)}>
                 +{track.track_genres.length - 2}
               </span>
             )}
