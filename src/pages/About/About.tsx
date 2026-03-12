@@ -38,7 +38,7 @@ const About = () => {
           <div className="about__content__text__box">
             <div className="about__content__text__box__content" ref={textRef}>
               <h1>
-              Welcome dear music lovers and listeners,
+              Welcome dear music lovers & listeners,
               </h1>
               <p>
               Happy you found your way into this space of vintage sounds with soul. Hand-picked gems, curated by a digging nerd. Want to pay homage with this site to musical heritage from all over the world, giving your heart and ears some great variety of emotions, impressions and love. This living room can be your space and supporter for any mood and emotional state you might be in.

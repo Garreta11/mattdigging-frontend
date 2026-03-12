@@ -20,6 +20,7 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
   const hasTracks = tracks.length > 0;
 
   const handleTrackClick = (track: Track) => {
+    console.log('track', track);
     setTrack(track);
     onClose();
   };

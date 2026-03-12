@@ -59,7 +59,6 @@ const Artists = () => {
       try {
         setIsLoading(true);
         const data = await fetchArtists();
-        console.log(data);
         setArtists(data);
       } catch (err) {
         console.error('Error loading artists:', err);
@@ -94,7 +93,6 @@ const Artists = () => {
   };
 
   const handleClick = (artist: Artist) => {
-    console.log(artist);
     setModalArtist(artist);
     setIsModalArtistOpen(true);
   };

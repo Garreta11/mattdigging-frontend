@@ -34,6 +34,9 @@ interface AppContextType {
 
   isFullscreen: boolean;
   setIsFullscreen: (isFullscreen: boolean) => void;
+
+  isSearchModalOpen: boolean;
+  setIsSearchModalOpen: (isOpen: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,6 +53,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isModalArtistOpen, setIsModalArtistOpen] = useState(false);
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   useEffect(() => {
     // Check active session on mount
@@ -127,6 +131,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setIsTrackModalOpen,
       isFullscreen,
       setIsFullscreen,
+      isSearchModalOpen,
+      setIsSearchModalOpen,
     }}>
       {children}
     </AppContext.Provider>

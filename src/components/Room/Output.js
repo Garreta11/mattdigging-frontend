@@ -449,6 +449,7 @@ export default class Output {
   }
 
   onTouchStart(event) {
+    if (!this.interactionsEnabled) return;
     if (event.touches.length > 0) {
       const touch = event.touches[0];
       this.updatePointerPosition(touch.clientX, touch.clientY);
@@ -480,9 +481,10 @@ export default class Output {
   onClick(event) {
     if (!this.interactionsEnabled) return;
     this.updatePointerPosition(event.clientX, event.clientY);
+
+    // Handle clicks
     if (this.hoveringChest()) {
       this.handleChestClick();
-      return;
     }
     if (this.hoveringTrackCover()) {
       this.handleTrackCoverClick();

@@ -12,57 +12,81 @@
   &--fullscreen {
     display: none;
   }
-  
+
+  // ─── Input Bar ────────────────────────────────────────────
   &__input {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* border: 1px solid var(--color-white); */
-    border: 1px solid rgba(245, 241, 232, 0.2);
+    border: 1px solid rgba(245, 241, 232, 0.12);
     border-radius: var(--border-radius);
     width: 100%;
     height: 50px;
-  
     padding: var(--space-4);
+    transition: border-color 0.2s ease;
 
-    /* background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px); */
-  
+    &:focus-within {
+      border-color: rgba(245, 241, 232, 0.3);
+    }
+
     &__content {
       display: flex;
       align-items: center;
       gap: var(--space-4);
       width: 100%;
-  
+
+      &__icon {
+        flex-shrink: 0;
+        opacity: 0.4;
+        transition: opacity 0.2s ease;
+      }
+
       &__input {
         width: 100%;
         background-color: transparent;
         border: none;
         outline: none;
+        color: var(--color-white);
+        font-size: 0.875rem;
+
+        &::placeholder {
+          color: rgba(245, 241, 232, 0.3);
+        }
+
         &:focus {
           outline: none;
+
+          ~ .search__input__content__icon {
+            opacity: 0.7;
+          }
         }
       }
     }
-  
+
+    &:focus-within &__content__icon {
+      opacity: 0.7;
+    }
+
     &__playlists {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-left: 1px solid var(--color-white);
+      border-left: 1px solid rgba(245, 241, 232, 0.12);
       padding-left: var(--space-4);
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
 
       &__icon {
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        opacity: 0.55;
 
         path {
-          transition: all 0.3s ease;
+          transition: fill 0.2s ease;
         }
 
         &--active {
+          opacity: 1;
           path {
             fill: var(--color-green);
           }
@@ -71,233 +95,283 @@
 
       &:hover {
         .search__input__playlists__icon {
-          scale: 1.1;
+          transform: scale(1.1);
+          opacity: 0.9;
         }
+
         .search__input__playlists__tooltip {
-          opacity: 0.6;
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
         }
       }
 
       &__tooltip {
         position: absolute;
         opacity: 0;
-        top: calc(100% + var(--space-4));
-        left: 0%;
-        background-color: var(--color-white);
-        color: var(--color-black);
-        padding: var(--space-2);
-        border-radius: var(--border-radius-super-small);
-        transition: all 0.3s ease;
+        top: calc(100% + 0.6rem);
+        left: 50%;
+        transform: translateX(-50%) translateY(-4px);
+        background-color: var(--color-black);
+        border: 1px solid rgba(245, 241, 232, 0.12);
+        color: rgba(245, 241, 232, 0.7);
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
         pointer-events: none;
+        white-space: nowrap;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
       }
     }
   }
 
+  // ─── Results Panel ────────────────────────────────────────
   &__results {
     visibility: hidden;
+    opacity: 0;
     position: absolute;
-    top: calc(100% + var(--space-2));
+    top: calc(100% + 0.5rem);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-6px) scale(0.99);
     width: 150%;
 
-    background-color: rgba(10, 17, 17, 0.8);
-    /* border: 1px solid var(--color-white); */
-    border: 1px solid rgba(245, 241, 232, 0.2);
-    backdrop-filter: blur(10px);
-
-    border-radius: var(--border-radius-super-small);
-
-    overflow-y: scroll;
+    background: rgba(8, 12, 12, 0.92);
+    border: 1px solid rgba(245, 241, 232, 0.1);
+    backdrop-filter: blur(16px);
+    border-radius: 12px;
+    overflow-y: auto;
     max-height: 50dvh;
-    
-    transition: all 0.3s ease;
-    
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s ease;
+
     @include respond-to(md) {
       max-height: 50dvh;
       width: 100%;
-      padding: var(--space-2);
+      left: 0;
+      transform: translateY(-6px) scale(0.99);
     }
 
     &--open {
       visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+
+      @include respond-to(md) {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    // Scrollbar
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
     }
 
     &__loading,
     &__noResults {
-      text-align: left;
-      color: #666;
+      padding: 1.25rem 1rem;
+      font-size: 0.8rem;
+      color: rgba(245, 241, 232, 0.3);
+      letter-spacing: 0.04em;
     }
 
+    // ─── Results Content ──────────────────────────────────
     &__content {
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      padding: 0.5rem 0;
 
+      // ─── Group ───────────────────────────────────────────
       &__group {
         display: flex;
         flex-direction: column;
 
         &__title {
-          padding: var(--space-4);
-          font-weight: 400;
-          color: var(--color-white);
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(245, 241, 232, 0.28);
+          padding: 0.9rem 1rem 0.4rem;
         }
       }
 
+      // ─── Shared list reset ───────────────────────────────
       &__artists,
       &__tracks,
       &__countries,
       &__genres,
       &__moods {
+        list-style: none;
         display: flex;
         flex-direction: column;
-        list-style: none;
-        padding-bottom: var(--space-4);
-        border-bottom: 1px solid rgba(245, 241, 232, 0.2);
+        padding: 0 0.35rem 0.5rem;
+
+        &:not(:last-child) {
+          margin-bottom: 0.25rem;
+
+          // Faint divider after the list, before next group title
+          &::after {
+            content: '';
+            display: block;
+            height: 1px;
+            background: rgba(245, 241, 232, 0.07);
+            margin: 0.4rem 0.65rem 0;
+          }
+        }
       }
 
+      // ─── Artists ─────────────────────────────────────────
       &__artists {
         &__item {
           cursor: pointer;
           display: flex;
           align-items: center;
-          gap: var(--space-4);
-          padding: var(--space-4);
-          transition: all 0.3s ease;
-
-          @include respond-to(md) {
-            padding: var(--space-2);
-          }
+          gap: 0.75rem;
+          padding: 0.55rem 0.65rem;
+          border-radius: 8px;
+          transition: background 0.18s ease;
 
           &:hover {
-            background-color: rgba(245, 241, 232, 0.2);
+            background: rgba(245, 241, 232, 0.06);
+          }
+
+          h3 {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: rgba(245, 241, 232, 0.85);
           }
 
           &__image {
-            width: 50px;
-            height: 50px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             object-fit: cover;
             overflow: hidden;
-
-            @include respond-to(md) {
-              width: 50px;
-              height: 50px;
-            }
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
           }
         }
       }
-      
+
+      // ─── Tracks ──────────────────────────────────────────
       &__tracks {
         &__item {
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          width: 100%;
-          padding: var(--space-4);
-          transition: all 0.3s ease;
-
-          @include respond-to(md) {
-            padding: var(--space-2);
-          }
+          padding: 0.55rem 0.65rem;
+          border-radius: 8px;
+          transition: background 0.18s ease;
 
           &:hover {
-            background-color: rgba(245, 241, 232, 0.2);
+            background: rgba(245, 241, 232, 0.06);
+
+            .search__results__content__tracks__item__play {
+              opacity: 1;
+              color: var(--color-green, #00ff87);
+            }
           }
 
           &__content {
             display: flex;
             align-items: center;
-            gap: var(--space-4);
+            gap: 0.75rem;
           }
 
           &__image {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--border-radius-super-small);
+            width: 38px;
+            height: 38px;
+            border-radius: 6px;
             object-fit: cover;
             overflow: hidden;
-
-            @include respond-to(md) {
-              width: 50px;
-              height: 50px;
-            }
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
           }
 
           &__info {
             display: flex;
             flex-direction: column;
+            gap: 0.15rem;
 
-            &__artist {
-              font-size: var(--font-size-md);
-              opacity: 0.6;
+            &__title {
+              font-size: 0.875rem;
+              font-weight: 400;
+              color: rgba(245, 241, 232, 0.85);
             }
 
+            &__artist {
+              font-size: 0.75rem;
+              color: rgba(245, 241, 232, 0.35);
+            }
           }
 
-        }
-      }
-
-      &__countries {
-        &__item {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          padding: var(--space-4);
-          transition: all 0.3s ease;
-
-          @include respond-to(md) {
-            padding: var(--space-2);
-          }
-
-          &:hover {
-            background-color: rgba(245, 241, 232, 0.2);
-          }
-
-        }
-      }
-
-      &__genres {
-        &__item {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          padding: var(--space-4);
-          transition: all 0.3s ease;
-
-          @include respond-to(md) {
-            padding: var(--space-2);
-          }
-
-          &:hover {
-            background-color: rgba(245, 241, 232, 0.2);
+          &__play {
+            opacity: 0;
+            color: rgba(245, 241, 232, 0.4);
+            transition: opacity 0.18s ease, color 0.18s ease;
+            flex-shrink: 0;
           }
         }
       }
-      
+
+      // ─── Countries / Genres / Moods (pill tags) ───────────
+      &__countries,
+      &__genres,
       &__moods {
-        &__item {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          padding: var(--space-4);
-          transition: all 0.3s ease;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 0 0.65rem 0.5rem;
 
-          @include respond-to(md) {
-            padding: var(--space-2);
+        &::after {
+          display: none !important;
+        }
+
+        li {
+          cursor: pointer;
+          padding: 0.35rem 0.75rem;
+          border-radius: 20px;
+          border: 1px solid rgba(245, 241, 232, 0.12);
+          transition: background 0.18s ease, border-color 0.18s ease;
+
+          h3 {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(245, 241, 232, 0.6);
+            white-space: nowrap;
           }
 
           &:hover {
-            background-color: rgba(245, 241, 232, 0.2);
+            background: rgba(245, 241, 232, 0.07);
+            border-color: rgba(245, 241, 232, 0.25);
+
+            h3 {
+              color: rgba(245, 241, 232, 0.9);
+            }
           }
+        }
+      }
+
+      // Divider between groups after countries
+      &__countries {
+        &::after {
+          display: block !important;
+          content: '';
+          width: 100%;
+          flex-basis: 100%;
+          height: 1px;
+          background: rgba(245, 241, 232, 0.07);
+          margin: 0.25rem 0 0;
         }
       }
     }

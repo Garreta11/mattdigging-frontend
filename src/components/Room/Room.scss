@@ -23,18 +23,14 @@
     pointer-events: none; // so it doesn't block clicks
     transform: translate(0, 0);
     z-index: 1000;
-
-    background-color: var(--color-white);
-    color: var(--color-black);
-    padding: var(--space-2);
-    border-radius: var(--border-radius-super-small);
     animation: fadeInTip 0.3s ease forwards;
     transition: opacity 0.3s ease;
 
-    &__text {
-      color: var(--color-black);
-    }
-
+    background-color: var(--color-black);
+    border: 1px solid rgba(245, 241, 232, 0.12);
+    color: rgba(245, 241, 232, 0.7);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--border-radius-super-small);
   }
 
   canvas {
@@ -49,6 +45,6 @@
     opacity: 0;
   }
   to {
-    opacity: 0.6;
+    opacity: 1;
   }
 }

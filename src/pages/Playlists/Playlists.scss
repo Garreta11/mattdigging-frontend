@@ -1,14 +1,15 @@
 @import '../../_breakpoints.scss';
+
 .playlistsPage {
   padding: var(--space-16) var(--space-4);
   background-color: var(--color-black);
   padding-bottom: var(--space-20);
-  
+
   @include respond-to(md) {
-    /* background-color: transparent; */
     padding: var(--space-24) var(--space-4);
   }
 
+  // ─── Header ───────────────────────────────────────────────
   &__header {
     display: flex;
     justify-content: space-between;
@@ -25,47 +26,257 @@
 
     &__title {
       margin: 0;
-      font-size: 40px;
-      font-weight: 700;
-      color: var(--color-white);
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: rgba(245, 241, 232, 0.9);
 
       span {
-        font-size: 40px;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: 300;
+        letter-spacing: -0.02em;
       }
-    }
-
-    &__actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
     }
   }
 
+  // ─── Clear / Back button ──────────────────────────────────
   &__clear-filter-btn {
-    padding: 0px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0;
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(245, 241, 232, 0.35);
+    transition: color 0.2s ease, gap 0.2s ease;
+
+    svg {
+      opacity: 0.4;
+      transition: opacity 0.2s ease;
+      flex-shrink: 0;
+    }
 
     &:hover {
-      gap: var(--space-3);
+      color: rgba(245, 241, 232, 0.75);
+      gap: 0.9rem;
+
+      svg {
+        opacity: 0.75;
+      }
     }
   }
 
+  // ─── Play playlist button ─────────────────────────────────
+  &__play-playlist {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(245, 241, 232, 0.07);
+    border: 1px solid rgba(245, 241, 232, 0.12);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    padding: 0px;
+
+    svg {
+      transition: all 0.2s ease;
+
+      path {
+        fill: rgba(245, 241, 232, 0.7);
+        transition: fill 0.2s ease;
+      }
+    }
+
+    &:hover {
+      background: rgba(245, 241, 232, 0.12);
+      border-color: rgba(245, 241, 232, 0.22);
+
+      svg path {
+        fill: var(--color-green, #00ff87);
+      }
+    }
+  }
+
+  // ─── Filters bar ─────────────────────────────────────────
+  &__filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: var(--space-4);
+
+    @include respond-to(md) {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+
+  // ─── Dropdown ─────────────────────────────────────────────
+  &__dropdown {
+    position: relative;
+
+    &__trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.9rem;
+      background: transparent;
+      border: 1px solid rgba(245, 241, 232, 0.12);
+      border-radius: 10px;
+      color: rgba(245, 241, 232, 0.55);
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+      white-space: nowrap;
+
+      svg {
+        transition: transform 0.2s ease, opacity 0.18s ease;
+        opacity: 0.35;
+        flex-shrink: 0;
+
+        path {
+          fill: currentColor;
+        }
+      }
+
+      &:hover {
+        border-color: rgba(245, 241, 232, 0.25);
+        color: rgba(245, 241, 232, 0.85);
+
+        svg {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    // Open state
+    &.is-open .playlistsPage__dropdown__trigger {
+      border-color: rgba(245, 241, 232, 0.3);
+      color: rgba(245, 241, 232, 0.9);
+
+      svg {
+        transform: rotate(180deg);
+        opacity: 0.7;
+      }
+    }
+
+    // Active (filter selected) state
+    &.is-active .playlistsPage__dropdown__trigger {
+      background: rgba(245, 241, 232, 0.08);
+      border-color: rgba(245, 241, 232, 0.22);
+      color: rgba(245, 241, 232, 0.9);
+
+      svg {
+        opacity: 0.5;
+      }
+    }
+
+    &.is-active.is-open .playlistsPage__dropdown__trigger svg {
+      transform: rotate(180deg);
+    }
+
+    // ─── Dropdown menu ──────────────────────────────────────
+    &__menu {
+      position: relative;
+      z-index: 10;
+      top: 6px;
+      left: 0;
+      min-width: 200px;
+      max-height: 260px;
+      overflow-y: auto;
+      background: rgba(8, 12, 12, 0.96);
+      border: 1px solid rgba(245, 241, 232, 0.1);
+      border-radius: 12px;
+      list-style: none;
+      margin: 0;
+      padding: 0.4rem 0.35rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 0.5px rgba(255,255,255,0.04);
+      animation: dropdownReveal 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(12px);
+
+      li {
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: rgba(245, 241, 232, 0.6);
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          background: rgba(245, 241, 232, 0.07);
+          color: rgba(245, 241, 232, 0.9);
+        }
+
+        &.is-selected {
+          color: var(--color-green, #00ff87);
+          background: rgba(0, 255, 135, 0.06);
+        }
+      }
+
+      // Scrollbar
+      &::-webkit-scrollbar { width: 3px; }
+      &::-webkit-scrollbar-track { background: transparent; }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(245, 241, 232, 0.12);
+        border-radius: 2px;
+      }
+    }
+  }
+
+  // ─── Tracks list ──────────────────────────────────────────
+  &__tracks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding-right: var(--space-8);
+
+    @include respond-to(md) {
+      padding-right: 0;
+    }
+  }
+
+  // ─── Empty state ──────────────────────────────────────────
+  &__empty {
+    margin-top: var(--space-8);
+
+    p {
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: rgba(245, 241, 232, 0.22);
+      text-transform: uppercase;
+    }
+  }
+
+  // ─── Error ────────────────────────────────────────────────
+  .error {
+    padding: 1rem 1.25rem;
+    background: rgba(239, 68, 68, 0.07);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    color: rgba(252, 165, 165, 0.8);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  // ─── Section (legacy, kept for compat) ───────────────────
   &__section {
     margin-bottom: 64px;
 
     h2 {
       margin-bottom: 32px;
-      font-size: 32px;
-      font-weight: 600;
-      color: #fff;
-      text-transform: lowercase;
+      font-size: 1.75rem;
+      font-weight: 300;
+      color: rgba(245, 241, 232, 0.85);
       position: relative;
       display: inline-block;
 
@@ -74,172 +285,40 @@
         position: absolute;
         bottom: -8px;
         left: 0;
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(90deg, var(--color-green), var(--color-green));
-        border-radius: 2px;
+        width: 32px;
+        height: 1px;
+        background: var(--color-green, #00ff87);
       }
     }
   }
 
-  &__filters {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
-
-    @include respond-to(md) {
-      /* flex-direction: column; */
-      gap: var(--space-2);
-      /* width: fit-content; */
-
-      display: inline-flex;
-      flex-wrap: wrap;
-    }
-  }
-
-  &__dropdown {
-    position: relative;
-
-    &__trigger {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-2) var(--space-4);
-      background: transparent;
-      border: 1px solid var(--color-white);
-      border-radius: var(--border-radius-super-small);
-      color: var(--color-white);
-      font-size: var(--font-size-lg);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-  
-      svg {
-        transition: all 0.3s ease;
-        opacity: 0.6;
-      }
-  
-      &:hover {
-        color: var(--color-green);
-      }
-    }
-
-    &.is-open .playlistsPage__dropdown__trigger {
-      border-color: var(--color-white);
-  
-      svg {
-        transform: rotate(180deg);
-        opacity: 1;
-      }
-    }
-
-    &.is-active .playlistsPage__dropdown__trigger {
-      background: var(--color-white);
-      color: var(--color-black, #000);
-      border-color: var(--color-white);
-  
-      svg {
-        opacity: 0.5;
-      }
-    }
-  
-    &.is-active.is-open .playlistsPage__dropdown__trigger svg {
-      transform: rotate(180deg);
-    }
-
-    &__menu {
-      position: relative;
-      z-index: 1;
-      /* top: calc(100% + 6px);
-      left: 0; */
-      top: 6px;
-      left: 0px;
-      min-width: 180px;
-      max-height: 260px;
-      overflow-y: auto;
-      background: var(--color-black);
-      border: 1px solid var(--color-white);
-      border-radius: var(--border-radius-super-small);
-      list-style: none;
-      margin: 0;
-      padding: var(--space-2) 0;
-      animation: dropdownFadeIn 0.15s ease;
-
-      @include respond-to(md) {
-        position: relative;
-        top: 6px;
-      }
-  
-      li {
-        padding: var(--space-2) var(--space-4);
-        font-size: var(--font-size-lg);
-        color: rgba(var(--color-white-rgb, 255, 255, 255), 0.8);
-        cursor: pointer;
-        transition: all 0.15s ease;
-  
-        &:hover {
-          background: rgba(245, 241, 232, 0.2);
-          color: var(--color-white);
-        }
-  
-        &.is-selected {
-          color: var(--color-white);
-          font-weight: 600;
-          background: rgba(var(--color-white-rgb, 255, 255, 255), 0.1);
-        }
-      }
-  
-      // Custom scrollbar
-      &::-webkit-scrollbar {
-        width: 4px;
-      }
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      &::-webkit-scrollbar-thumb {
-        background: rgba(var(--color-white-rgb, 255, 255, 255), 0.2);
-        border-radius: 2px;
-      }
-    }
-
-  }
-
+  // ─── Cards (legacy) ───────────────────────────────────────
   .card {
     position: relative;
     aspect-ratio: 1;
-    border-radius: var(--border-radius-x-small);
+    border-radius: 10px;
     padding: 0.5rem 1rem;
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(245, 241, 232, 0.08);
     width: 100%;
     height: 100%;
 
     &::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.2s ease;
     }
 
     &:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
-                  0 0 0 1px rgba(255, 255, 255, 0.2);
+      border-color: rgba(245, 241, 232, 0.18);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 
-      &::before {
-        opacity: 1;
-      }
-
-      .info h3 {
-        transform: scale(1.02);
-      }
+      &::before { opacity: 1; }
+      .info h3 { transform: scale(1.02); }
     }
 
     .info {
@@ -250,150 +329,44 @@
       justify-content: space-between;
       flex-direction: column;
 
-      img {
-        width: 16px;
-        height: 16px;
-        object-fit: cover;
-      }
+      img { width: 16px; height: 16px; object-fit: cover; }
 
       h3 {
         margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--color-white);
-        line-height: 1.2;
-        transition: transform 0.3s ease;
+        font-size: 1rem;
+        font-weight: 400;
+        color: rgba(245, 241, 232, 0.85);
+        line-height: 1.3;
+        transition: transform 0.25s ease;
         word-break: break-word;
         text-align: left;
 
-        @media (max-width: 768px) {
-          font-size: 15px;
-        }
+        @include respond-to(md) { font-size: 0.875rem; }
       }
     }
 
-    // Colores específicos por clase
-    &--color-1 {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.15));
-      }
-    }
-
-    &--color-2 {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(219, 39, 119, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(219, 39, 119, 0.15));
-      }
-    }
-
-    &--color-3 {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.15));
-      }
-    }
-
-    &--color-4 {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(52, 211, 153, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.15));
-      }
-    }
-
-    &--color-5 {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(96, 165, 250, 0.15));
-      }
-    }
-
-    &--color-6 {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(192, 132, 252, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(192, 132, 252, 0.15));
-      }
-    }
-
-    &--color-7 {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(248, 113, 113, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(248, 113, 113, 0.15));
-      }
-    }
-
-    &--color-8 {
-      background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), rgba(45, 212, 191, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(45, 212, 191, 0.15));
-      }
-    }
-
-    &--color-9 {
-      background: linear-gradient(135deg, rgba(217, 70, 239, 0.12), rgba(232, 121, 249, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(217, 70, 239, 0.25), rgba(232, 121, 249, 0.15));
-      }
-    }
-
-    &--color-10 {
-      background: linear-gradient(135deg, rgba(251, 146, 60, 0.12), rgba(253, 186, 116, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(251, 146, 60, 0.25), rgba(253, 186, 116, 0.15));
-      }
-    }
-
-    &--color-11 {
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(56, 189, 248, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(56, 189, 248, 0.15));
-      }
-    }
-
-    &--color-12 {
-      background: linear-gradient(135deg, rgba(132, 204, 22, 0.12), rgba(163, 230, 53, 0.08));
-      &::before {
-        background: linear-gradient(135deg, rgba(132, 204, 22, 0.25), rgba(163, 230, 53, 0.15));
+    @for $i from 1 through 12 {
+      &--color-#{$i} {
+        background: rgba(245, 241, 232, 0.03);
+        &::before { background: rgba(245, 241, 232, 0.05); }
       }
     }
   }
+}
 
-  &__tracks {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    padding-right: var(--space-8);
+// ─── Animations ───────────────────────────────────────────────
+@keyframes dropdownReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
   }
-
-  .error {
-    padding: 20px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 12px;
-    color: #fca5a5;
-    text-align: center;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
+}
 
-  &__play {
-    &-playlist {
-      background-color: transparent;
-      border: none;
-      padding: 0;
-
-      svg {
-        transition: all 0.3s ease;
-        path {
-          transition: all 0.3s ease;
-        }
-      }
-
-      &:hover {
-        svg {
-          path {
-            fill: var(--color-green);
-          }
-        }
-      }
-    }
-  }
+@keyframes dropdownFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

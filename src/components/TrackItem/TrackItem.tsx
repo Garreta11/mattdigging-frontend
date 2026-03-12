@@ -16,15 +16,21 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
     <div
       onClick={onClick}
       className={`track-item ${isPlaying ? 'track-item--playing' : ''}`}
-
     >
       <div className="track-item__left">
+        {/* Index or animated playing bars */}
         {index !== undefined && (
-          <p className="track-item__index">{String(index + 1).padStart(2, '0')}</p>
+          <>
+            <p className="track-item__index">{String(index + 1).padStart(2, '0')}</p>
+            <div className="track-item__playing-indicator">
+              <span /><span /><span />
+            </div>
+          </>
         )}
+
         <div className="track-item__cover">
           {track.cover_url ? (
-            <StorageImage 
+            <StorageImage
               path={track.cover_url}
               alt={track.title}
               bucket="covers"
@@ -42,14 +48,19 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
             )}
           </div>
 
-          <div className="track-item__meta">
-            {track.album_name && (
-              <span className="track-item__album">{track.album_name}</span>
-            )}
-            {track.year && (
-              <span className="track-item__year">{track.year}</span>
-            )}
-          </div>
+          {(track.album_name || track.year) && (
+            <div className="track-item__meta">
+              {track.album_name && (
+                <span className="track-item__album">{track.album_name}</span>
+              )}
+              {track.album_name && track.year && (
+                <span className="track-item__meta__dot" />
+              )}
+              {track.year && (
+                <span className="track-item__year">{track.year}</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

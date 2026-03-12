@@ -3,291 +3,278 @@
 .selectionsPage {
   padding: var(--space-16) var(--space-4);
   background-color: var(--color-black);
+  padding-bottom: var(--space-20);
 
   @include respond-to(md) {
     padding-top: var(--space-24);
     padding-bottom: var(--space-24);
   }
 
+  // ─── Header / view toggle ─────────────────────────────────
   &__header {
-    margin-bottom: 48px;
+    margin-bottom: 2.5rem;
 
     &__controls {
       display: flex;
       justify-content: center;
-      gap: var(--space-4);
 
       &__viewToggle {
         display: inline-flex;
-        background: var(--color-black);
-        border-radius: var(--border-radius-super-small);
-        /* gap: var(--space-2); */
-        border: 1px solid var(--color-white);
+        background: transparent;
+        border: 1px solid rgba(245, 241, 232, 0.12);
+        border-radius: 10px;
+        overflow: hidden;
 
         &__button {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
+          gap: 0.5rem;
+          padding: 0.55rem 1.25rem;
           border: none;
           background: transparent;
-          font-size: 16px;
-          color: var(--color-white);
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: rgba(245, 241, 232, 0.4);
           cursor: pointer;
-          transition: all 0.3s;
+          transition: background 0.18s ease, color 0.18s ease;
 
-          &--calendar {
-            border-radius: 0px;
-            border-top-left-radius: var(--border-radius-super-small);
-            border-bottom-left-radius: var(--border-radius-super-small);
-          }
-
-          &--list {
-            border-radius: 0px;
-            border-top-right-radius: var(--border-radius-super-small);
-            border-bottom-right-radius: var(--border-radius-super-small);
-          }
-      
           &:hover {
-            color: var(--color-green);
+            color: rgba(245, 241, 232, 0.8);
+            background: rgba(245, 241, 232, 0.05);
           }
-      
+
           &--active {
-            border: 1px solid var(--color-white);
-            color: var(--color-black);
-            background-color: var(--color-white);
+            background: rgba(245, 241, 232, 0.08);
+            color: rgba(245, 241, 232, 0.9);
+            border: none;
           }
-      
-          svg {
-            flex-shrink: 0;
-          }
+
+          svg { flex-shrink: 0; }
         }
       }
     }
-
   }
 
-  &__header-content {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
+  // ─── Empty / loading ──────────────────────────────────────
   &__loading,
   &__empty {
     text-align: center;
-    padding: 80px 20px;
-    color: #666;
-    font-size: 18px;
+    padding: 5rem 1.25rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(245, 241, 232, 0.22);
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // CALENDAR VIEW
+  // ═══════════════════════════════════════════════════════════
   &__calendarView {
     padding-right: var(--space-8);
 
+    @include respond-to(md) {
+      padding-right: 0;
+    }
+
+    // ─── Month navigation ──────────────────────────────────
     &__navigation {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: var(--space-8);
-      margin-bottom: var(--space-7);
+      margin-bottom: 1.75rem;
     }
-  
+
     &__current-date {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-1);
-      min-width: 200px;
+      gap: 0.15rem;
+      min-width: 180px;
     }
-  
+
     &__month {
-      font-size: var(--font-size-xl);
+      font-size: 1.4rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: rgba(245, 241, 232, 0.9);
       margin: 0;
-      text-align: center;
     }
-  
+
     &__year {
-      font-size: var(--font-size-md);
-      color: var(--color-white);
-      opacity: 0.6;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.28);
     }
-  
+
     &__nav-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid rgba(245, 241, 232, 0.12);
       cursor: pointer;
-      transition: all 0.3s ease;
-      background-color: transparent;
-      border: none;
-      
-      &:hover:not(:disabled) {
-        background-color: transparent;
-        transform: scale(1.2);
+      transition: background 0.18s ease, border-color 0.18s ease;
+      padding: 0;
+
+      svg {
+        width: 14px;
+        height: 14px;
+
+        path { fill: rgba(245, 241, 232, 0.6); }
       }
-  
+
+      &:hover:not(:disabled) {
+        background: rgba(245, 241, 232, 0.07);
+        border-color: rgba(245, 241, 232, 0.25);
+      }
+
       &:disabled {
-        opacity: 0.3;
+        opacity: 0.2;
         cursor: not-allowed;
       }
     }
-  
+
+    // ─── Grid ──────────────────────────────────────────────
     &__grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+      display: flex;
+      flex-direction: column;
       margin-bottom: var(--space-6);
     }
-  
-    &__info {
-      text-align: center;
-      padding: var(--space-4);
-      color: var(--color-white);
-      opacity: 0.6;
-      font-style: italic;
-  
-      p {
-        margin: 0;
-      }
-    }
 
+    // ─── Week cell ─────────────────────────────────────────
     &__weekCell {
-      background: transparent;
-      padding: var(--space-4);
       display: flex;
       flex-direction: row;
-      gap: var(--space-4);
-      border-bottom: 1px solid rgba(245, 241, 232, 0.2);
-      transition: all 0.3s;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(245, 241, 232, 0.06);
+      transition: background 0.18s ease;
+      border-radius: 10px;
       position: relative;
-    
+
       &__content {
         display: flex;
         flex-direction: column;
-        gap: var(--space-2);
-        justify-content: space-between;
+        gap: 0.25rem;
         width: 100%;
 
         &__header {
           display: flex;
-          flex-direction: row;
-          gap: var(--space-2);
+          align-items: flex-start;
           justify-content: space-between;
+          gap: 0.75rem;
           width: 100%;
         }
 
         &__body {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-2);
-          justify-content: space-between;
           width: 70%;
 
+          @include respond-to(md) { width: 100%; }
+
           &__description {
-            font-size: var(--font-size-sm);
-            color: var(--color-white);
-            opacity: 0.6;
+            font-size: 0.775rem;
+            color: rgba(245, 241, 232, 0.35);
             font-style: italic;
-            transition: all 0.3s ease;
+            margin: 0;
+            line-height: 1.5;
           }
         }
       }
-    
+
       &__title {
-        font-size: var(--font-size-lg);
-        color: var(--color-white);
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: rgba(245, 241, 232, 0.85);
         flex: 1;
         display: flex;
         align-items: center;
-        gap: var(--space-2);
-        transition: all 0.3s ease;
+        gap: 0.4rem;
+        margin: 0;
+        flex-wrap: wrap;
 
         &__date {
-          text-transform: none;
-          font-size: var(--font-size-sm);
-          color: var(--color-white);
-          opacity: 0.6;
-          letter-spacing: 0.5px;
-          transition: all 0.3s ease;
-          -webkit-text-stroke: 0px var(--color-white);
+          font-size: 0.72rem;
+          color: rgba(245, 241, 232, 0.3);
+          font-weight: 400;
+          letter-spacing: 0;
         }
       }
-    
-      &__badge {
-        display: inline-block;
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--border-radius);
-        font-size: var(--font-size-sm);
-        background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
-        color: var(--color-white);
-        width: fit-content;
-        height: fit-content;
-    
-        &--upcoming {
-          background: var(--color-white);
-          color: #6c757d;
-        }
-      }
-    
-      &__empty {
-        opacity: 0.4;
-        font-size: var(--font-size-sm);
-        color: var(--color-white);
-        font-style: italic;
-      }
-    
-      &--has-selection {
-        cursor: pointer;
-      }
-    
-      &--published {
 
-        animation: fadeInUp 0.5s ease-out;
-        animation-fill-mode: both;
-        @for $i from 1 through 52 {
-          &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.02}s;
-          }
+      &__badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        &--published {
+          background: rgba(0, 255, 135, 0.08);
+          color: var(--color-green, #00ff87);
+          border: 1px solid rgba(0, 255, 135, 0.2);
         }
-        
-        &:hover {
-          background-color: rgba(245, 241, 232, 0.2);
+
+        &--upcoming {
+          background: rgba(245, 241, 232, 0.05);
+          color: rgba(245, 241, 232, 0.28);
+          border: 1px solid rgba(245, 241, 232, 0.08);
         }
       }
-    
-      &--upcoming {
-        animation: fadeInUpUpcoming 0.5s ease-out;
-        animation-fill-mode: both;
+
+      &__empty {
+        font-size: 0.775rem;
+        color: rgba(245, 241, 232, 0.22);
+        font-style: italic;
+        padding: 1rem 0;
+      }
+
+      &--has-selection { cursor: pointer; }
+
+      &--published {
+        animation: fadeInUp 0.4s ease-out both;
         @for $i from 1 through 52 {
-          &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.02}s;
-          }
+          &:nth-child(#{$i}) { animation-delay: #{$i * 0.03}s; }
         }
-        position: relative;
-        cursor: inherit;
-    
-        &::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(0, 0, 0, 0.02) 10px,
-            rgba(0, 0, 0, 0.02) 20px
-          );
-          border-radius: 12px;
-          pointer-events: none;
+        &:hover {
+          background: rgba(245, 241, 232, 0.05);
         }
+      }
+
+      &--upcoming {
+        animation: fadeInUpUpcoming 0.4s ease-out both;
+        @for $i from 1 through 52 {
+          &:nth-child(#{$i}) { animation-delay: #{$i * 0.03}s; }
+        }
+        cursor: default;
+        opacity: 0.4;
       }
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // LIST VIEW
+  // ═══════════════════════════════════════════════════════════
   &__listView {
-    margin-bottom: var(--space-8);
+    margin-bottom: 2.5rem;
 
     &__title {
-      font-size: var(--font-size-xl);
-      margin-bottom: var(--space-4);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.28);
+      margin: 0 0 0.5rem;
     }
 
     &__grid {
@@ -295,252 +282,216 @@
       flex-direction: column;
     }
 
+    &__empty {
+      padding: 5rem 1.25rem;
+      text-align: center;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.22);
+    }
+
     &__card {
-      background: transparent;
-      padding: var(--space-4);
       display: flex;
       flex-direction: row;
-      gap: var(--space-4);
-      border-bottom: 1px solid rgba(245, 241, 232, 0.2);
-      opacity: 0.2;
-      transition: all 0.3s ease;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(245, 241, 232, 0.06);
+      border-radius: 10px;
+      transition: background 0.18s ease, opacity 0.18s ease;
 
       &--published {
-        animation: fadeInUp 0.5s ease-out;
-        animation-fill-mode: both;
+        animation: fadeInUp 0.4s ease-out both;
         @for $i from 1 through 52 {
-          &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.02}s;
-          }
+          &:nth-child(#{$i}) { animation-delay: #{$i * 0.03}s; }
         }
         cursor: pointer;
-
-        &:hover {
-          background-color: rgba(245, 241, 232, 0.2);
-        }
+        &:hover { background: rgba(245, 241, 232, 0.05); }
       }
 
       &--upcoming {
-        animation: fadeInUpUpcoming 0.5s ease-out;
-        animation-fill-mode: both;
+        animation: fadeInUpUpcoming 0.4s ease-out both;
         @for $i from 1 through 52 {
-          &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.02}s;
-          }
+          &:nth-child(#{$i}) { animation-delay: #{$i * 0.03}s; }
         }
-        cursor: inherit;
+        cursor: default;
+        opacity: 0.35;
       }
 
       &__header {
         display: flex;
         flex-direction: column;
-        gap: var(--space-2);
-        justify-content: space-between;
-        width: 100%;
+        gap: 0.2rem;
+        flex: 1;
+        min-width: 0;
 
         &__title {
-          font-size: var(--font-size-lg);
-          color: var(--color-white);
-          flex: 1;
+          font-size: 0.9rem;
+          font-weight: 400;
+          color: rgba(245, 241, 232, 0.85);
           display: flex;
           align-items: center;
-          gap: var(--space-2);
-          transition: all 0.3s ease;
-
-          
+          gap: 0.4rem;
+          margin: 0;
+          flex-wrap: wrap;
 
           &__date {
-            text-transform: none;
-            font-size: var(--font-size-sm);
-            color: var(--color-white);
-            opacity: 0.6;
-            letter-spacing: 0.5px;
-            -webkit-text-stroke: 0px var(--color-white);
-            transition: all 0.3s ease;
+            font-size: 0.72rem;
+            color: rgba(245, 241, 232, 0.3);
+            font-weight: 400;
           }
-
         }
 
         &__badge {
-          font-size: var(--font-size-sm);
-          color: var(--color-white);
-          background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green) 100%);
-          padding: var(--space-1) var(--space-3);
-          border-radius: var(--border-radius);
+          display: inline-flex;
+          align-items: center;
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          flex-shrink: 0;
+          background: rgba(0, 255, 135, 0.08);
+          color: var(--color-green, #00ff87);
+          border: 1px solid rgba(0, 255, 135, 0.2);
           width: fit-content;
-          height: fit-content;
         }
       }
 
       &__description {
-        width: 80%;
-        font-size: var(--font-size-sm);
-        color: var(--color-white);
-        opacity: 0.6;
+        font-size: 0.775rem;
+        color: rgba(245, 241, 232, 0.32);
         font-style: italic;
-        transition: all 0.3s ease;
+        margin: 0;
+        line-height: 1.5;
+
+        @include respond-to(md) { width: 100%; }
       }
+
+      &__badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        &--upcoming {
+          background: rgba(245, 241, 232, 0.05);
+          color: rgba(245, 241, 232, 0.28);
+          border: 1px solid rgba(245, 241, 232, 0.08);
+        }
+
+        &--published {
+          background: rgba(0, 255, 135, 0.08);
+          color: var(--color-green, #00ff87);
+          border: 1px solid rgba(0, 255, 135, 0.2);
+        }
+      }
+
+      &__meta { display: flex; gap: 0.5rem; align-items: center; }
     }
-    
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // SELECTION DETAIL VIEW
+  // ═══════════════════════════════════════════════════════════
   &__selectionView {
 
     &__clear-filter-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: var(--space-2);
+      gap: 0.6rem;
+      padding: 0;
       background: transparent;
       border: none;
-      color: var(--color-white);
-      font-size: var(--font-size-sm);
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.35);
+      transition: color 0.2s ease, gap 0.2s ease;
+
+      svg { opacity: 0.4; transition: opacity 0.2s ease; }
+
+      &:hover {
+        color: rgba(245, 241, 232, 0.75);
+        gap: 0.9rem;
+        svg { opacity: 0.75; }
+      }
     }
 
     &__header {
       display: flex;
-      gap: var(--space-4);
       align-items: center;
-      width: 100%;
-      margin-bottom: var(--space-4);
+      gap: 0.75rem;
+      margin: var(--space-4) 0;
+
+      &__title {
+        font-size: 2.5rem;
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        color: rgba(245, 241, 232, 0.9);
+        margin: 0;
+
+        span {
+          font-size: 2.5rem;
+          font-weight: 300;
+          letter-spacing: -0.02em;
+        }
+      }
 
       &__play-playlist {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
-        background: transparent;
-        border: none;
-        color: var(--color-white);
-        font-size: var(--font-size-sm);
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(245, 241, 232, 0.07);
+        border: 1px solid rgba(245, 241, 232, 0.12);
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.2s ease, border-color 0.2s ease;
+        padding: 0;
 
-        path {
-          transition: all 0.3s ease;
+        svg path {
+          fill: rgba(245, 241, 232, 0.7);
+          transition: fill 0.2s ease;
         }
 
         &:hover {
-          path {
-            fill: var(--color-green);
-          }
+          background: rgba(245, 241, 232, 0.12);
+          border-color: rgba(245, 241, 232, 0.22);
+
+          svg path { fill: var(--color-green, #00ff87); }
         }
       }
     }
 
-  }
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .selectionsPage {
-    padding: 24px 16px;
-
-    &__title {
-      font-size: 36px;
-    }
-
-    &__subtitle {
-      font-size: 16px;
-    }
-
-    &__section-title {
-      font-size: 24px;
-    }
-
-    &__grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-  }
-
-  .viewToggle {
-    &__button {
-      padding: 10px 16px;
-      font-size: 14px;
-
-      svg {
-        display: none;
-      }
-    }
-  }
-
-  .calendarView {
-    &__navigation {
-      gap: 24px;
-    }
-
-    &__month {
-      font-size: 24px;
-    }
-
-    &__year {
-      font-size: 16px;
-    }
-
-    &__current-date {
-      min-width: 150px;
-    }
-
-    &__grid {
-      grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
-      gap: 12px;
-    }
-  }
-
-  .weekCell {
-    padding: 12px;
-    min-height: 100px;
-
-    &__title {
-      font-size: 14px;
-    }
-  }
-
-  .selectionCard {
-    padding: 20px;
-
-    &__title {
-      font-size: 20px;
-    }
-
-    &__description {
-      -webkit-line-clamp: 4;
+    &__tracks {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
     }
   }
 }
 
-/* Tablet responsive */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .selectionsPage__grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-
-  .calendarView__grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
-}
-
-/* Animation for cards appearing */
+// ─── Animations ───────────────────────────────────────────────
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUpUpcoming {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-}
-
-.selectionsPage__calendarView__weekCell,
-.selectionsPage__listView__card {
-  
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 0.35; transform: translateY(0); }
 }

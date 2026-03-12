@@ -25,7 +25,7 @@ interface SearchResults {
 }
 
 const SearchInput = () => {
-  const { setModalArtist, setIsModalArtistOpen, setTrack, isFullscreen } = useAppContext();
+  const { setModalArtist, setIsModalArtistOpen, setTrack, isFullscreen, setIsSearchModalOpen } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -60,11 +60,13 @@ const SearchInput = () => {
   ========================= */
   useEffect(() => {
     if (!query.trim()) {
+      setIsSearchModalOpen(false);
       setResults({ artists: [], tracks: [], countries: [], genres: [], moods: [] });
       return;
     }
 
     const timeoutId = setTimeout(async () => {
+      setIsSearchModalOpen(true);
       setIsLoading(true);
       await performSearch(query);
       setIsLoading(false);

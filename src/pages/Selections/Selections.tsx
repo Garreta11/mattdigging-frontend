@@ -500,10 +500,11 @@ const SelectionsPage = () => {
               {tracks.length === 0 ? (
                 <p>No tracks found</p>
               ) : (
-                tracks.map((track) => (
+                tracks.map((track, index) => (
                   <TrackItem
                     key={track.id}
                     track={track}
+                    index={index}
                     onClick={() => handleTrackClick(track)}
                     isPlaying={currentTrack?.id === track.id}
                   />

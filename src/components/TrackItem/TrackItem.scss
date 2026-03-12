@@ -5,89 +5,151 @@
   justify-content: space-between;
   gap: var(--space-4);
   align-items: center;
-  padding: var(--space-4);
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.18s ease;
+  position: relative;
 
   @include respond-to(md) {
-    padding: var(--space-2);
+    padding: 0.5rem 0.4rem;
   }
 
+  // ─── Playing state ────────────────────────────────────────
   &--playing {
-    background: rgba(55, 93, 44, 0.3); // Verde suave
-    border-left: 3px solid var(--color-yellow);
+    background: rgba(245, 241, 232, 0.05);
+
+    /* .track-item__index {
+      display: none;
+    }
+
+    .track-item__playing-indicator {
+      display: flex;
+    } */
+
+    .track-item__title {
+      color: var(--color-green);
+      -webkit-text-stroke: 0.5px var(--color-green);
+    }
   }
 
   &:hover {
-    background: rgba(55, 93, 44, 0.3);
+    background: rgba(245, 241, 232, 0.05);
+
+    .track-item__cover img {
+      transform: scale(1.04);
+    }
   }
 
-  &__index {
-    font-size: var(--font-size-sm);
-    color: var(--color-white);
-    opacity: 0.2;
-    font-variant-numeric: tabular-nums;
-    width: 20px;
-    flex-shrink: 0;
-  }
-
+  // ─── Layout ───────────────────────────────────────────────
   &__left {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: 0.75rem;
+    min-width: 0;
+    flex: 1;
   }
 
   &__right {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: 0.75rem;
+    flex-shrink: 0;
   }
 
+  // ─── Index ────────────────────────────────────────────────
+  &__index {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(245, 241, 232, 0.25);
+    font-variant-numeric: tabular-nums;
+    width: 1.5rem;
+    flex-shrink: 0;
+    text-align: right;
+    transition: opacity 0.18s ease;
+  }
+
+  // ─── Playing indicator (bars) ─────────────────────────────
+  /* &__playing-indicator {
+    display: none;
+    align-items: flex-end;
+    gap: 2px;
+    width: 1.5rem;
+    height: 14px;
+    flex-shrink: 0;
+
+    span {
+      display: block;
+      width: 3px;
+      border-radius: 1.5px;
+      background: var(--color-green);
+      animation: soundBar 0.9s ease-in-out infinite alternate;
+      transform-origin: bottom;
+
+      &:nth-child(1) { height: 50%; animation-delay: 0s; }
+      &:nth-child(2) { height: 100%; animation-delay: 0.2s; }
+      &:nth-child(3) { height: 80%; animation-delay: 0.4s; }
+    }
+  } */
+
+  // ─── Cover ────────────────────────────────────────────────
   &__cover {
-    width: 80px;
-    height: 80px;
-    border-radius: var(--border-radius-super-small);
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
     overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(245, 241, 232, 0.05);
+
+    @include respond-to(md) {
+      width: 44px;
+      height: 44px;
+    }
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      transition: transform 0.3s ease;
     }
   }
 
   &__cover-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+    background: rgba(245, 241, 232, 0.04);
   }
 
+  // ─── Info ─────────────────────────────────────────────────
   &__info {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    min-width: 0; // Para que el texto se trunque correctamente
+    gap: 0.2rem;
+    min-width: 0;
   }
 
   &__main {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 0.1rem;
   }
 
   &__title {
-    font-size: var(--font-size-lg);
-    color: var(--color-white);
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(245, 241, 232, 0.9);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.18s ease;
   }
 
   &__artist {
-    font-size: 14px;
-    color: #aaa;
+    font-size: 0.775rem;
+    color: rgba(245, 241, 232, 0.35);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -97,9 +159,17 @@
   &__meta {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    color: #666;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: rgba(245, 241, 232, 0.22);
+
+    &__dot {
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
   }
 
   &__album {
@@ -112,53 +182,47 @@
     flex-shrink: 0;
   }
 
+  // ─── Genre pills ──────────────────────────────────────────
   &__genres {
     display: flex;
-    gap: var(--space-1);
+    gap: 0.35rem;
     align-items: center;
     flex-wrap: wrap;
+
+    @include respond-to(md) {
+      display: none;
+    }
   }
 
-  &__genre {
+  &__genre,
+  &__genre-more {
     display: inline-flex;
-    padding: var(--space-1) var(--space-4);
-    border-radius: var(--border-radius-super-small);
-    font-size: var(--font-size-xs);
-    background: rgba(0, 159, 183, 0.15);
-    color: var(--color-blue);
-    border: 1px solid rgba(0, 159, 183, 0.3);
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    background: rgba(245, 241, 232, 0.05);
+    color: rgba(245, 241, 232, 0.45);
+    border: 1px solid rgba(245, 241, 232, 0.1);
     white-space: nowrap;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+
+    &:hover {
+      background: rgba(245, 241, 232, 0.09);
+      border-color: rgba(245, 241, 232, 0.22);
+      color: rgba(245, 241, 232, 0.75);
+    }
   }
 
   &__genre-more {
-    display: inline-flex;
-    padding: var(--space-1) var(--space-4);
-    border-radius: var(--border-radius-super-small);
-    font-size: var(--font-size-xs);
-    background: rgba(0, 159, 183, 0.15);
-    border: 1px solid rgba(0, 159, 183, 0.3);
-    color: var(--color-blue);
+    color: rgba(245, 241, 232, 0.25);
+    border-color: rgba(245, 241, 232, 0.07);
   }
+}
 
-  @media (max-width: 768px) {
-    grid-template-columns: 60px 1fr;
-    gap: 12px;
-
-    &__cover {
-      width: 60px;
-      height: 60px;
-    }
-
-    &__genres {
-      display: none;
-    }
-
-    &__title {
-      font-size: 14px;
-    }
-
-    &__artist {
-      font-size: 13px;
-    }
-  }
+// ─── Sound bar animation ──────────────────────────────────────
+@keyframes soundBar {
+  from { transform: scaleY(0.5); }
+  to   { transform: scaleY(1); }
 }

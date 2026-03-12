@@ -1,6 +1,6 @@
 @import '../../_breakpoints.scss';
-.profile {
 
+.profile {
   background-color: var(--color-black);
   padding: var(--space-16) var(--space-4);
   padding-bottom: var(--space-20);
@@ -9,38 +9,50 @@
     padding-top: var(--space-24);
   }
 
-
   &__inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: 2.5rem;
     max-width: 860px;
     margin: 0 auto;
     width: 100%;
   }
 
-  // ── Hero ────────────────────────────────────────────────
+  // ─── Hero ─────────────────────────────────────────────────
   &__hero {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-6);
+    gap: 2rem;
+
+    @include respond-to(md) {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      text-align: center;
+    }
   }
 
-  // ── Avatar ──────────────────────────────────────────────
+  // ─── Avatar ───────────────────────────────────────────────
   &__avatar-wrap {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     flex-shrink: 0;
     cursor: pointer;
+    border: 1px solid rgba(245, 241, 232, 0.1);
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: rgba(245, 241, 232, 0.25);
+
+      .profile__avatar-overlay {
+        opacity: 1;
+      }
+    }
 
     &--loading {
       pointer-events: none;
-    }
-
-    &:hover .profile__avatar-overlay {
-      opacity: 1;
     }
   }
 
@@ -55,11 +67,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--color-green);
-      color: var(--color-white);
-      font-size: var(--font-size-3xl);
-      font-weight: 600;
+      background: rgba(0, 255, 135, 0.12);
+      color: var(--color-green, #00ff87);
+      font-size: 1.75rem;
+      font-weight: 300;
       letter-spacing: 0.04em;
+      border-radius: 50%;
     }
   }
 
@@ -67,209 +80,245 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: opacity 0.2s ease;
-    color: var(--color-white, #fff);
+    color: rgba(245, 241, 232, 0.8);
 
     &__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #fff;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid rgba(245, 241, 232, 0.2);
+      border-top-color: rgba(245, 241, 232, 0.8);
       border-radius: 50%;
       animation: profile-spin 0.7s linear infinite;
     }
   }
 
-  &__avatar-input {
-    display: none;
-  }
+  &__avatar-input { display: none; }
 
-  // ── Info ─────────────────────────────────────────────────
+  // ─── Info ─────────────────────────────────────────────────
   &__info {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: var(--space-1);
-    padding-top: var(--space-2);
+    gap: 0.2rem;
+    padding-top: 0.25rem;
     min-width: 0;
+
+    @include respond-to(md) {
+      align-items: center;
+    }
   }
 
   &__name {
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-    color: var(--color-white);
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: rgba(245, 241, 232, 0.92);
     margin: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    line-height: 1.1;
+    gap: 0.5rem;
+    line-height: 1.15;
 
-    &:hover .profile__edit-hint {
-      opacity: 0.6;
-    }
+    @include respond-to(md) { justify-content: center; }
+
+    &:hover .profile__edit-hint { opacity: 0.5; }
   }
 
   &__username {
-    font-size: var(--font-size-md);
-    color: var(--color-white);
-    opacity: 0.45;
-    margin: 0;
+    font-size: 0.875rem;
+    color: rgba(245, 241, 232, 0.35);
+    margin: 0.1rem 0 0;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 0.5rem;
 
-    &:hover .profile__edit-hint {
-      opacity: 0.6;
-    }
+    @include respond-to(md) { justify-content: center; }
+
+    &:hover .profile__edit-hint { opacity: 0.5; }
   }
 
   &__email {
-    font-size: var(--font-size-md);
-    color: var(--color-white);
-    opacity: 0.35;
-    margin: 10px 0 0;
+    font-size: 0.775rem;
+    color: rgba(245, 241, 232, 0.28);
+    margin: 0.5rem 0 0;
   }
 
   &__member-since {
-    font-size: var(--font-size-xs);
-    color: var(--color-white);
-    opacity: 0.25;
-    margin: var(--space-1) 0 0;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    color: rgba(245, 241, 232, 0.18);
+    margin: 0.2rem 0 0;
   }
 
   &__placeholder {
-    opacity: 0.3;
-    font-weight: 400;
+    opacity: 0.25;
+    font-weight: 300;
   }
 
   &__edit-hint {
-    font-size: var(--font-size-xs);
+    font-size: 0.7rem;
     opacity: 0;
     transition: opacity 0.15s ease;
     font-weight: 400;
+    color: rgba(245, 241, 232, 0.4);
   }
 
-  // ── Inline edit ──────────────────────────────────────────
+  // ─── Inline edit ──────────────────────────────────────────
   &__inline-edit {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-
-    &--username {
-      margin-top: 0;
-    }
+    gap: 0.5rem;
 
     &__at {
-      color: var(--color-white);
-      opacity: 0.45;
-      font-size: var(--font-size-md);
+      color: rgba(245, 241, 232, 0.35);
+      font-size: 0.875rem;
     }
 
     &__input {
       background: transparent;
       border: none;
-      border-radius: var(--border-radius);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      color: var(--color-white);
-      font-size: var(--font-size-md);
-      padding: var(--space-1) 0;
+      border-bottom: 1px solid rgba(245, 241, 232, 0.2);
+      border-radius: 0;
+      color: rgba(245, 241, 232, 0.85);
+      font-size: 0.875rem;
+      padding: 0.2rem 0.25rem;
       outline: none;
       font-family: inherit;
       min-width: 0;
       width: 200px;
-      padding: var(--space-1) var(--space-2);
+      transition: border-color 0.18s ease;
 
       &--name {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
+        font-size: 1.6rem;
+        font-weight: 300;
+        letter-spacing: -0.02em;
         width: 280px;
-        line-height: 1.1;
+        line-height: 1.15;
+
+        @include respond-to(md) { width: 220px; }
       }
 
       &::placeholder {
-        color: rgba(255, 255, 255, 0.2);
+        color: rgba(245, 241, 232, 0.18);
       }
 
       &:focus {
-        border-bottom-color: rgba(255, 255, 255, 0.7);
+        border-bottom-color: rgba(245, 241, 232, 0.5);
       }
     }
 
     &__confirm {
-      background: none;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: var(--color-white);
-      font-size: var(--font-size-sm);
-      padding: var(--space-1) var(--space-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(245, 241, 232, 0.06);
+      border: 1px solid rgba(245, 241, 232, 0.15);
+      color: rgba(245, 241, 232, 0.6);
+      font-size: 0.75rem;
       cursor: pointer;
       font-family: inherit;
-      transition: border-color 0.15s ease;
       flex-shrink: 0;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
       &:hover:not(:disabled) {
-        border-color: var(--color-white);
+        background: rgba(245, 241, 232, 0.1);
+        border-color: rgba(245, 241, 232, 0.3);
+        color: rgba(245, 241, 232, 0.9);
       }
 
       &:disabled {
-        opacity: 0.3;
+        opacity: 0.25;
         cursor: not-allowed;
       }
     }
   }
 
-  // ── Error ────────────────────────────────────────────────
+  // ─── Error ────────────────────────────────────────────────
   &__error {
-    font-size: var(--font-size-xs);
-    color: #ff6b6b;
-    margin: -var(--space-4) 0 0;
+    font-size: 0.775rem;
+    color: rgba(255, 107, 107, 0.85);
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255, 77, 77, 0.07);
+    border: 1px solid rgba(255, 77, 77, 0.15);
+    border-radius: 8px;
   }
 
-  // ── Favorites ────────────────────────────────────────────
+  // ─── Favorites section ────────────────────────────────────
   &__favorites {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(245, 241, 232, 0.06);
 
     &__header {
       display: flex;
       align-items: center;
-      gap: var(--space-4);
+      gap: 0.65rem;
+      margin-bottom: 0.25rem;
+    }
+
+    &__title {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.28);
+      margin: 0;
     }
 
     &__play {
-      background-color: transparent;
-      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(245, 241, 232, 0.06);
+      border: 1px solid rgba(245, 241, 232, 0.1);
+      cursor: pointer;
+      flex-shrink: 0;
       padding: 0;
+      transition: background 0.18s ease, border-color 0.18s ease;
 
       svg {
-        transition: all 0.3s ease;
+        width: 12px;
+        height: 12px;
+        transition: all 0.18s ease;
+
         path {
-          transition: all 0.3s ease;
+          fill: rgba(245, 241, 232, 0.55);
+          transition: fill 0.18s ease;
         }
       }
 
       &:hover {
-        svg {
-          path {
-            fill: var(--color-green);
-          }
-        }
+        background: rgba(245, 241, 232, 0.1);
+        border-color: rgba(245, 241, 232, 0.2);
+
+        svg path { fill: var(--color-green, #00ff87); }
       }
     }
 
-    &__title {
-      font-size: var(--font-size-sm);
-      letter-spacing: 0.12em;
-      color: var(--color-white);
+    &__empty {
+      font-size: 0.775rem;
+      color: rgba(245, 241, 232, 0.25);
+      font-style: italic;
+      padding: 1.5rem 0;
       margin: 0;
     }
 
@@ -279,118 +328,12 @@
       margin: 0;
       display: flex;
       flex-direction: column;
-    }
-
-    &__item {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      transition: background 0.15s ease;
-    }
-
-    &__index {
-      font-size: var(--font-size-sm);
-      color: var(--color-white);
-      opacity: 0.2;
-      font-variant-numeric: tabular-nums;
-      width: 20px;
-      flex-shrink: 0;
-    }
-
-    &__cover {
-      width: 80px;
-      height: 80px;
-      border-radius: var(--border-radius-super-small);
-      background: rgba(255, 255, 255, 0.07);
-      flex-shrink: 0;
-      overflow: hidden;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-    }
-
-    &__meta {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      flex: 1;
-      min-width: 0;
-    }
-
-    &__track-title {
-      font-size: var(--font-size-lg);
-      color: var(--color-white);
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    &__artist {
-      font-size: var(--font-size-md);
-      color: #aaa;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    &__duration {
-      font-size: var(--font-size-sm);
-      color: var(--color-white);
-      opacity: 0.3;
-      font-variant-numeric: tabular-nums;
-      flex-shrink: 0;
-    }
-
-    &__remove {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      color: var(--color-green);
-      transition: opacity 0.2s ease;
+      gap: 0.1rem;
     }
   }
 
-  // ── Animations ───────────────────────────────────────────
+  // ─── Animation ────────────────────────────────────────────
   @keyframes profile-spin {
     to { transform: rotate(360deg); }
-  }
-
-  // ── Responsive ───────────────────────────────────────────
-  @include respond-to(md) {
-    &__inner {
-      gap: var(--space-6);
-    }
-
-    &__hero {
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-6);
-      text-align: center;
-    }
-
-    &__info {
-      align-items: center;
-    }
-
-    &__name {
-      font-size: var(--font-size-2xl);
-      justify-content: center;
-    }
-
-    &__username {
-      justify-content: center;
-    }
-
-    &__inline-edit__input--name {
-      font-size: var(--font-size-2xl);
-      width: 220px;
-    }
   }
 }
