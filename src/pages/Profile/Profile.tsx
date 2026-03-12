@@ -76,10 +76,12 @@ const Profile = () => {
     }
   };
 
-  const handlePlayFavorites = () => {
+  const handlePlayFavorites = async () => {
     if (favorites.length > 0) {
       setPlayerTrackList(favorites);
       setPlaylist({ name: 'Favorite Tracks', url: '/favorites' });
+      await new Promise(resolve => setTimeout(resolve, 0));
+      setTrack(favorites[0]);
     }
   };
 
