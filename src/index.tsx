@@ -7,18 +7,16 @@ import Lenis from '@studio-freight/lenis';
 import Home from './pages/Home/Home';
 import About from './pages/About/About';
 import Artists from './pages/Artists/Artists';
-import Join from './pages/Join/Join';
 import Playlists from './pages/Playlists/Playlists';
 import Selections from './pages/Selections/Selections';
-import Play from './pages/Play/Play';
 import AuthConfirm from './pages/AuthConfirm/AuthConfirm';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
-import Member from './pages/Member/Member';
 import Admin from './pages/Admin/Admin';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import HiddenGems from './pages/HiddenGems/HiddenGems';
 import Terms from './pages/Terms/Terms';
 import Profile from './pages/Profile/Profile';
+import Login from './pages/Login/Login';
 
 // Components
 import Player from './components/Player/Player';
@@ -81,6 +79,16 @@ function App() {
         }
       />
 
+      {/* Login route - separate layout */}
+      {/* <Route
+        path="/login"
+        element={
+          <RequireAuth>
+            <Login />
+          </RequireAuth>
+        }
+      /> */}
+
       {/* All other routes with main layout */}
       <Route
         path="*"
@@ -102,14 +110,16 @@ function App() {
                 <Route path="/hidden-gems" element={<HiddenGems />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/artists" element={<Artists />} />
-                <Route path="/join" element={<Join />} />
                 <Route path="/playlists" element={<Playlists />} />
                 <Route path="/selections" element={<Selections />} />
-                <Route path="/play" element={<Play />} />
-                <Route path="/member" element={<Member />} />
                 <Route path="/profile" element={<Profile />} />
               </Routes>
             </main>
+
+            <Routes>
+              <Route path="/login" element={<Login />} />
+            </Routes>
+            
             <Footer />
           </RequireAuth>
         }

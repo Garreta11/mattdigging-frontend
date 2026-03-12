@@ -13,7 +13,6 @@ const Room: React.FC = () => {
     isTrackModalOpen,
     setIsFullscreen,
     isSearchModalOpen,
-    setIsSearchModalOpen,
   } = useAppContext();
 
   const isMobile = useIsMobile();

@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import { lenis } from '../../index';
+import MembersOnly from "../../components/MembersOnly/MembersOnly";
 
 const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -41,7 +42,7 @@ const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }
 };
 
 const Artists = () => {
-  const { user, setModalArtist, setIsModalArtistOpen } = useAppContext();
+  const { user, setModalArtist, setIsModalArtistOpen, isAuthed } = useAppContext();
   const isMember = user?.isMember;
 
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -111,13 +112,22 @@ const Artists = () => {
 
       <div className="main-content__close">
         <button className="main-content__close__button main-content__close__button--reverse" onClick={handleClose}>
-          <svg width="34" height="11" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0.204244 4.65981C-0.069123 4.93318 -0.069123 5.37639 0.204244 5.64976L4.65902 10.1045C4.93238 10.3779 5.3756 10.3779 5.64897 10.1045C5.92233 9.83117 5.92233 9.38795 5.64897 9.11458L1.68917 5.15479L5.64897 1.19499C5.92233 0.92162 5.92233 0.478405 5.64897 0.205038C5.3756 -0.0683293 4.93238 -0.0683293 4.65902 0.205038L0.204244 4.65981ZM33.8867 5.15479V4.45479H0.699219V5.15479V5.85479H33.8867V5.15479Z" fill="var(--color-white)"/>
+          HOME
+          <svg width="17" height="6" viewBox="0 0 17 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clipPath="url(#clip0_47_2)">
+              <path d="M16.898 3.1701C17.0347 3.03342 17.0347 2.81181 16.898 2.67513L14.6706 0.447756C14.5339 0.311057 14.3123 0.311057 14.1756 0.447757C14.0389 0.584422 14.0389 0.806031 14.1756 0.942716L16.1555 2.92261L14.1756 4.90251C14.0389 5.0392 14.0389 5.2608 14.1756 5.39749C14.3123 5.53417 14.5339 5.53417 14.6706 5.39749L16.898 3.1701ZM0.0567477 2.92261L0.0567477 3.27261L16.6505 3.27261L16.6505 2.92261L16.6505 2.57261L0.0567477 2.57261L0.0567477 2.92261Z" fill="var(--color-white)"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_47_2">
+            <rect width="17" height="5.5" fill="white" transform="translate(17 5.5) rotate(180)"/>
+            </clipPath>
+            </defs>
           </svg>
+
         </button>
       </div>
 
-      {!isMember ? (
+      {isAuthed ? (
         <div className="artists__content">
           <div className="artists__mobile__alphabet">
             <nav className="artists__mobile__alphabet__letters">
@@ -162,9 +172,7 @@ const Artists = () => {
           , document.body)}
         </div>
       ) : (
-        <div>
-          <h2>🔒 Only members can access artist profiles. Log in or join to unlock.</h2>
-        </div>
+        <MembersOnly />
       )}
 
     </section>

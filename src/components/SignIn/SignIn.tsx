@@ -1,8 +1,8 @@
 import { supabase } from "../../lib/supabase";
 import { useState } from "react";
 import './SignIn.scss';
-
-const BACKGROUND_IMAGE = '/chest/chest_00000.jpg';
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../../context/AppContext";
 
 type Mode = 'login' | 'signup' | 'forgot';
 
@@ -30,6 +30,8 @@ const SignIn = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { setIsSearchModalOpen } = useAppContext();
 
   const update = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -112,10 +114,16 @@ const SignIn = () => {
   const isSignup = mode === 'signup';
 
   return (
-    <div className="signin" style={{ backgroundImage: `url(${BACKGROUND_IMAGE})` }}>
+    <div className="signin">
       <div className="signin__overlay" />
 
       <div className={`signin__card ${isSignup ? 'signin__card--wide' : ''}`}>
+
+        <button className="signin__close" onClick={() => { navigate('/'); setTimeout(() => setIsSearchModalOpen(false), 300);}}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
 
         {/* Mode toggle — hidden on forgot screen */}
         {!isForgot && (

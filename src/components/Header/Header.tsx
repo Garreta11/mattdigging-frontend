@@ -8,7 +8,7 @@ import SearchInput from '../SearchInput/SearchInput';
 import UserInfo from '../UserInfo/UserInfo';
 
 const Header = () => {
-  const { user, isFullscreen, setIsFullscreen } = useAppContext();
+  const { user, isAuthed, isFullscreen, setIsFullscreen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const location = useLocation();
@@ -82,7 +82,6 @@ const Header = () => {
 
   return (
     <>
-      {user && (
         <header className={`header ${isFullscreen ? 'header--fullscreen' : ''}`}>
           {/* Logo */}
           <div className="header__logo">
@@ -114,6 +113,7 @@ const Header = () => {
               <Link to="/about" onClick={(e) => handleNavigate(e, '/about')}>About</Link>
             </div>
 
+            {isAuthed ? (
             <div className="header__links__items header__links__user" ref={dropdownRef}>
               <UserInfo onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} />
               {isUserDropdownOpen && (
@@ -160,6 +160,14 @@ const Header = () => {
                 </div>
               )}
             </div>
+            ) : (
+              <button
+                className="header__links__login"
+                onClick={() => navigate('/login')}
+              >
+                Log in
+              </button>
+            )}
           </nav>
 
           {/* Mobile Burger Button */}
@@ -264,7 +272,6 @@ const Header = () => {
             </div>
           </nav>
         </header>
-      )}
     </>
   );
 };

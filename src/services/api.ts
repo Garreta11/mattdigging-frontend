@@ -145,6 +145,12 @@ export const fetchTracksBySelection = async (selectionId: string): Promise<Track
   return response.json();
 };
 
+export const fetchFreeTracks = async (): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/free`);
+  if (!response.ok) throw new Error("Failed to fetch free tracks");
+  return response.json();
+};
+
 /* =========================
    SEARCH FUNCTIONS
 ========================= */

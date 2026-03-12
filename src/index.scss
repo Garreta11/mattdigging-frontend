@@ -172,18 +172,33 @@ input {
     z-index: 1000;
 
     &__button {
-      background-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0;
+      background: transparent;
       border: none;
       cursor: pointer;
-      color: var(--primary-color);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.35);
+      transition: color 0.2s ease, gap 0.2s ease;
 
-      @include respond-to(md) {
-        padding: 0;
+      svg {
+        opacity: 0.4;
+        transition: opacity 0.2s ease;
+        flex-shrink: 0;
       }
 
-      &--reverse {
-        padding: 0;
-        transform: rotate(180deg);
+      &:hover {
+        color: rgba(245, 241, 232, 0.75);
+        gap: 0.9rem;
+
+        svg {
+          opacity: 0.75;
+        }
       }
     }
 

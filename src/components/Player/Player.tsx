@@ -1,6 +1,6 @@
 import './Player.scss';
 import { useState, useEffect, useRef } from 'react'
-import { fetchTracks, Track, Artist } from '../../services/api';
+import { fetchTracks, fetchFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
@@ -17,7 +17,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = useAppContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isAuthed } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -45,7 +45,7 @@ const Player = () => {
     hasInitialized.current = true;
 
     const loadTracks = async () => {
-      const data = await fetchTracks();
+      const data = isAuthed ? await fetchTracks() : await fetchFreeTracks();
       setPlayerTrackList(data);
 
       if (data.length > 0) {
@@ -56,7 +56,7 @@ const Player = () => {
     };
 
     loadTracks();
-  }, [setPlayerTrackList]);
+  }, [setPlayerTrackList, isAuthed]);
 
   // --------------------------------
   // REACT TO PLAYLIST CHANGES

@@ -1,49 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 
-// ── Concurrency limiter ──────────────────────────────────────────────────────
-const MAX_CONCURRENT = 5;
-let active = 0;
-const queue: (() => void)[] = [];
-
-function drain() {
-  while (active < MAX_CONCURRENT && queue.length > 0) {
-    const next = queue.shift()!;
-    active++;
-    next();
-  }
-}
-
-function release() {
-  active--;
-  drain();
-}
-
-function enqueue(fn: () => Promise<void>): () => void {
-  let cancelled = false;
-
-  const wrapped = () => {
-    if (cancelled) {
-      release();
-      return;
-    }
-    fn().finally(release);
-  };
-
-  queue.push(wrapped);
-  drain();
-
-  return () => {
-    cancelled = true;
-  };
-}
-// ────────────────────────────────────────────────────────────────────────────
-
 /**
- * Hook to get a signed URL for a file in Supabase Storage.
- * Works with private buckets since it uses the authenticated client.
- * Requests are queued with a max concurrency of 5 to avoid exhausting
- * the Supabase connection pool.
+ * Hook to get a public URL for a file in Supabase Storage.
+ * Requires the bucket to be set to Public in Supabase dashboard.
+ * Works without authentication.
  */
 export function useStorageUrl(
   bucket: string | null,
@@ -72,29 +33,11 @@ export function useStorageUrl(
       return;
     }
 
-    let cancelled = false;
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(path);
 
-    const cancelEnqueue = enqueue(async () => {
-      if (cancelled) return;
-
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .createSignedUrl(path, 3600);
-
-      if (!cancelled) {
-        if (error) {
-          console.error(`[useStorageUrl] Error getting signed URL for ${bucket}/${path}:`, error.message);
-          setUrl(null);
-        } else {
-          setUrl(data.signedUrl);
-        }
-      }
-    });
-
-    return () => {
-      cancelled = true;
-      cancelEnqueue();
-    };
+    setUrl(data.publicUrl);
   }, [bucket, path, localFile]);
 
   return url;
