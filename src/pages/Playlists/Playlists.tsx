@@ -8,6 +8,7 @@ import TrackItem from '../../components/TrackItem/TrackItem';
 import TrackModal from '../../components/TrackModal/TrackModal';
 import { useAppContext } from '../../context/AppContext';
 import Loader from "../../components/Loader/Loader";
+import MembersOnly from "../../components/MembersOnly/MembersOnly";
 
 interface Season {
   slug: string;
@@ -24,7 +25,7 @@ const SEASONS: Season[] = [
 type DropdownKey = 'genre' | 'mood' | 'country' | 'season' | 'year' | null;
 
 const PlaylistsPage = () => {
-  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist } = useAppContext();
+  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist, isAuthed } = useAppContext();
   
   const [genres, setGenres] = useState<Genre[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
@@ -384,11 +385,13 @@ const PlaylistsPage = () => {
               className="playlistsPage__header__title"
               dangerouslySetInnerHTML={{ __html: getPageTitle }}
             />
-            <button className="playlistsPage__play-playlist" onClick={handlePlayPlaylist}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
+            {isAuthed && (
+              <button className="playlistsPage__play-playlist" onClick={handlePlayPlaylist}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -397,7 +400,7 @@ const PlaylistsPage = () => {
       {error && <p className="error">{error}</p>}
 
       {/* Tracks list */}
-      {hasActiveFilter && !isLoading && (
+      {hasActiveFilter && !isLoading && isAuthed && (
         <div className="playlistsPage__tracks">
           {tracks.length === 0 ? (
             <p>Music coming soon</p>
@@ -413,6 +416,10 @@ const PlaylistsPage = () => {
             ))
           )}
         </div>
+      )}
+
+      {hasActiveFilter && !isLoading && !isAuthed && (
+        <MembersOnly />
       )}
 
       {/* Empty state when no filter selected */}

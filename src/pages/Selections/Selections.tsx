@@ -199,14 +199,13 @@ const SelectionsPage = () => {
   const canGoPrevious = () => selectedMonth === 0 ? availableYears.includes(selectedYear - 1) : true;
   const canGoNext     = () => selectedMonth === 11 ? availableYears.includes(selectedYear + 1) : true;
 
-  const handlePlaySelection = () => {
+  const handlePlaySelection = async () => {
     if (tracks.length > 0) {
       setTrack(null);
       setPlayerTrackList(tracks);
       setPlaylist({ name: activeSelection?.title ?? '', url: `/selections?selection=${activeSelection?.id}` });
-      setTimeout(() => {
-        setTrack(tracks[0]);
-      }, 50);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      setTrack(tracks[0]);
     }
   };
 

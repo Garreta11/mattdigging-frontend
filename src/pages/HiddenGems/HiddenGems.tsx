@@ -38,15 +38,18 @@ const HiddenGemsPage = () => {
     load();
   }, []);
 
-  const handleClose = () => {
+  const handleClose = async () => {
     setIsFadingOut(true);
     setTimeout(() => navigate('/'), 1000);
   };
 
-  const handlePlaySelection = () => {
+  const handlePlaySelection = async () => {
     if (tracks.length > 0 && hiddenGemsSelection) {
+      setTrack(null);
       setPlayerTrackList(tracks);
       setPlaylist({ name: hiddenGemsSelection.title, url: '/hidden-gems' });
+      await new Promise(resolve => setTimeout(resolve, 0));
+      setTrack(tracks[0]);
     }
   };
 

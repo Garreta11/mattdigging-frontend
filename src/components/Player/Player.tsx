@@ -237,12 +237,12 @@ const Player = () => {
     if (!audio || !currentTrack) return;
 
     const handleCanPlay = () => {
-      if (isPlayingRef.current) {
+      // if (isPlayingRef.current) {
         audio.play().catch((err) => {
           console.error('Error auto-playing audio:', err);
           setIsPlaying(false);
         });
-      }
+      // }
     };
 
     audio.addEventListener("canplay", handleCanPlay);
