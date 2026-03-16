@@ -14,11 +14,11 @@ export default class Output {
 
     // Config
     this.BASE_VIDEO_URL = "/base.mp4";
-    this.CHEST_DIR = "/chest/";
-    this.CHEST_PREFIX = "chest_";
-    this.CHEST_PAD = 5;
+    this.CHEST_DIR = "/newchest/";
+    this.CHEST_PREFIX = "frame_";
+    this.CHEST_PAD = 4;
     this.CHEST_COUNT = 60;
-    this.CHEST_EXT = ".jpg";
+    this.CHEST_EXT = ".png";
     
     // Chest zone (normalized inside square viewport)
     this.CHEST_ZONE = { x0: 0.2, x1: 0.56, y0: 0, y1: 0.38 };
@@ -54,7 +54,7 @@ export default class Output {
     this.setCamera();
     this.setupVideo();
     this.setupMaterial();
-    //this.setupDebugOverlay();
+    // this.setupDebugOverlay();
     this.loadChestFrames();
     
     this.updateViewport();
@@ -269,10 +269,12 @@ export default class Output {
   }
 
   setupMaterial() {
+
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         tBase: { value: this.baseTex },
         tChest: { value: this.baseTex },
+        tMask: { value: null },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uZone: { value: new THREE.Vector4(
           this.CHEST_ZONE.x0, 
@@ -295,6 +297,7 @@ export default class Output {
 
         uniform sampler2D tBase;
         uniform sampler2D tChest;
+        uniform sampler2D tMask;
         uniform vec2 uMouse;
         uniform vec4 uZone;
         uniform float uBias;
@@ -307,18 +310,29 @@ export default class Output {
         void main() {
           vec2 p = uMouse * (${this.PARALLAX_BASE.toFixed(4)} + uBias);
           vec3 baseCol = texture2D(tBase, vUv + p).rgb;
+          vec3 chestCol = texture2D(tChest, vUv + p).rgb;
+          
+          // Sample the mask. Parallax p is applied so the mask stays 
+          // aligned with the chest frames.
+          float mask = texture2D(tMask, vUv + p).r; 
 
-          if (insideZone(vUv)) {
-            vec3 chestCol = texture2D(tChest, vUv + p).rgb;
-            gl_FragColor = vec4(chestCol, 1.0);
-          } else {
-            gl_FragColor = vec4(baseCol, 1.0);
-          }
+          // Linearly interpolate between background and chest based on mask intensity
+          vec3 finalCol = mix(baseCol, chestCol, mask);
+
+          gl_FragColor = vec4(finalCol, 1.0);
         }
       `
     });
 
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material);
+
+
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load('/chest_mask.png', (maskTex) => {
+      // maskTex.flipY = false; // Match your video/image orientation
+      this.material.uniforms.tMask.value = maskTex;
+    });
+
     this.scene.add(mesh);
   }
 
@@ -328,7 +342,7 @@ export default class Output {
   }
 
   chestFrameUrl(i) {
-    const actualFrame = i * 2;
+    const actualFrame = i;
     return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(actualFrame, this.CHEST_PAD)}${this.CHEST_EXT}`;
   }
 
