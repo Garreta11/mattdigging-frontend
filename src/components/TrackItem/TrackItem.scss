@@ -59,7 +59,7 @@
 
   // ─── Index ────────────────────────────────────────────────
   &__index {
-    font-size: 0.6rem;
+    font-size: 0.8rem;
     font-weight: 500;
     letter-spacing: 0.06em;
     color: rgba(245, 241, 232, 0.25);
@@ -137,7 +137,7 @@
   }
 
   &__title {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
     font-weight: 400;
     color: rgba(245, 241, 232, 0.9);
     margin: 0;
@@ -148,7 +148,7 @@
   }
 
   &__artist {
-    font-size: 0.775rem;
+    font-size: 1.1rem;
     color: rgba(245, 241, 232, 0.35);
     margin: 0;
     white-space: nowrap;
@@ -160,7 +160,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.7rem;
+    font-size: 1rem;
     color: rgba(245, 241, 232, 0.22);
 
     &__dot {
