@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import './Room.scss';
-import Output from './Output';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAppContext } from '../../context/AppContext';
 import { useStorageUrl } from '../../pages/Admin/hooks/useStorageUrl';
-import { useNavigate, useLocation } from 'react-router-dom';
+import Output from './Output';
+import './Room.scss';
 
 const Room: React.FC = () => {
   const {
@@ -17,122 +17,102 @@ const Room: React.FC = () => {
 
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const pathname = useLocation().pathname;
+  const { pathname } = useLocation();
+  
   const roomRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<Output | null>(null);
-  const trackRef = useRef(track);
-
-  const [tip, setTip] = useState<string>('');
   const tipRef = useRef<HTMLDivElement>(null);
 
+  const [tip, setTip] = useState<string>('');
   const coverUrl = useStorageUrl('covers', track?.cover_url || null, null);
-  const coverUrlRef = useRef(coverUrl);
 
-  // Keep trackRef in sync
-  useEffect(() => {
-    trackRef.current = track;
-  }, [track]);
+  // ─── Shared Navigation Logic ────────────────────────────────
+  const fadeTo = useCallback((path: string) => {
+    const mainContent = document.querySelector('.main-content');
+    setIsFullscreen(false);
 
-  // Keep coverUrlRef in sync and push new cover to the Output
-  useEffect(() => {
-    coverUrlRef.current = coverUrl;
-    if (outputRef.current && trackRef.current && coverUrlRef.current) {
-      outputRef.current.setTrackCover({ backgroundImage: coverUrlRef.current });
+    if (mainContent) {
+      mainContent.classList.add('fade-out');
+      setTimeout(() => {
+        navigate(path);
+        setTimeout(() => {
+          mainContent.classList.replace('fade-out', 'fade-in');
+          setTimeout(() => mainContent.classList.remove('fade-in'), 300);
+        }, 50);
+      }, 1000);
+    } else {
+      navigate(path);
     }
-  }, [coverUrl]);
+  }, [navigate, setIsFullscreen]);
 
-  // ─── Single source of truth for interactions ────────────────
-  // Interactions are disabled when ANY of these is true:
-  //   1. Search modal is open
-  //   2. Track modal is open
-  //   3. On mobile and not on the home route
-  useEffect(() => {
-    const shouldDisable =
-      isSearchModalOpen ||
-      isTrackModalOpen ||
-      (isMobile && pathname !== '/');
-
-    outputRef.current?.setInteractionsEnabled(!shouldDisable);
-  }, [isSearchModalOpen, isTrackModalOpen, isMobile, pathname]);
-
-  // ─── Keep isMobile in sync with Output ──────────────────────
-  useEffect(() => {
-    outputRef.current?.setIsMobile(isMobile);
-  }, [isMobile]);
-
-  // ─── Mount / unmount Output ─────────────────────────────────
+  // ─── Initialize Output ──────────────────────────────────────
   useEffect(() => {
     if (!roomRef.current) return;
 
-    const navigate_ = navigate;
-
-    const fadeTo = (path: string) => {
-      const mainContent = document.querySelector('.main-content');
-      if (mainContent) {
-        mainContent.classList.add('fade-out');
-        setTimeout(() => {
-          navigate_(path);
-          setTimeout(() => {
-            mainContent.classList.remove('fade-out');
-            mainContent.classList.add('fade-in');
-            setTimeout(() => mainContent.classList.remove('fade-in'), 300);
-          }, 50);
-        }, 1000);
-      } else {
-        navigate_(path);
-      }
-      setIsFullscreen(false);
-    };
-
     outputRef.current = new Output({
       container: roomRef.current,
-
-      onChestClick: () => {
-        if (isSearchModalOpen) return;
-        fadeTo('/hidden-gems');
-      },
-
+      onChestClick: () => !isSearchModalOpen && fadeTo('/hidden-gems'),
       onTrackCoverClick: () => {
         if (isSearchModalOpen) return;
         setIsTrackModalOpen(true);
         setIsFullscreen(false);
       },
-
-      onLampClick: () => {
-        if (isSearchModalOpen) return;
-        fadeTo('/playlists?mood=lava-lamp');
-      },
-
-      onShelfClick: () => {
-        if (isSearchModalOpen) return;
-        fadeTo('/selections');
-      },
-
-      onTipChange: (tip: string) => setTip(tip),
+      onLampClick: () => !isSearchModalOpen && fadeTo('/playlists?mood=lava-lamp'),
+      onShelfClick: () => !isSearchModalOpen && fadeTo('/selections'),
+      onTipChange: setTip,
     });
 
     return () => {
       outputRef.current?.dispose();
       outputRef.current = null;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
-  // Mouse-tracked tooltip
+  // ─── Sync Logic (Using refs to avoid Output re-instantiation) ──
   useEffect(() => {
+    outputRef.current?.setIsMobile(isMobile);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (coverUrl) {
+      outputRef.current?.setTrackCover({ backgroundImage: coverUrl });
+    }
+  }, [coverUrl]);
+
+  useEffect(() => {
+    const shouldDisable = isSearchModalOpen || isTrackModalOpen || (isMobile && pathname !== '/');
+    outputRef.current?.setInteractionsEnabled(!shouldDisable);
+  }, [isSearchModalOpen, isTrackModalOpen, isMobile, pathname]);
+
+  // ─── Optimized Tooltip Movement ─────────────────────────────
+  useEffect(() => {
+    let frameId: number;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!tipRef.current || !roomRef.current) return;
-      const rect = roomRef.current.getBoundingClientRect();
-      tipRef.current.style.transform = `translate(${e.clientX - rect.left}px, ${e.clientY - rect.top}px)`;
+      
+      // Use requestAnimationFrame to throttle updates to screen refresh rate
+      frameId = requestAnimationFrame(() => {
+        const rect = roomRef.current!.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        // Use translate3d for GPU acceleration
+        tipRef.current!.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      });
     };
 
-    document.body.addEventListener('mousemove', handleMouseMove);
-    return () => document.body.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(frameId);
+    };
   }, []);
 
   return (
     <div className="room" ref={roomRef}>
       {tip !== '' && (
-        <div className="room__tip" ref={tipRef}>
+        <div className="room__tip" ref={tipRef} style={{ willChange: 'transform' }}>
           <p className="room__tip__text">{tip}</p>
         </div>
       )}
