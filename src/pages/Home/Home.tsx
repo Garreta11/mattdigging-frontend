@@ -10,8 +10,8 @@ const Home = () => {
 
   return (
     <div className="home" >
-      {/* <div className="home__frame" style={{ backgroundImage: `url(${backgroundImage})` }}> */}
-      <div className={`home__frame ${isFullscreen ? 'home__frame--fullscreen' : ''}`}>
+      <div className={`home__frame ${isFullscreen ? 'home__frame--fullscreen' : ''}`} style={{ backgroundImage: `url(${backgroundImage})`}}>
+      {/* <div className={`home__frame ${isFullscreen ? 'home__frame--fullscreen' : ''}`}> */}
         <Room />
       </div>
     </div>
