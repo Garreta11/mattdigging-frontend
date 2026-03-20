@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useFavorites } from '../../hooks/useFavorites';
 import ImageStorage from '../../components/ImageStorage/ImageStorage';
 import TrackItem from '../../components/TrackItem/TrackItem';
-import { Track, handleBillingCheckout } from '../../services/api';
+import { Track, fetchBillingCheckout, fetchBillingPortal } from '../../services/api';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -96,10 +96,17 @@ const Profile = () => {
   const handleSubscribe = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
-    console.log(token);
     if (!token) return;
-    const { url } = await handleBillingCheckout(token);
-    console.log(url);
+    const { url } = await fetchBillingCheckout(token);
+    window.open(url, '_blank');
+  }
+
+  const handleBillingPortal = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+    const { url } = await fetchBillingPortal(token);
+    window.open(url, '_blank');
   }
 
   const initials = user?.name
@@ -205,7 +212,7 @@ const Profile = () => {
             {auth?.profile?.subscription_type ? (
               <div className="profile__member-since">
                 Subscription: {auth?.profile?.subscription_type}
-                <button>manage</button>
+                <button onClick={handleBillingPortal}>manage</button>
               </div>
             ) : (
               <button onClick={handleSubscribe}>subscribe</button>

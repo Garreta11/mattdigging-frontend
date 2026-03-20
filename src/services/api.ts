@@ -124,7 +124,7 @@ export const fetchAuth = async (token: string): Promise<Auth> => {
 };
 
 // STRIPE
-export const handleBillingCheckout = async (token: string): Promise<{ url: string }> => {
+export const fetchBillingCheckout = async (token: string): Promise<{ url: string }> => {
   const response = await fetch(`${API_BASE_URL}/billing/checkout`, {
     method: 'POST',
     headers: {
@@ -133,6 +133,18 @@ export const handleBillingCheckout = async (token: string): Promise<{ url: strin
       },
     });
   if (!response.ok) throw new Error("Failed to handle billing checkout");
+  return response.json();
+};
+
+export const fetchBillingPortal = async (token: string): Promise<{ url: string }> => {
+  const response = await fetch(`${API_BASE_URL}/billing/portal`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to handle billing portal");
   return response.json();
 };
 

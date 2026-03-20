@@ -98,7 +98,7 @@ const Room: React.FC = () => {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         // Use translate3d for GPU acceleration
-        // tipRef.current!.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        tipRef.current!.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       });
     };
 
