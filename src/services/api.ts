@@ -91,10 +91,53 @@ export type Playlist = {
   url: string;
 };
 
+export type Auth = {
+  user: {
+    id: string;
+    email: string | undefined;
+    created_at: string;
+  };
+  profile: {
+    username: any;
+    is_member: any;
+    subscription_type: any;
+    subscription_expires_at: any;
+    member_since: any;
+}
+};
+
 /* =========================
    BASIC FETCHERS
 ========================= */
 
+// AUTHENTICATION
+
+export const fetchAuth = async (token: string): Promise<Auth> => {
+  const response = await fetch(`${API_BASE_URL}/auth`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch user");
+  return response.json();
+};
+
+// STRIPE
+export const handleBillingCheckout = async (token: string): Promise<{ url: string }> => {
+  const response = await fetch(`${API_BASE_URL}/billing/checkout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      },
+    });
+  if (!response.ok) throw new Error("Failed to handle billing checkout");
+  return response.json();
+};
+
+
+// GENRES
 export const fetchGenres = async (): Promise<Genre[]> => {
   const response = await fetch(`${API_BASE_URL}/genres`);
   if (!response.ok) throw new Error("Failed to fetch genres");

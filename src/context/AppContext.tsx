@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../../types/user";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
-import { Track, Artist, Playlist } from "../services/api";
+import { Track, Artist, Playlist, fetchAuth, Auth } from "../services/api";
 
 interface AppContextType {
   user: User | null;
@@ -37,11 +37,15 @@ interface AppContextType {
 
   isSearchModalOpen: boolean;
   setIsSearchModalOpen: (isOpen: boolean) => void;
+
+  auth: Auth | null;
+  setAuth: (auth: Auth | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  const [auth, setAuth] = useState<Auth | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -60,6 +64,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (token) {
+          const authData = await fetchAuth(token);
+          setAuth(authData);
+        }
+
         updateUserState(session);
       } catch (error) {
         console.error("Error getting session:", error);
@@ -133,6 +143,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setIsFullscreen,
       isSearchModalOpen,
       setIsSearchModalOpen,
+      auth,
+      setAuth,
     }}>
       {children}
     </AppContext.Provider>

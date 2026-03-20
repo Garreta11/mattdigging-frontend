@@ -6,11 +6,11 @@ import { supabase } from '../../lib/supabase';
 import { useFavorites } from '../../hooks/useFavorites';
 import ImageStorage from '../../components/ImageStorage/ImageStorage';
 import TrackItem from '../../components/TrackItem/TrackItem';
-import { Track } from '../../services/api';
+import { Track, handleBillingCheckout } from '../../services/api';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, setUser, setPlayerTrackList, setPlaylist, setTrack, track: currentTrack } = useAppContext();
+  const { user, setUser, setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, auth } = useAppContext();
   const { favorites, loading: favoritesLoading, toggleFavorite } = useFavorites();
 
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -92,6 +92,15 @@ const Profile = () => {
     await new Promise(resolve => setTimeout(resolve, 0));
     setTrack(track);
   };
+
+  const handleSubscribe = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    console.log(token);
+    if (!token) return;
+    const { url } = await handleBillingCheckout(token);
+    console.log(url);
+  }
 
   const initials = user?.name
     ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -193,6 +202,14 @@ const Profile = () => {
             <p className="profile__member-since">
               Member since {user?.createdAt?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </p>
+            {auth?.profile?.subscription_type ? (
+              <div className="profile__member-since">
+                Subscription: {auth?.profile?.subscription_type}
+                <button>manage</button>
+              </div>
+            ) : (
+              <button onClick={handleSubscribe}>subscribe</button>
+            )}
 
           </div>
         </div>
