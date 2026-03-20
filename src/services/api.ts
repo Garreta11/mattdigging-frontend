@@ -1,7 +1,6 @@
 // services/api.ts
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:3333";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3333";
 
 /* =========================
    TYPES
@@ -103,7 +102,7 @@ export type Auth = {
     subscription_type: any;
     subscription_expires_at: any;
     member_since: any;
-}
+  };
 };
 
 /* =========================
@@ -115,8 +114,8 @@ export type Auth = {
 export const fetchAuth = async (token: string): Promise<Auth> => {
   const response = await fetch(`${API_BASE_URL}/auth`, {
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
   if (!response.ok) throw new Error("Failed to fetch user");
@@ -124,30 +123,41 @@ export const fetchAuth = async (token: string): Promise<Auth> => {
 };
 
 // STRIPE
-export const fetchBillingCheckout = async (token: string): Promise<{ url: string }> => {
+export const fetchBillingCheckout = async (
+  token: string,
+  onReloadAuth: () => void,
+): Promise<{ url: string }> => {
   const response = await fetch(`${API_BASE_URL}/billing/checkout`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      },
-    });
-  if (!response.ok) throw new Error("Failed to handle billing checkout");
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const json = await response.json();
+    if (json.error === "You already have a subscription") {
+      onReloadAuth();
+    } else {
+      throw new Error("Failed to handle billing checkout");
+    }
+  }
   return response.json();
 };
 
-export const fetchBillingPortal = async (token: string): Promise<{ url: string }> => {
+export const fetchBillingPortal = async (
+  token: string,
+): Promise<{ url: string }> => {
   const response = await fetch(`${API_BASE_URL}/billing/portal`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
   if (!response.ok) throw new Error("Failed to handle billing portal");
   return response.json();
 };
-
 
 // GENRES
 export const fetchGenres = async (): Promise<Genre[]> => {
@@ -169,7 +179,7 @@ export const fetchArtists = async (): Promise<Artist[]> => {
 };
 
 export const fetchTracks = async (
-  queryString: string = ""
+  queryString: string = "",
 ): Promise<Track[]> => {
   const response = await fetch(`${API_BASE_URL}/tracks${queryString}`);
   if (!response.ok) throw new Error("Failed to fetch tracks");
@@ -178,24 +188,28 @@ export const fetchTracks = async (
 
 export const fetchYears = async (): Promise<Year[]> => {
   const response = await fetch(`${API_BASE_URL}/tracks/years`);
-  if (!response.ok) throw new Error('Failed to fetch years');
+  if (!response.ok) throw new Error("Failed to fetch years");
   return response.json();
 };
 
 export const fetchCountries = async (): Promise<Country[]> => {
   const response = await fetch(`${API_BASE_URL}/tracks/countries`);
-  if (!response.ok) throw new Error('Failed to fetch countries');
+  if (!response.ok) throw new Error("Failed to fetch countries");
   return response.json();
 };
 
 export const fetchSelections = async (): Promise<Selections[]> => {
   const response = await fetch(`${API_BASE_URL}/selections`);
-  if (!response.ok) throw new Error('Failed to fetch selections');
+  if (!response.ok) throw new Error("Failed to fetch selections");
   return response.json();
 };
 
-export const fetchTracksBySelection = async (selectionId: string): Promise<Track[]> => {
-  const response = await fetch(`${API_BASE_URL}/tracks/by-selection/${selectionId}`);
+export const fetchTracksBySelection = async (
+  selectionId: string,
+): Promise<Track[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/tracks/by-selection/${selectionId}`,
+  );
   if (!response.ok) throw new Error("Failed to fetch selection tracks");
   return response.json();
 };
@@ -210,11 +224,9 @@ export const fetchFreeTracks = async (): Promise<Track[]> => {
    SEARCH FUNCTIONS
 ========================= */
 
-export const searchArtists = async (
-  query: string
-): Promise<Artist[]> => {
+export const searchArtists = async (query: string): Promise<Artist[]> => {
   const response = await fetch(
-    `${API_BASE_URL}/artists/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/artists/search?q=${encodeURIComponent(query)}`,
   );
 
   if (!response.ok) throw new Error("Failed to search artists");
@@ -222,11 +234,9 @@ export const searchArtists = async (
   return response.json();
 };
 
-export const searchTracks = async (
-  query: string
-): Promise<Track[]> => {
+export const searchTracks = async (query: string): Promise<Track[]> => {
   const response = await fetch(
-    `${API_BASE_URL}/tracks/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/tracks/search?q=${encodeURIComponent(query)}`,
   );
 
   if (!response.ok) throw new Error("Failed to search tracks");
@@ -234,11 +244,9 @@ export const searchTracks = async (
   return response.json();
 };
 
-export const searchCountries = async (
-  query: string
-): Promise<Country[]> => {
+export const searchCountries = async (query: string): Promise<Country[]> => {
   const response = await fetch(
-    `${API_BASE_URL}/tracks/countries/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/tracks/countries/search?q=${encodeURIComponent(query)}`,
   );
   if (!response.ok) throw new Error("Failed to search countries");
   return response.json();
@@ -246,7 +254,7 @@ export const searchCountries = async (
 
 export const searchGenres = async (query: string): Promise<Genre[]> => {
   const response = await fetch(
-    `${API_BASE_URL}/tracks/genres/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/tracks/genres/search?q=${encodeURIComponent(query)}`,
   );
   if (!response.ok) throw new Error("Failed to search genres");
   return response.json();
@@ -254,7 +262,7 @@ export const searchGenres = async (query: string): Promise<Genre[]> => {
 
 export const searchMoods = async (query: string): Promise<Mood[]> => {
   const response = await fetch(
-    `${API_BASE_URL}/tracks/moods/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/tracks/moods/search?q=${encodeURIComponent(query)}`,
   );
   if (!response.ok) throw new Error("Failed to search moods");
   return response.json();
