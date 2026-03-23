@@ -76,6 +76,8 @@ const Header = () => {
       .filter((key) => key.startsWith('sb-'))
       .forEach((key) => localStorage.removeItem(key));
     supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    navigate('/');
+    window.location.reload();
   };
 
   if (location.pathname.startsWith("/admin")) return null;
@@ -192,9 +194,12 @@ const Header = () => {
           <nav className={`header__mobile-menu ${isOpen ? 'header__mobile-menu--open' : ''}`}>
 
             {/* User Card at top */}
-            <div className="header__mobile-menu__user-card">
-              <UserInfo onClick={() => {}} />
-            </div>
+            {isAuthed && (
+              <div className="header__mobile-menu__user-card">
+                <UserInfo onClick={() => {}} />
+              </div>
+            )}
+
 
             {/* Main Nav Links */}
             <div className="header__mobile-menu__content">
@@ -232,17 +237,19 @@ const Header = () => {
             <div className="header__mobile-menu__account">
               <span className="header__mobile-menu__section-label">Account</span>
 
-              <Link
-                className="header__mobile-menu__account__item"
-                to="/profile"
-                onClick={(e) => { handleNavigate(e, '/profile'); closeSidebar(); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                </svg>
-                Profile
-              </Link>
+              {isAuthed && (
+                <Link
+                  className="header__mobile-menu__account__item"
+                  to="/profile"
+                  onClick={(e) => { handleNavigate(e, '/profile'); closeSidebar(); }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                  </svg>
+                  Profile
+                </Link>
+              )}
 
               <Link
                 className="header__mobile-menu__account__item"
@@ -260,15 +267,19 @@ const Header = () => {
 
               <div className="header__mobile-menu__account__divider" />
 
-              <button
-                className="header__mobile-menu__account__logout"
-                onClick={() => { handleLogout(); closeSidebar(); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-                </svg>
-                Logout
-              </button>
+              {isAuthed ? (
+                <button
+                  className="header__mobile-menu__account__logout"
+                  onClick={() => { handleLogout(); closeSidebar(); }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+                  </svg>
+                  Logout
+                </button>
+              ) : (
+                <button className="header__mobile-menu__account__subscribe" onClick={() => navigate('/login')}>Log in</button>
+              )}
             </div>
           </nav>
         </header>
