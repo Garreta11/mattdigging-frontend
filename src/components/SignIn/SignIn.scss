@@ -61,16 +61,16 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
     width: 100%;
     max-width: 400px;
-    padding: var(--space-10) var(--space-4);
-    background: rgba(8, 12, 12, 0.92);
-    border: 1px solid rgba(245, 241, 232, 0.1);
+    padding: var(--space-10) var(--space-6);
+    background: rgba(8, 12, 12, 0.95);
+    border: 1px solid rgba(55, 93, 44, 0.25);
     border-radius: 16px;
     box-shadow:
       0 32px 80px rgba(0, 0, 0, 0.7),
-      0 0 0 0.5px rgba(255, 255, 255, 0.04);
+      0 0 0 0.5px rgba(55, 93, 44, 0.1);
     transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     animation: cardReveal 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
 
@@ -101,14 +101,14 @@
       cursor: pointer;
       font-size: var(--font-size-sm);
       font-weight: 400;
-      color: rgba(245, 241, 232, 0.3);
+      color: rgba(245, 241, 232, 0.45);
       padding: var(--space-1) 0;
       position: relative;
       z-index: 1;
       transition: color 0.2s ease;
 
       &.active {
-        color: rgba(245, 241, 232, 0.9);
+        color: var(--color-white);
       }
     }
 
@@ -118,7 +118,7 @@
       left: var(--space-1);
       width: calc(50% - 3px);
       height: calc(100% - 6px);
-      background: rgba(245, 241, 232, 0.08);
+      background: rgba(55, 93, 44, 0.35);
       border-radius: var(--border-radius-super-small);
       transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -137,15 +137,15 @@
 
     h2 {
       font-size: var(--font-size-2xl);
-      font-weight: 300;
-      letter-spacing: -0.02em;
-      color: rgba(245, 241, 232, 0.92);
+      font-weight: 400;
+      letter-spacing: .045em;
+      color: var(--color-white);
       margin: 0;
     }
 
     p {
       font-size: var(--font-size-md);
-      color: rgba(245, 241, 232, 0.3);
+      color: rgba(245, 241, 232, 0.6);
       margin: 0;
       line-height: 1.5;
     }
@@ -163,13 +163,13 @@
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(245, 241, 232, 0.3);
+    color: rgba(245, 241, 232, 0.5);
     padding: 0;
     margin-bottom: 0.25rem;
     transition: color 0.18s ease;
 
     &:hover {
-      color: rgba(245, 241, 232, 0.7);
+      color: rgba(245, 241, 232, 0.85);
     }
   }
 
@@ -210,18 +210,19 @@
 
       label {
         font-size: var(--font-size-xs);
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        color: rgba(245, 241, 232, 0.28);
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(245, 241, 232, 0.55);
       }
 
       input {
         background: rgba(245, 241, 232, 0.04);
-        border: 1px solid rgba(245, 241, 232, 0.1);
+        border: 1px solid rgba(55, 93, 44, 0.4);
         border-radius: var(--border-radius-super-small);
         padding: var(--space-2) var(--space-3);
         font-size: var(--font-size-md);
-        color: rgba(245, 241, 232, 0.88);
+        color: var(--color-white);
         outline: none;
         transition: border-color 0.18s ease, background 0.18s ease;
         width: 100%;
@@ -229,12 +230,12 @@
         font-family: inherit;
 
         &::placeholder {
-          color: rgba(245, 241, 232, 0.18);
+          color: rgba(245, 241, 232, 0.3);
         }
 
         &:focus {
-          border-color: rgba(245, 241, 232, 0.28);
-          background: rgba(245, 241, 232, 0.06);
+          border-color: var(--color-green);
+          background: rgba(55, 93, 44, 0.08);
         }
 
         &:disabled {
@@ -251,8 +252,8 @@
       align-items: center;
       gap: var(--space-2);
       cursor: pointer;
-      font-size: var(--font-size-md);
-      color: rgba(245, 241, 232, 0.35);
+      font-size: var(--font-size-sm);
+      color: rgba(245, 241, 232, 0.6);
       line-height: 1.5;
       grid-column: 1 / -1;
 
@@ -261,12 +262,12 @@
         height: 14px;
         flex-shrink: 0;
         margin-top: 1px;
-        accent-color: var(--color-green, #00ff87);
+        accent-color: var(--color-green);
         cursor: pointer;
       }
 
       a {
-        color: rgba(245, 241, 232, 0.65);
+        color: rgba(245, 241, 232, 0.85);
         text-decoration: underline;
         text-underline-offset: 3px;
         transition: color 0.18s ease;
@@ -280,26 +281,25 @@
 
     // Submit button
     &__button {
-      margin-top: var(--space-1);
-      padding: var(--space-2) var(--space-3);
-      border-radius: var(--border-radius-super-small);
-      background: rgba(245, 241, 232, 0.08);
-      border: 1px solid rgba(245, 241, 232, 0.14);
-      color: rgba(245, 241, 232, 0.85);
+      margin-top: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--border-radius);
+      background: var(--color-green);
+      border: 1px solid var(--color-green);
+      color: var(--color-white);
       font-size: var(--font-size-md);
       font-weight: 400;
       font-family: inherit;
       cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 
       &:hover:not(:disabled) {
-        background: rgba(245, 241, 232, 0.13);
-        border-color: rgba(245, 241, 232, 0.25);
-        color: rgba(245, 241, 232, 0.95);
+        background: #476e3a;
+        border-color: #476e3a;
       }
 
       &:disabled {
-        opacity: 0.35;
+        opacity: 0.4;
         cursor: not-allowed;
       }
     }
@@ -310,8 +310,8 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: var(--font-size-xs);
-    color: rgba(245, 241, 232, 0.28);
+    font-size: var(--font-size-md);
+    color: rgba(245, 241, 232, 0.5);
     text-align: right;
     padding: 0;
     align-self: flex-end;
@@ -320,7 +320,7 @@
     margin-top: -0.25rem;
 
     &:hover {
-      color: rgba(245, 241, 232, 0.65);
+      color: rgba(245, 241, 232, 0.85);
     }
   }
 
@@ -347,8 +347,8 @@
 
   // ─── Footer switch ──────────────────────────────────────
   &__switch {
-    font-size: 0.75rem;
-    color: rgba(245, 241, 232, 0.25);
+    font-size: var(--font-size-md);
+    color: rgba(245, 241, 232, 0.5);
     text-align: center;
     margin: 0;
     margin-top: var(--space-2);
@@ -359,14 +359,14 @@
       cursor: pointer;
       font-size: inherit;
       font-family: inherit;
-      color: rgba(245, 241, 232, 0.55);
+      color: rgba(245, 241, 232, 0.8);
       text-decoration: underline;
       text-underline-offset: 3px;
       padding: 0;
       transition: color 0.18s ease;
 
       &:hover {
-        color: rgba(245, 241, 232, 0.88);
+        color: var(--color-white);
       }
     }
   }
