@@ -7,6 +7,7 @@ import { fetchSelections, fetchTracksBySelection, Selections, Track } from "../.
 import { useAppContext } from "../../context/AppContext";
 import TrackItem from "../../components/TrackItem/TrackItem";
 import Loader from "../../components/Loader/Loader";
+import MembersOnly from "../../components/MembersOnly/MembersOnly";
 
 const HiddenGemsPage = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const HiddenGemsPage = () => {
   const [hiddenGemsSelection, setHiddenGemsSelection] = useState<Selections | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isAuthed } = useAppContext();
 
   useEffect(() => {
     const load = async () => {
@@ -82,36 +83,40 @@ const HiddenGemsPage = () => {
         </button>
       </div>
 
-      <div className="hidden-gems__content">
-        <div className="selectionsPage__selectionView__header">
-          <h1 className="selectionsPage__selectionView__header__title">
-            <span>Hidden Gems</span>
-          </h1>
-          {tracks.length > 0 && (
-            <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
-          )}
-        </div>
+      {isAuthed ? (
+        <div className="hidden-gems__content">
+          <div className="selectionsPage__selectionView__header">
+            <h1 className="selectionsPage__selectionView__header__title">
+              <span>Hidden Gems</span>
+            </h1>
+            {tracks.length > 0 && (
+              <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
+                </svg>
+              </button>
+            )}
+          </div>
 
-        <div className="selectionsPage__selectionView__tracks">
-          {tracks.length === 0 ? (
-            <p>No tracks found</p>
-          ) : (
-            tracks.map((track, index) => (
-              <TrackItem
-                key={track.id}
-                track={track}
-                index={index}
-                onClick={() => handleTrackClick(track)}
-                isPlaying={currentTrack?.id === track.id}
-              />
-            ))
-          )}
+          <div className="selectionsPage__selectionView__tracks">
+            {tracks.length === 0 ? (
+              <p>No tracks found</p>
+            ) : (
+              tracks.map((track, index) => (
+                <TrackItem
+                  key={track.id}
+                  track={track}
+                  index={index}
+                  onClick={() => handleTrackClick(track)}
+                  isPlaying={currentTrack?.id === track.id}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <MembersOnly />
+      )}
     </section>
   );
 };
