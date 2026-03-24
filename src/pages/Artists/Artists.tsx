@@ -42,8 +42,7 @@ const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }
 };
 
 const Artists = () => {
-  const { user, setModalArtist, setIsModalArtistOpen, isAuthed } = useAppContext();
-  const isMember = user?.isMember;
+  const { setModalArtist, setIsModalArtistOpen, isMember } = useAppContext();
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -127,7 +126,7 @@ const Artists = () => {
         </button>
       </div>
 
-      {isAuthed ? (
+      {isMember ? (
         <div className="artists__content">
           <div className="artists__mobile__alphabet">
             <nav className="artists__mobile__alphabet__letters">

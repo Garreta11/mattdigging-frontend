@@ -9,13 +9,13 @@ interface FavoriteButtonProps {
 }
 
 const FavoriteButton = ({ track, className = '' }: FavoriteButtonProps) => {
-  const { isAuthed } = useAppContext();
+  const { isMember } = useAppContext();
   const { isFavorite, toggleFavorite } = useFavorites();
   const active = isFavorite(track.id);
 
   return (
     <button
-      className={`favorite-btn ${active ? 'favorite-btn--active' : ''} ${className} ${isAuthed ? '' : 'members-only'}`}
+      className={`favorite-btn ${active ? 'favorite-btn--active' : ''} ${className} ${isMember ? '' : 'members-only'}`}
       onClick={(e) => {
         e.stopPropagation();
         toggleFavorite(track);

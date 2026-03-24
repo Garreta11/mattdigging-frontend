@@ -13,15 +13,15 @@ interface ArtistModalProps {
 }
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
-  const { setIsTrackModalOpen, setTrack } = useAppContext();
+  const { setIsTrackModalOpen, setTrack, setPlayerTrackList } = useAppContext();
   if (!isOpen || !artist) return null;
 
   const tracks = artist.tracks || [];
   const hasTracks = tracks.length > 0;
 
-  const handleTrackClick = (track: Track) => {
-    console.log('track', track);
-    setTrack(track);
+  const handleTrackClick = (clickedTrack: Track) => {
+    setPlayerTrackList(tracks);
+    setTrack(clickedTrack);
     onClose();
   };
 

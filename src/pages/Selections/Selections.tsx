@@ -112,7 +112,7 @@ const getSelectionCovers = (selection: Selections) =>
 
 // ─── SelectionsPage ───────────────────────────────────────────────────────────
 const SelectionsPage = () => {
-  const { setPlayerTrackList, setPlaylist, setTrack, isAuthed } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, isMember } = useAppContext();
   const { track: currentTrack } = useAppContext();
   const [searchParams] = useSearchParams();
   const selectionParam = searchParams.get("selection");
@@ -242,7 +242,7 @@ const SelectionsPage = () => {
       </div>
 
       {/* Auth gate */}
-      {!isAuthed ? (
+      {!isMember ? (
         <MembersOnly />
       ) : selectionParam ? (
         /* ── Active selection view ── */

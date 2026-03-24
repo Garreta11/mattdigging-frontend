@@ -15,7 +15,7 @@ const HiddenGemsPage = () => {
   const [hiddenGemsSelection, setHiddenGemsSelection] = useState<Selections | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isAuthed } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isMember } = useAppContext();
 
   useEffect(() => {
     const load = async () => {
@@ -83,7 +83,7 @@ const HiddenGemsPage = () => {
         </button>
       </div>
 
-      {isAuthed ? (
+      {isMember ? (
         <div className="hidden-gems__content">
           <div className="selectionsPage__selectionView__header">
             <h1 className="selectionsPage__selectionView__header__title">

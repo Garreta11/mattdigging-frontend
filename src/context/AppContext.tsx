@@ -8,6 +8,7 @@ interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   isAuthed: boolean;
+  isMember: boolean;
   loading: boolean;
   setIsAuthed: (isAuthed: boolean) => void;
 
@@ -128,12 +129,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   };
 
+  const isMember = isAuthed && auth?.profile?.is_member === true;
+
   return (
     <AppContext.Provider
       value={{
         user,
         setUser,
         isAuthed,
+        isMember,
         loading,
         setIsAuthed,
         track,
