@@ -33,6 +33,7 @@ const Player = () => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
+  const isInitialPlaylistLoad = useRef(true);
   const previousTrackId = useRef<string | null>(null);
   const isManualTrackChange = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -68,7 +69,12 @@ const Player = () => {
   // REACT TO PLAYLIST CHANGES
   // --------------------------------
   useEffect(() => {
-    if (!hasInitialized.current || playerTrackList.length === 0) return;
+    if (playerTrackList.length === 0) return;
+
+    if (isInitialPlaylistLoad.current) {
+      isInitialPlaylistLoad.current = false;
+      return;
+    }
     
     if (isShuffleMode) {
       const randomIndex = Math.floor(Math.random() * playerTrackList.length);
