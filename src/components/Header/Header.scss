@@ -111,6 +111,27 @@
       }
     }
 
+    &__feedback {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      flex-shrink: 0;
+
+      &:hover {
+        color: var(--color-white);
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.06);
+      }
+    }
+
     &__user {
       cursor: pointer;
       margin-left: 1rem;
@@ -154,6 +175,12 @@
           font-weight: 400;
           text-decoration: none;
           transition: background 0.18s ease, color 0.18s ease;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          width: calc(100% - 0.7rem);
+          text-align: left;
+          font-family: inherit;
 
           svg {
             flex-shrink: 0;
@@ -359,6 +386,44 @@
         color: var(--color-green, #00ff87);
 
         .header__mobile-menu__item__index {
+          color: var(--color-green, #00ff87);
+        }
+      }
+    }
+
+    // ─── Feedback Button ─────────────────────────────────
+    &__feedback {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: color 0.25s ease, padding-left 0.25s ease;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 0.4rem;
+      padding-top: 1rem;
+
+      &__index {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.25);
+        min-width: 1.5rem;
+        transition: color 0.25s ease;
+      }
+
+      &:hover {
+        color: var(--color-white, #fff);
+        padding-left: 0.35rem;
+
+        .header__mobile-menu__feedback__index {
           color: var(--color-green, #00ff87);
         }
       }

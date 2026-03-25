@@ -6,11 +6,13 @@ import { useAppContext } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
 import SearchInput from '../SearchInput/SearchInput';
 import UserInfo from '../UserInfo/UserInfo';
+import ContactDialog from '../ContactDialog/ContactDialog';
 
 const Header = () => {
   const { user, isAuthed, isFullscreen, setIsFullscreen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -84,6 +86,11 @@ const Header = () => {
 
   return (
     <>
+        <ContactDialog
+          isOpen={isContactOpen}
+          onClose={() => setIsContactOpen(false)}
+          defaultEmail={user?.email ?? ''}
+        />
         <header className={`header ${isFullscreen ? 'header--fullscreen' : ''}`}>
           {/* Logo */}
           <div className="header__logo">
@@ -147,6 +154,18 @@ const Header = () => {
                       <path d="M15.707 0.999999C15.707 0.447715 15.2593 -2.87362e-07 14.707 -5.40243e-07L5.70703 2.60547e-07C5.15475 -7.66277e-08 4.70703 0.447715 4.70703 1C4.70703 1.55228 5.15475 2 5.70703 2L13.707 2L13.707 10C13.707 10.5523 14.1547 11 14.707 11C15.2593 11 15.707 10.5523 15.707 10L15.707 0.999999ZM0.707031 15L1.41414 15.7071L15.4141 1.70711L14.707 1L13.9999 0.292893L-7.55191e-05 14.2929L0.707031 15Z" fill="currentColor" />
                     </svg>
                   </Link>
+
+                  <button
+                    className="header__links__user__dropdown__item"
+                    onClick={() => { setIsContactOpen(true); setIsUserDropdownOpen(false); }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <circle cx="12" cy="17" r="0.5" fill="currentColor" />
+                    </svg>
+                    Any Questions / Feedback?
+                  </button>
 
                   <div className="header__links__user__dropdown__divider" />
 
@@ -231,6 +250,14 @@ const Header = () => {
                 <span className="header__mobile-menu__item__index">03</span>
                 About
               </Link>
+
+              <button
+                className="header__mobile-menu__feedback"
+                onClick={() => { setIsContactOpen(true); closeSidebar(); }}
+              >
+                <span className="header__mobile-menu__feedback__index">?</span>
+                Any Questions / Feedback?
+              </button>
             </div>
 
             {/* Account Section */}
