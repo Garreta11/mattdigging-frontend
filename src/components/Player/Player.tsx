@@ -17,7 +17,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isMember, loading } = useAppContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isMember, loading, isAuthed, auth } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -49,11 +49,16 @@ const Player = () => {
   // --------------------------------
   useEffect(() => {
     if (loading) return;
+    // Wait until auth data is fully resolved for authenticated users
+    // to avoid fetching free tracks during the brief window where
+    // loading=false but auth (and isMember) hasn't arrived yet.
+    if (isAuthed && auth === null) return;
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
     const loadTracks = async () => {
       const data = isMember ? await fetchTracks() : await fetchFreeTracks();
+      console.log(data)
       setPlayerTrackList(data);
 
       if (data.length > 0) {
@@ -64,7 +69,7 @@ const Player = () => {
     };
 
     loadTracks();
-  }, [setPlayerTrackList, isMember, loading]);
+  }, [loading, isAuthed, auth, isMember, setPlayerTrackList]);
 
   // --------------------------------
   // REACT TO PLAYLIST CHANGES

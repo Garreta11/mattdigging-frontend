@@ -8,7 +8,7 @@ import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import { lenis } from '../../index';
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
 
-const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }) => {
+const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () => void; hidden?: boolean }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -28,7 +28,7 @@ const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }
 
   return (
     <div ref={ref} className="artists__content__artistItem">
-      <p className="artists__content__artistName" onClick={onClick}>{artist.name}</p>
+      <p className={`artists__content__artistName${hidden ? ' artists__content__artistName--hidden' : ''}`} onClick={onClick}>{artist.name}</p>
       {visible && (
         <ImageStorage
           bucket="artist_photos"
@@ -42,7 +42,7 @@ const ArtistItem = ({ artist, onClick }: { artist: Artist; onClick: () => void }
 };
 
 const Artists = () => {
-  const { setModalArtist, setIsModalArtistOpen, isMember } = useAppContext();
+  const { setModalArtist, setIsModalArtistOpen, isMember, setIsPricingModalOpen } = useAppContext();
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -171,7 +171,61 @@ const Artists = () => {
           , document.body)}
         </div>
       ) : (
-        <MembersOnly />
+        <>
+          <p className="artists__preview-notice">
+            A glimpse into the archive. Become a member to explore every artist.
+          </p>
+          <button className="artists__subscribe-btn" onClick={() => setIsPricingModalOpen(true)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Become a member
+          </button>
+          <div className="artists__content">
+            <div className="artists__mobile__alphabet">
+              <nav className="artists__mobile__alphabet__letters">
+                {alphabet.map((letter) => (
+                  <span
+                    key={letter}
+                    className={`artists__alphabet__letter ${availableLetters.includes(letter) ? "artists__alphabet__letter--active" : "artists__alphabet__letter--disabled"}`}
+                    onClick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
+                  >
+                    {letter}
+                  </span>
+                ))}
+              </nav>
+            </div>
+            <div className="artists__content__artistsList">
+              {availableLetters.map((letter) => (
+                <div key={letter} id={`artist-letter-${letter}`} className="artists__content__letterGroup">
+                  <span className="artists__content__letterGroup__label">{letter}</span>
+                  {groupedArtists[letter].map((artist) => (
+                    <ArtistItem
+                      key={artist.id}
+                      artist={artist}
+                      onClick={() => null}
+                      hidden
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {createPortal(
+              <nav className="artists__alphabet">
+                {alphabet.map((letter) => (
+                  <span
+                    key={letter}
+                    className={`artists__alphabet__letter ${availableLetters.includes(letter) ? "artists__alphabet__letter--active" : "artists__alphabet__letter--disabled"}`}
+                    onClick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
+                  >
+                    {letter}
+                  </span>
+                ))}
+              </nav>
+            , document.body)}
+          </div>
+        </>
       )}
 
     </section>

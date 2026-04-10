@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -r \"interface User\\\\|type User\" C:UsersjordiDocuments00_Projectes2025Mattdiggingmattdiggingfrontendsrc --include=*.ts --include=*.tsx)"
+      "Bash(grep -r \"interface User\\\\|type User\" C:UsersjordiDocuments00_Projectes2025Mattdiggingmattdiggingfrontendsrc --include=*.ts --include=*.tsx)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

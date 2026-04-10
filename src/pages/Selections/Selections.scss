@@ -265,6 +265,37 @@
   // ═══════════════════════════════════════════════════════════
   // LIST VIEW
   // ═══════════════════════════════════════════════════════════
+  &__subscribe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.1rem;
+    margin: 0 0 var(--space-6);
+    background: var(--color-green);
+    border: 1px solid rgba(245, 241, 232, 0.12);
+    border-radius: var(--border-radius);
+    color: rgba(245, 241, 232, 0.85);
+    font-family: inherit;
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: filter 0.2s ease, border-color 0.2s ease, color 0.2s ease, gap 0.2s ease;
+
+    svg {
+      opacity: 0.7;
+      flex-shrink: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover {
+      filter: brightness(1.15);
+      border-color: rgba(245, 241, 232, 0.22);
+      color: var(--color-white);
+      gap: 0.7rem;
+
+      svg { opacity: 1; }
+    }
+  }
+
   &__listView {
     margin-bottom: 2.5rem;
 
@@ -275,6 +306,14 @@
       text-transform: uppercase;
       color: rgba(245, 241, 232, 0.28);
       margin: 0 0 0.5rem;
+    }
+
+    &__preview-notice {
+      font-size: var(--font-size-md);
+      color: rgba(245, 241, 232, 0.3);
+      margin: 0 0 1.5rem;
+      line-height: 1.6;
+      font-style: italic;
     }
 
     &__grid {

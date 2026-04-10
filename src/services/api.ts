@@ -126,6 +126,7 @@ export const fetchAuth = async (token: string): Promise<Auth> => {
 export const fetchBillingCheckout = async (
   token: string,
   onReloadAuth: () => void,
+  plan?: 'monthly' | 'annual',
 ): Promise<{ url: string }> => {
   const response = await fetch(`${API_BASE_URL}/billing/checkout`, {
     method: "POST",
@@ -133,6 +134,7 @@ export const fetchBillingCheckout = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: plan ? JSON.stringify({ plan }) : undefined,
   });
   if (!response.ok) {
     const json = await response.json();

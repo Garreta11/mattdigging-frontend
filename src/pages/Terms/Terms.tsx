@@ -8,14 +8,14 @@ const content: Record<Lang, { label: string; title: string; subtitle: string; to
   en: {
     label: 'Legal',
     title: 'Terms & Conditions',
-    subtitle: 'mattdigging.com — operated by mattmosphere',
+    subtitle: 'mattdigging.com',
     toc: 'Contents',
     sections: [
       {
         number: '01',
         title: 'Scope and Provider',
         items: [
-          "These T&Cs apply to all contracts regarding the use of the curated music streaming service on the website mattdigging.com, operated by: Mattmosphere (hereinafter 'Provider').",
+          "These T&Cs apply to all contracts regarding the use of the curated music streaming service on the website mattdigging.com, operated by: mattmosphere (hereinafter 'Provider').",
           'The offer is directed exclusively at consumers within the meaning of Section 13 of the German Civil Code (BGB).',
           'A consumer is any natural person who enters into a legal transaction for purposes that are predominantly neither commercial nor related to their independent professional activity.',
         ],
@@ -93,14 +93,14 @@ const content: Record<Lang, { label: string; title: string; subtitle: string; to
   de: {
     label: 'Rechtliches',
     title: 'AGB',
-    subtitle: 'mattdigging.com — betrieben durch mattmosphere',
+    subtitle: 'mattdigging.com',
     toc: 'Inhalt',
     sections: [
       {
         number: '01',
         title: 'Geltungsbereich und Anbieter',
         items: [
-          'Diese AGB gelten für alle Verträge über die Nutzung des kuratierten Musik-Streaming-Dienstes auf der Website mattdigging.com, betrieben durch Mattmosphere (nachfolgend „Anbieter").',
+          'Diese AGB gelten für alle Verträge über die Nutzung des kuratierten Musik-Streaming-Dienstes auf der Website mattdigging.com, betrieben durch mattmosphere (nachfolgend „Anbieter").',
           'Das Angebot richtet sich ausschließlich an Verbraucher im Sinne des § 13 BGB.',
           'Verbraucher ist jede natürliche Person, die ein Rechtsgeschäft zu Zwecken abschließt, die überwiegend weder ihrer gewerblichen noch ihrer selbstständigen beruflichen Tätigkeit zugerechnet werden können.',
         ],

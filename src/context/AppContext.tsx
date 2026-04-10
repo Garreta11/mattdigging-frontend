@@ -1,5 +1,5 @@
 import { Session } from "@supabase/supabase-js";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { User } from "../../types/user";
 import { supabase } from "../lib/supabase";
 import { Artist, Auth, Playlist, Track, fetchAuth } from "../services/api";
@@ -39,6 +39,9 @@ interface AppContextType {
   isSearchModalOpen: boolean;
   setIsSearchModalOpen: (isOpen: boolean) => void;
 
+  isPricingModalOpen: boolean;
+  setIsPricingModalOpen: (isOpen: boolean) => void;
+
   auth: Auth | null;
   setAuth: (auth: Auth | null) => void;
 
@@ -61,6 +64,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const pricingModalTriggered = useRef(false);
 
   const initializeAuth = async () => {
     try {
@@ -131,6 +136,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isMember = isAuthed && auth?.profile?.is_member === true;
 
+  useEffect(() => {
+    if (!loading && auth !== null && !pricingModalTriggered.current) {
+      pricingModalTriggered.current = true;
+      if (isAuthed && !isMember) {
+        setIsPricingModalOpen(true);
+      }
+    }
+  }, [loading, auth, isAuthed, isMember]);
+
   return (
     <AppContext.Provider
       value={{
@@ -158,6 +172,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setIsFullscreen,
         isSearchModalOpen,
         setIsSearchModalOpen,
+        isPricingModalOpen,
+        setIsPricingModalOpen,
         auth,
         setAuth,
         initializeAuth,

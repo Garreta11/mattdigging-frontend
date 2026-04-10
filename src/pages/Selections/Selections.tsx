@@ -9,7 +9,6 @@ import { useSearchParams } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import TrackItem from "../../components/TrackItem/TrackItem";
 import Loader from "../../components/Loader/Loader";
-import MembersOnly from "../../components/MembersOnly/MembersOnly";
 
 type ViewMode = "calendar" | "list";
 
@@ -112,7 +111,7 @@ const getSelectionCovers = (selection: Selections) =>
 
 // ─── SelectionsPage ───────────────────────────────────────────────────────────
 const SelectionsPage = () => {
-  const { setPlayerTrackList, setPlaylist, setTrack, isMember } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, isMember, setIsPricingModalOpen } = useAppContext();
   const { track: currentTrack } = useAppContext();
   const [searchParams] = useSearchParams();
   const selectionParam = searchParams.get("selection");
@@ -121,7 +120,7 @@ const SelectionsPage = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>("calendar");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -243,7 +242,54 @@ const SelectionsPage = () => {
 
       {/* Auth gate */}
       {!isMember ? (
-        <MembersOnly />
+        /* ── Browse view (non-member, first 3 selections) ── */
+        <>
+          {publishedSelections.slice(0, 3).length > 0 && (
+            <section className="selectionsPage__listView">
+              <p className="selectionsPage__listView__preview-notice">
+                A preview of our archive. Become a member to unlock every selection.
+              </p>
+              <button className="selectionsPage__subscribe-btn" onClick={() => setIsPricingModalOpen(true)}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Become a member
+              </button>
+              <div className="selectionsPage__listView__grid">
+               <h2 className="selectionsPage__listView__title">Available Now</h2>
+                {publishedSelections.slice(0, 3).map((selection) => {
+                  const startDate = new Date(selection.published_at);
+                  const endDate = new Date(selection.published_at);
+                  endDate.setDate(endDate.getDate() + 6);
+                  return (
+                    <div
+                      key={selection.title}
+                      className="selectionsPage__listView__card selectionsPage__listView__card--published"
+                      onClick={() => handleSelectionClick(selection)}
+                    >
+                      <SelectionCover coverUrls={getSelectionCovers(selection)} size={80} />
+                      <div className="selectionsPage__listView__card__header">
+                        <h3 className="selectionsPage__listView__card__header__title">
+                          {selection.title}
+                          <span className="selectionsPage__listView__card__header__title__date">
+                            · {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} –{" "}
+                            {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}, {selection.year}
+                          </span>
+                        </h3>
+                        {selection.description && (
+                          <p className="selectionsPage__listView__card__description">{selection.description}</p>
+                        )}
+                      </div>
+                      <p className="selectionsPage__listView__card__header__badge selectionsPage__listView__card__header__badge--published">
+                        Published
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </>
       ) : selectionParam ? (
         /* ── Active selection view ── */
         <>

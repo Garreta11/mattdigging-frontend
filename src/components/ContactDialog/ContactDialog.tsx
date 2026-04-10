@@ -63,7 +63,6 @@ const ContactDialog: React.FC<ContactDialogProps> = ({ isOpen, onClose, defaultE
           </div>
           <div>
             <h2 className="contact-dialog__title" id="contact-dialog-title">Any Questions / Feedback?</h2>
-            <p className="contact-dialog__subtitle">We'd love to hear from you</p>
           </div>
           <button className="contact-dialog__close" onClick={onClose} aria-label="Close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -86,9 +86,10 @@ const HiddenGemsPage = () => {
       {isMember ? (
         <div className="hidden-gems__content">
           <div className="selectionsPage__selectionView__header">
-            <h1 className="selectionsPage__selectionView__header__title">
-              <span>Hidden Gems</span>
-            </h1>
+            <div className="selectionsPage__selectionView__header__title">
+              <h2>Hidden Gems</h2>
+              <p>new additions every first of the </p>
+            </div>
             {tracks.length > 0 && (
               <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
