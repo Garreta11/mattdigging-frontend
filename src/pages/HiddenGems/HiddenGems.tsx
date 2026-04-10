@@ -88,7 +88,7 @@ const HiddenGemsPage = () => {
           <div className="selectionsPage__selectionView__header">
             <div className="selectionsPage__selectionView__header__title">
               <h2>Hidden Gems</h2>
-              <p>new additions every first of the </p>
+              <p>new additions every first of the month</p>
             </div>
             {tracks.length > 0 && (
               <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
