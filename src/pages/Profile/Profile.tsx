@@ -21,7 +21,7 @@ const Profile = () => {
     setTrack,
     track: currentTrack,
     auth,
-    initializeAuth,
+    setIsPricingModalOpen
   } = useAppContext();
   const { favorites, loading: favoritesLoading } = useFavorites();
 
@@ -112,13 +112,7 @@ const Profile = () => {
   };
 
   const handleSubscribe = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const token = session?.access_token;
-    if (!token) return;
-    const { url } = await fetchBillingCheckout(token, initializeAuth);
-    window.open(url, "_blank");
+    setIsPricingModalOpen(true)
   };
 
   const handleBillingPortal = async () => {
