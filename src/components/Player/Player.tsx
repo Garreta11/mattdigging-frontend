@@ -17,7 +17,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isMember, loading } = useAppContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isMember, loading, authReady } = useAppContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -48,7 +48,7 @@ const Player = () => {
   // LOAD TRACKS INITIAL (solo una vez al montar)
   // --------------------------------
   useEffect(() => {
-    if (loading) return;
+    if (loading || !authReady) return;
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
@@ -68,7 +68,7 @@ const Player = () => {
     };
 
     loadTracks();
-  }, [loading, isMember, setPlayerTrackList]);
+  }, [loading, authReady, isMember, setPlayerTrackList]);
 
   // --------------------------------
   // REACT TO PLAYLIST CHANGES

@@ -45,6 +45,8 @@ interface AppContextType {
   auth: Auth | null;
   setAuth: (auth: Auth | null) => void;
 
+  authReady: boolean;
+
   initializeAuth: () => void;
 }
 
@@ -52,6 +54,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [auth, setAuth] = useState<Auth | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -89,6 +92,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     updateUserState(session);
+    setAuthReady(true);
   };
 
   useEffect(() => {
@@ -140,7 +144,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   };
 
-  const isMember = isAuthed && auth?.profile?.is_member === true;
+  const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
 
   useEffect(() => {
     if (!loading && auth !== null && !pricingModalTriggered.current) {
@@ -182,6 +186,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setIsPricingModalOpen,
         auth,
         setAuth,
+        authReady,
         initializeAuth,
       }}
     >

@@ -1,6 +1,8 @@
 // services/api.ts
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3333";
+/* const API_BASE_URL = "http://localhost:3333";
+console.log(API_BASE_URL) */
 
 /* =========================
    TYPES
@@ -228,8 +230,9 @@ export const fetchTrackById = async (id: string): Promise<Track> => {
   return response.json();
 };
 
-export const fetchTracksByArtist = async (artistId: string): Promise<Track[]> => {
-  const response = await fetch(`${API_BASE_URL}/artists/${artistId}/tracks`);
+export const fetchTracksByArtist = async (artistId: string, maxSelections?: number): Promise<Track[]> => {
+  const params = maxSelections ? `?max_selections=${maxSelections}` : '';
+  const response = await fetch(`${API_BASE_URL}/artists/${artistId}/tracks${params}`);
   if (!response.ok) throw new Error("Failed to fetch artist tracks");
   return response.json();
 };

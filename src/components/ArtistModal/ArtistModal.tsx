@@ -14,15 +14,18 @@ interface ArtistModalProps {
 }
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
-  const { setIsTrackModalOpen, setTrack, setPlayerTrackList } = useAppContext();
+  const { setIsTrackModalOpen, setTrack, setPlayerTrackList, isMember } = useAppContext();
   const [tracks, setTracks] = useState<Track[]>([]);
 
   useEffect(() => {
     if (isOpen && artist?.id) {
       setTracks([]);
-      fetchTracksByArtist(artist.id).then(setTracks).catch(() => setTracks(artist.tracks ?? []));
+      const maxSelections = isMember ? undefined : 3;
+      fetchTracksByArtist(artist.id, maxSelections)
+        .then(setTracks)
+        .catch(() => setTracks(artist.tracks ?? []));
     }
-  }, [isOpen, artist?.id]);
+  }, [isOpen, artist?.id, isMember]);
 
   if (!isOpen || !artist) return null;
 
