@@ -257,13 +257,11 @@ const SelectionsPage = () => {
               <h1 className="selectionsPage__selectionView__header__title">
                 <span>{activeSelection.title}</span>
               </h1>
-              {isMember && (
-                <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-                  </svg>
-                </button>
-              )}
+              <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
+                </svg>
+              </button>
             </div>
           )}
 
@@ -277,7 +275,7 @@ const SelectionsPage = () => {
                     key={track.id}
                     track={track}
                     index={index}
-                    onClick={() => isMember ? handleTrackClick(track) : setIsPricingModalOpen(true)}
+                    onClick={() => handleTrackClick(track)}
                     isPlaying={currentTrack?.id === track.id}
                   />
                 ))

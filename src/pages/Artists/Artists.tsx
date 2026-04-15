@@ -42,7 +42,7 @@ const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () =
 };
 
 const Artists = () => {
-  const { setModalArtist, setIsModalArtistOpen, isMember, setIsPricingModalOpen } = useAppContext();
+  const { setModalArtist, setIsModalArtistOpen, isMember, setIsPricingModalOpen, user } = useAppContext();
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -175,11 +175,14 @@ const Artists = () => {
           <p className="artists__preview-notice">
             A glimpse into the archive. Become a member to explore every artist.
           </p>
-          <button className="artists__subscribe-btn" onClick={() => setIsPricingModalOpen(true)}>
+          <button
+            className="artists__subscribe-btn"
+            onClick={() => user ? setIsPricingModalOpen(true) : navigate('/login')}
+          >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Become a member
+            {user ? 'Become a member' : 'Log in'}
           </button>
           <div className="artists__content">
             <div className="artists__mobile__alphabet">
