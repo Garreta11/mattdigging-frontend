@@ -222,6 +222,30 @@ export const fetchFreeTracks = async (): Promise<Track[]> => {
   return response.json();
 };
 
+export const fetchTrackById = async (id: string): Promise<Track> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/${id}`);
+  if (!response.ok) throw new Error("Failed to fetch track");
+  return response.json();
+};
+
+export const fetchTracksByArtist = async (artistId: string): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/artists/${artistId}/tracks`);
+  if (!response.ok) throw new Error("Failed to fetch artist tracks");
+  return response.json();
+};
+
+export const fetchPlayerTracks = async (): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/player`);
+  if (!response.ok) throw new Error("Failed to fetch player tracks");
+  return response.json();
+};
+
+export const fetchPlayerFreeTracks = async (): Promise<Track[]> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/player/free`);
+  if (!response.ok) throw new Error("Failed to fetch player free tracks");
+  return response.json();
+};
+
 /* =========================
    SEARCH FUNCTIONS
 ========================= */

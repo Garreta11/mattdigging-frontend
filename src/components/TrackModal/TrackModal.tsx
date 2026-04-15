@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './TrackModal.scss';
-import { Artist, Track } from '../../services/api';
+import { Artist, Track, fetchTrackById } from '../../services/api';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
@@ -14,6 +14,14 @@ interface TrackModalProps {
 const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
   const navigate = useNavigate();
   const { setModalArtist, setIsModalArtistOpen } = useAppContext();
+  const [fullTrack, setFullTrack] = useState<Track | null>(null);
+
+  useEffect(() => {
+    if (isOpen && track?.id) {
+      setFullTrack(null);
+      fetchTrackById(track.id).then(setFullTrack).catch(() => setFullTrack(track));
+    }
+  }, [isOpen, track?.id]);
 
   // Cerrar con ESC
   useEffect(() => {
@@ -36,8 +44,9 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
 
   if (!isOpen || !track) return null;
 
-  const genres = track.track_genres?.map(tg => tg.genre) ?? [];
-  const moods = track.track_moods?.map(tm => tm.mood) ?? [];
+  const t = fullTrack ?? track;
+  const genres = t.track_genres?.map(tg => tg.genre) ?? [];
+  const moods = t.track_moods?.map(tm => tm.mood) ?? [];
 
   const handleGenreClick = (slug: string) => {
     onClose();
@@ -96,77 +105,77 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
         </button>
 
         <div className="track-modal__body">
-          {track.cover_url && (
+          {t.cover_url && (
             <div className="track-modal__cover">
-              <ImageStorage 
-                path={track.cover_url} 
-                alt={track.title}
+              <ImageStorage
+                path={t.cover_url}
+                alt={t.title}
                 bucket="covers"
               />
             </div>
           )}
 
           <div className="track-modal__info">
-            <h2 className="track-modal__title">{track.title}</h2>
-            
-            {track.artist && (
-              <div className="track-modal__artist" onClick={() => handleArtistClick(track.artist)}>
-                {track.artist.photo_url && (
-                  <ImageStorage 
-                    path={track.artist.photo_url}
-                    alt={track.artist.name}
+            <h2 className="track-modal__title">{t.title}</h2>
+
+            {t.artist && (
+              <div className="track-modal__artist" onClick={() => handleArtistClick(t.artist)}>
+                {t.artist.photo_url && (
+                  <ImageStorage
+                    path={t.artist.photo_url}
+                    alt={t.artist.name}
                     bucket="artist_photos"
                     className="track-modal__artist-photo"
                   />
                 )}
-                <span className="track-modal__artist-name">{track.artist.name}</span>
+                <span className="track-modal__artist-name">{t.artist.name}</span>
               </div>
             )}
 
-            {track.description && (
-              <p className="track-modal__description">{track.description}</p>
+            {t.description && (
+              <p className="track-modal__description">{t.description}</p>
             )}
 
             <div className="track-modal__details">
-              {track.album_name && (
+              {t.album_name && (
                 <div className="track-modal__details__detail">
                   <span className="track-modal__details__detail-label">Album</span>
-                  <span className="track-modal__details__detail-value">{track.album_name}</span>
+                  <span className="track-modal__details__detail-value">{t.album_name}</span>
                 </div>
               )}
 
-              {track.country && (
+              {t.country && (
                 <div className="track-modal__details__detail track-modal__details__detail--clickable">
                   <span className="track-modal__details__detail-label">Country</span>
-                  <span 
+                  <span
                     className="track-modal__details__detail-value track-modal__details__detail-value--link"
-                    onClick={() => handleCountryClick(track.country!)}
+                    onClick={() => handleCountryClick(t.country!)}
                   >
-                    {track.country}
+                    {t.country}
                   </span>
                 </div>
               )}
 
-              {track.year && (
+              {t.year && (
                 <div className="track-modal__details__detail track-modal__details__detail--clickable">
                   <span className="track-modal__details__detail-label">Year</span>
-                  <span 
+                  <span
                     className="track-modal__details__detail-value track-modal__details__detail-value--link"
-                    onClick={() => handleYearClick(track.year!)}
+                    onClick={() => handleYearClick(t.year!)}
                   >
-                    {track.year}
+                    {t.year}
                   </span>
                 </div>
               )}
 
-              {track.season && (
+              {t.season && (
                 <div className="track-modal__details__detail track-modal__details__detail--clickable">
                   <span className="track-modal__details__detail-label">Season</span>
-                  <span 
+                  <span
                     className="track-modal__details__detail-value track-modal__details__detail-value--link"
-                    onClick={() => handleSeasonClick(track.season!)}
+                    onClick={() => handleSeasonClick(t.season!)}
                   >
-                    {track.season}
+                    {t.season}
                   </span>
                 </div>
               )}

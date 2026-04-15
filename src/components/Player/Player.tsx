@@ -1,6 +1,6 @@
 import './Player.scss';
 import { useState, useEffect, useRef } from 'react'
-import { fetchTracks, fetchFreeTracks, Track, Artist } from '../../services/api';
+import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
@@ -54,7 +54,7 @@ const Player = () => {
 
     const loadTracks = async () => {
       try {
-        const data = isMember ? await fetchTracks() : await fetchFreeTracks();
+        const data = isMember ? await fetchPlayerTracks() : await fetchPlayerFreeTracks();
         setPlayerTrackList(data);
 
         if (data.length > 0) {

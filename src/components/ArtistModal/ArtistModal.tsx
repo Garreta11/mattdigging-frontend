@@ -3,8 +3,9 @@
 import "./ArtistModal.scss";
 import { useAppContext } from "../../context/AppContext";
 import { FiX } from "react-icons/fi";
-import { Artist, Track } from "../../services/api";
+import { Artist, Track, fetchTracksByArtist } from "../../services/api";
 import ImageStorage from "../ImageStorage/ImageStorage";
+import { useState, useEffect } from "react";
 
 interface ArtistModalProps {
   artist: Artist;
@@ -14,9 +15,17 @@ interface ArtistModalProps {
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
   const { setIsTrackModalOpen, setTrack, setPlayerTrackList } = useAppContext();
+  const [tracks, setTracks] = useState<Track[]>([]);
+
+  useEffect(() => {
+    if (isOpen && artist?.id) {
+      setTracks([]);
+      fetchTracksByArtist(artist.id).then(setTracks).catch(() => setTracks(artist.tracks ?? []));
+    }
+  }, [isOpen, artist?.id]);
+
   if (!isOpen || !artist) return null;
 
-  const tracks = artist.tracks || [];
   const hasTracks = tracks.length > 0;
 
   const handleTrackClick = (clickedTrack: Track) => {
