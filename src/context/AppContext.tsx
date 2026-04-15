@@ -68,21 +68,27 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const pricingModalTriggered = useRef(false);
 
   const initializeAuth = async () => {
+    let session = null;
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (token) {
-        const authData = await fetchAuth(token);
-        setAuth(authData);
-      }
-
-      updateUserState(session);
+      const { data } = await supabase.auth.getSession();
+      session = data.session;
     } catch (error) {
       console.error("Error getting session:", error);
       setLoading(false);
+      return;
     }
+
+    if (session?.access_token) {
+      try {
+        const authData = await fetchAuth(session.access_token);
+        setAuth(authData);
+      } catch (error) {
+        console.error("Error fetching auth data:", error);
+        // Backend unreachable — continue with Supabase session data only
+      }
+    }
+
+    updateUserState(session);
   };
 
   useEffect(() => {

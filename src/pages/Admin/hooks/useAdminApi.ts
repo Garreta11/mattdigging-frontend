@@ -84,7 +84,15 @@ export function useAdminApi() {
     const res = await fetch(`${apiBase}/admin/tracks`, { headers });
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || 'Failed to load tracks');
-    return json;
+    return json.map((track: any) => ({
+      ...track,
+      genre_ids: track.genre_ids?.length
+        ? track.genre_ids
+        : (track.track_genres ?? []).map((tg: any) => tg.genre?.id ?? tg.genre_id ?? tg.id),
+      mood_ids: track.mood_ids?.length
+        ? track.mood_ids
+        : (track.track_moods ?? []).map((tm: any) => tm.mood?.id ?? tm.mood_id ?? tm.id),
+    }));
   }, []);
 
   const refreshTags = useCallback(async (): Promise<{ genres: Genre[]; moods: Mood[] }> => {
