@@ -53,13 +53,17 @@ const Player = () => {
     hasInitialized.current = true;
 
     const loadTracks = async () => {
-      const data = isMember ? await fetchTracks() : await fetchFreeTracks();
-      setPlayerTrackList(data);
+      try {
+        const data = isMember ? await fetchTracks() : await fetchFreeTracks();
+        setPlayerTrackList(data);
 
-      if (data.length > 0) {
-        const randomIndex = Math.floor(Math.random() * data.length);
-        setCurrentTrackIndex(randomIndex);
-        setPlayedIndices([randomIndex]);
+        if (data.length > 0) {
+          const randomIndex = Math.floor(Math.random() * data.length);
+          setCurrentTrackIndex(randomIndex);
+          setPlayedIndices([randomIndex]);
+        }
+      } catch (err) {
+        console.error('Failed to load tracks:', err);
       }
     };
 
@@ -415,7 +419,8 @@ const Player = () => {
     navigate(url);
   };
 
-  const isPlayerReady = !!currentTrack && isAudioReady;
+  const hasTrack = !!currentTrack;
+  const isPlayerReady = hasTrack && isAudioReady;
 
   return (
     <div className={`player ${isFullscreen ? 'player--fullscreen' : ''}`}>
@@ -443,7 +448,7 @@ const Player = () => {
       )}
 
       <div className='player__info'>
-        {isPlayerReady ? (
+        {hasTrack ? (
           <>
             <ImageStorage
               path={currentTrack?.cover_url}
