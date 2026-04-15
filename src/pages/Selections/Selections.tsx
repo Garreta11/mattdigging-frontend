@@ -111,7 +111,7 @@ const getSelectionCovers = (selection: Selections) =>
 
 // ─── SelectionsPage ───────────────────────────────────────────────────────────
 const SelectionsPage = () => {
-  const { setPlayerTrackList, setPlaylist, setTrack, isMember, setIsPricingModalOpen } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, isMember, setIsPricingModalOpen, user } = useAppContext();
   const { track: currentTrack } = useAppContext();
   const [searchParams] = useSearchParams();
   const selectionParam = searchParams.get("selection");
@@ -240,8 +240,52 @@ const SelectionsPage = () => {
         </button>
       </div>
 
-      {/* Auth gate */}
-      {!isMember ? (
+      {selectionParam ? (
+        /* ── Active selection view (members and non-members) ── */
+        <>
+          {!isLoadingTracks && (
+            <button className="selectionsPage__selectionView__clear-filter-btn" onClick={() => navigate("/selections")}>
+              <svg width="17" height="5.5" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0.204244 4.65981C-0.069123 4.93318 -0.069123 5.37639 0.204244 5.64976L4.65902 10.1045C4.93238 10.3779 5.3756 10.3779 5.64897 10.1045C5.92233 9.83117 5.92233 9.38795 5.64897 9.11458L1.68917 5.15479L5.64897 1.19499C5.92233 0.92162 5.92233 0.478405 5.64897 0.205038C5.3756 -0.0683293 4.93238 -0.0683293 4.65902 0.205038L0.204244 4.65981ZM33.8867 5.15479V4.45479H0.699219V5.15479V5.85479H33.8867V5.15479Z" fill="var(--color-white)" />
+              </svg>
+              Back
+            </button>
+          )}
+
+          {!isLoadingTracks && activeSelection && (
+            <div className="selectionsPage__selectionView__header">
+              <h1 className="selectionsPage__selectionView__header__title">
+                <span>{activeSelection.title}</span>
+              </h1>
+              {isMember && (
+                <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+
+          {!isLoadingTracks && (
+            <div className="selectionsPage__selectionView__tracks">
+              {tracks.length === 0 ? (
+                <p>No tracks found</p>
+              ) : (
+                tracks.map((track, index) => (
+                  <TrackItem
+                    key={track.id}
+                    track={track}
+                    index={index}
+                    onClick={() => isMember ? handleTrackClick(track) : setIsPricingModalOpen(true)}
+                    isPlaying={currentTrack?.id === track.id}
+                  />
+                ))
+              )}
+            </div>
+          )}
+        </>
+      ) : !isMember ? (
         /* ── Browse view (non-member, first 3 selections) ── */
         <>
           {publishedSelections.slice(0, 3).length > 0 && (
@@ -249,11 +293,14 @@ const SelectionsPage = () => {
               <p className="selectionsPage__listView__preview-notice">
                 A preview of our archive. Become a member to unlock every selection.
               </p>
-              <button className="selectionsPage__subscribe-btn" onClick={() => setIsPricingModalOpen(true)}>
+              <button
+                className="selectionsPage__subscribe-btn"
+                onClick={() => user ? setIsPricingModalOpen(true) : navigate('/login')}
+              >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Become a member
+                {user ? 'Become a member' : 'Log in'}
               </button>
               <div className="selectionsPage__listView__grid">
                <h2 className="selectionsPage__listView__title">Available Now</h2>
@@ -288,49 +335,6 @@ const SelectionsPage = () => {
                 })}
               </div>
             </section>
-          )}
-        </>
-      ) : selectionParam ? (
-        /* ── Active selection view ── */
-        <>
-          {!isLoadingTracks && (
-            <button className="selectionsPage__selectionView__clear-filter-btn" onClick={() => navigate("/selections")}>
-              <svg width="17" height="5.5" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0.204244 4.65981C-0.069123 4.93318 -0.069123 5.37639 0.204244 5.64976L4.65902 10.1045C4.93238 10.3779 5.3756 10.3779 5.64897 10.1045C5.92233 9.83117 5.92233 9.38795 5.64897 9.11458L1.68917 5.15479L5.64897 1.19499C5.92233 0.92162 5.92233 0.478405 5.64897 0.205038C5.3756 -0.0683293 4.93238 -0.0683293 4.65902 0.205038L0.204244 4.65981ZM33.8867 5.15479V4.45479H0.699219V5.15479V5.85479H33.8867V5.15479Z" fill="var(--color-white)" />
-              </svg>
-              Back
-            </button>
-          )}
-
-          {!isLoadingTracks && activeSelection && (
-            <div className="selectionsPage__selectionView__header">
-              <h1 className="selectionsPage__selectionView__header__title">
-                <span>{activeSelection.title}</span>
-              </h1>
-              <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-                </svg>
-              </button>
-            </div>
-          )}
-
-          {!isLoadingTracks && (
-            <div className="selectionsPage__selectionView__tracks">
-              {tracks.length === 0 ? (
-                <p>No tracks found</p>
-              ) : (
-                tracks.map((track, index) => (
-                  <TrackItem
-                    key={track.id}
-                    track={track}
-                    index={index}
-                    onClick={() => handleTrackClick(track)}
-                    isPlaying={currentTrack?.id === track.id}
-                  />
-                ))
-              )}
-            </div>
           )}
         </>
       ) : (
