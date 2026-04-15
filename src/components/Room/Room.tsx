@@ -51,6 +51,7 @@ const Room: React.FC = () => {
 
     outputRef.current = new Output({
       container: roomRef.current,
+      isMobile,
       onChestClick: () => !isSearchModalOpen && fadeTo('/hidden-gems'),
       onTrackCoverClick: () => {
         if (isSearchModalOpen) return;

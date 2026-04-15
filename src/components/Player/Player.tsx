@@ -58,7 +58,6 @@ const Player = () => {
 
     const loadTracks = async () => {
       const data = isMember ? await fetchTracks() : await fetchFreeTracks();
-      console.log(data)
       setPlayerTrackList(data);
 
       if (data.length > 0) {

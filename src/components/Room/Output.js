@@ -11,13 +11,15 @@ export default class Output {
     this.onShelfClick = _options.onShelfClick || null;
 
     this.onTipChange = _options.onTipChange || null;
+    this.isMobile = _options.isMobile || false;
 
     // Config
     this.BASE_VIDEO_URL = "/base.mp4";
+    this.STATIC_BG_URL = "/fotograma.png";
     this.CHEST_DIR = "/newchest/";
     this.CHEST_PREFIX = "frame_";
     this.CHEST_PAD = 4;
-    this.CHEST_COUNT = 60;
+    this.CHEST_COUNT = 70;
     this.CHEST_EXT = ".png";
     
     // Chest zone (normalized inside square viewport)
@@ -46,16 +48,22 @@ export default class Output {
     this.lastTime = performance.now();
     this.interactionsEnabled = true;
 
-    this.bitmapLoader = new THREE.ImageBitmapLoader();
-    this.bitmapLoader.setOptions({ imageOrientation: "flipY" });
-
     this.setRenderer();
     this.setScene();
     this.setCamera();
-    this.setupVideo();
+    if (this.isMobile) {
+      this.baseTex = new THREE.Texture(); // placeholder replaced async
+      this.setupStaticBackground();
+    } else {
+      this.setupVideo();
+    }
     this.setupMaterial();
     // this.setupDebugOverlay();
-    this.loadChestFrames();
+    if (!this.isMobile) {
+      this.loadChestFrames();
+    } else {
+      this.chestLoaded = true; // no chest on mobile
+    }
     
     this.updateViewport();
     this.animate();
@@ -268,6 +276,36 @@ export default class Output {
     } catch {}
   }
 
+  async setupStaticBackground() {
+    try {
+      const response = await fetch(this.STATIC_BG_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          const tex = new THREE.Texture(img);
+          tex.needsUpdate = true;
+          tex.minFilter = THREE.LinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
+          this.baseTex = tex;
+          if (this.material) {
+            this.material.uniforms.tBase.value = tex;
+            this.material.uniforms.tChest.value = tex;
+          }
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = objectUrl;
+      });
+    } catch (error) {
+      console.error('[setupStaticBackground] Failed to load fotograma.png:', error);
+    }
+  }
+
   setupMaterial() {
 
     this.material = new THREE.ShaderMaterial({
@@ -342,8 +380,7 @@ export default class Output {
   }
 
   chestFrameUrl(i) {
-    const actualFrame = i;
-    return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(actualFrame, this.CHEST_PAD)}${this.CHEST_EXT}`;
+    return `${this.CHEST_DIR}${this.CHEST_PREFIX}${this.pad(i + 1, this.CHEST_PAD)}${this.CHEST_EXT}`;
   }
 
   async loadChestFrames() {
@@ -369,12 +406,30 @@ export default class Output {
     if (this.chestFrames[index] || this.framesLoading.has(index)) return;
     this.framesLoading.add(index);
     try {
-      const bmp = await this.bitmapLoader.loadAsync(this.chestFrameUrl(index));
-      const tex = new THREE.Texture(bmp);
-      tex.needsUpdate = true;
-      tex.minFilter = THREE.LinearFilter;
-      tex.magFilter = THREE.LinearFilter;
-      tex.generateMipmaps = false;
+      const url = this.chestFrameUrl(index);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const tex = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          const t = new THREE.Texture(img);
+          t.needsUpdate = true;
+          t.minFilter = THREE.LinearFilter;
+          t.magFilter = THREE.LinearFilter;
+          t.generateMipmaps = false;
+          resolve(t);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error(`Image decode failed for frame ${index}`));
+        };
+        img.src = objectUrl;
+      });
+
       this.chestFrames[index] = tex;
     } catch (error) {
       console.error(`[loadFrame] Failed to load frame ${index}:`, error);
