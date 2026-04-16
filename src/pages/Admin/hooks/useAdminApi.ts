@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { supabase } from '../../../lib/supabase';
 import type { Artist, TrackListItem, Genre, Mood, Selection } from '../types';
 
-const apiBase = ((process.env.REACT_APP_API_URL as string) || 'http://localhost:3333').replace(/\/+$/, '');
+const apiBase = (process.env.REACT_APP_API_URL || "http://localhost:8787").replace(/\/+$/, "");
 
 async function withAuthHeaders() {
   const { data } = await supabase.auth.getSession();
