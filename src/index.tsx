@@ -12,6 +12,7 @@ import Selections from './pages/Selections/Selections';
 import AuthConfirm from './pages/AuthConfirm/AuthConfirm';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Admin from './pages/Admin/Admin';
+import Dashboard from './pages/Dashboard/Dashboard';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import HiddenGems from './pages/HiddenGems/HiddenGems';
 import Terms from './pages/Terms/Terms';
@@ -41,7 +42,7 @@ function App() {
   const isTermsPage = location.pathname === '/terms';
 
   useEffect(() => {
-    if (location.pathname === '/admin') return;
+    if (location.pathname === '/admin' || location.pathname === '/dashboard') return;
 
     const lenis = new Lenis({
       duration: 1.2,
@@ -78,6 +79,9 @@ function App() {
           </RequireAuth>
         }
       />
+
+      {/* Dashboard route - password-gated, separate layout */}
+      <Route path="/dashboard" element={<Dashboard />} />
 
       {/* Login route - separate layout */}
       {/* <Route

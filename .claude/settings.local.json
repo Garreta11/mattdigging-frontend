@@ -7,7 +7,9 @@
       "Bash(gh pr create --base main --head jordi --title 'Jordi'\\\\''s changes: new endpoints, player routes, webhook fixes' --body ':*)",
       "Bash(echo \"exit: $?\")",
       "Bash(npm run:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(set CI=false)",
+      "Bash(npx react-scripts *)"
     ]
   }
 }
