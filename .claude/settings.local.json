@@ -9,7 +9,8 @@
       "Bash(npm run:*)",
       "Bash(npm install:*)",
       "Bash(set CI=false)",
-      "Bash(npx react-scripts *)"
+      "Bash(npx react-scripts *)",
+      "Bash(node -e ' *)"
     ]
   }
 }
