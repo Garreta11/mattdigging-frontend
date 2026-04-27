@@ -1,7 +1,7 @@
 // services/api.ts
 
-// const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:8787").replace(/\/+$/, "");
-const API_BASE_URL = "http://localhost:8787";
+const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:8787").replace(/\/+$/, "");
+// const API_BASE_URL = "http://localhost:8787";
 
 /* =========================
    TYPES
