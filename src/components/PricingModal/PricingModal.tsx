@@ -16,6 +16,7 @@ const PricingModal = () => {
   const { isPricingModalOpen, setIsPricingModalOpen, initializeAuth } = useAppContext();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -85,6 +86,7 @@ const PricingModal = () => {
 
   const handleSubscribe = async () => {
     setLoading(true);
+    setError(null);
     try {
       const {
         data: { session },
@@ -96,7 +98,7 @@ const PricingModal = () => {
         closeModal(() => window.open(url, '_blank'));
       }
     } catch (err) {
-      console.error('Billing checkout error:', err);
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -200,6 +202,9 @@ const PricingModal = () => {
             <div className="pricing-modal__plan__billing">€{annualPrice.toFixed(2)} billed annually</div>
           </div>
         </div>
+
+        {/* Error */}
+        {error && <p className="pricing-modal__error">{error}</p>}
 
         {/* CTA */}
         <button

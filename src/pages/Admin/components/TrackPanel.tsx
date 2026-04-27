@@ -92,16 +92,17 @@ export function TrackPanel({
       if (trackForm.audio) {
         const { signedUrl, token, path } = await getSignedUploadUrl('audio', trackForm.audio);
         await uploadToSignedUrl({ signedUrl, token, file: trackForm.audio });
+        if (!path) throw new Error('Audio upload failed: no path returned from storage');
         audioUrl = path;
       }
       if (trackForm.cover) {
         const { signedUrl, token, path } = await getSignedUploadUrl('image', trackForm.cover);
         await uploadToSignedUrl({ signedUrl, token, file: trackForm.cover });
+        if (!path) throw new Error('Cover upload failed: no path returned from storage');
         coverUrl = path;
       }
 
-      // Only require audio for new tracks
-      if (!trackForm.id && !audioUrl && !trackForm.audio) {
+      if (!trackForm.id && !audioUrl) {
         throw new Error('Audio file is required for new tracks');
       }
 
@@ -121,6 +122,7 @@ export function TrackPanel({
         cover_url: coverUrl || undefined,
       };
 
+      console.log('[track submit] body:', body);
       const method = trackForm.id ? 'PUT' : 'POST';
       const path = trackForm.id ? `/admin/tracks/${trackForm.id}` : '/admin/tracks';
       const res = await adminFetch(path, { method, body: JSON.stringify(body) });

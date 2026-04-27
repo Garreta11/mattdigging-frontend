@@ -3,8 +3,70 @@ import './Admin.scss';
 import type { Tab, Artist, TrackListItem, Genre, Mood, Selection } from './types';
 import { useAdminApi } from './hooks/useAdminApi';
 import { ArtistPanel, TrackPanel, TagsPanel, SelectionsPanel } from './components';
+import { useAppContext } from '../../context/AppContext';
+import { supabase } from '../../lib/supabase';
 
-const Admin = () => {
+const AdminLogin = () => {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="admin-gate">
+      <div className="admin-gate__card">
+        <h1 className="admin-gate__title">Admin Access</h1>
+        <p className="admin-gate__message">This area is restricted to admin members only.</p>
+        <form className="admin-gate__form" onSubmit={handleSubmit} noValidate>
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(null); }}
+              placeholder="you@example.com"
+              disabled={loading}
+              required
+              autoComplete="email"
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(null); }}
+              placeholder="••••••••"
+              disabled={loading}
+              required
+              autoComplete="current-password"
+            />
+          </label>
+          {error && <p className="admin-gate__error">{error}</p>}
+          <button type="submit" className="admin-gate__submit" disabled={loading}>
+            {loading ? 'Logging in…' : 'Login'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const AdminContent = () => {
   const [activeTab, setActiveTab] = React.useState<Tab>('artists');
   const [status, setStatus] = React.useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isBusy, setIsBusy] = React.useState(false);
@@ -119,6 +181,10 @@ const Admin = () => {
     }
   }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
@@ -137,6 +203,9 @@ const Admin = () => {
             Selections
           </button>
         </nav>
+        <button className="admin-sidebar__logout" onClick={handleLogout}>
+          Logout
+        </button>
       </aside>
       <main className="admin-content">
         {renderStatus()}
@@ -144,6 +213,14 @@ const Admin = () => {
       </main>
     </div>
   );
+};
+
+const Admin = () => {
+  const { isAuthed, loading: authLoading } = useAppContext();
+
+  if (authLoading) return <div className="admin-gate admin-gate--loading">Loading…</div>;
+  if (!isAuthed) return <AdminLogin />;
+  return <AdminContent />;
 };
 
 export default Admin;

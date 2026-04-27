@@ -231,6 +231,19 @@
     }
   }
 
+  // ─── Error ───────────────────────────────────────
+  &__error {
+    margin: 0 0 var(--space-3);
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--border-radius);
+    background: rgba(255, 99, 99, 0.1);
+    border: 1px solid rgba(255, 99, 99, 0.3);
+    color: #ff8080;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
   // ─── CTA ─────────────────────────────────────────
   &__cta {
     width: 100%;

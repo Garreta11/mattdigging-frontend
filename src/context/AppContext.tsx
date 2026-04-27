@@ -1,6 +1,6 @@
 import { Session } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { User } from "../../types/user";
+import { User } from "../types/user";
 import { supabase } from "../lib/supabase";
 import { Artist, Auth, Playlist, Track, fetchAuth } from "../services/api";
 
@@ -9,6 +9,7 @@ interface AppContextType {
   setUser: (user: User | null) => void;
   isAuthed: boolean;
   isMember: boolean;
+  isAdmin: boolean;
   loading: boolean;
   setIsAuthed: (isAuthed: boolean) => void;
 
@@ -119,7 +120,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateUserState = (session: Session | null) => {
     if (session?.user) {
-      setUser({
+setUser({
         id: session.user.id,
         email: session.user.email || "",
         name: session.user.user_metadata?.name || "",
@@ -130,6 +131,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         image: session.user.user_metadata?.avatar_url || "",
         bio: session.user.user_metadata?.bio || "",
         isMember: session.user.user_metadata?.is_member || false,
+        isAdmin: session.user.app_metadata?.is_admin || session.user.user_metadata?.is_admin || false,
         dateOfBirth: session.user.user_metadata?.date_of_birth
           ? new Date(session.user.user_metadata.date_of_birth)
           : new Date(),
@@ -145,6 +147,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
+  const isAdmin = isAuthed && user?.isAdmin === true;
 
   useEffect(() => {
     if (!loading && auth !== null && !pricingModalTriggered.current) {
@@ -162,6 +165,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setUser,
         isAuthed,
         isMember,
+        isAdmin,
         loading,
         setIsAuthed,
         track,

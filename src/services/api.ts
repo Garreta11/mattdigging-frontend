@@ -1,7 +1,7 @@
 // services/api.ts
 
-const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:8787").replace(/\/+$/, "");
-// const API_BASE_URL = "http://localhost:8787";
+// const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:8787").replace(/\/+$/, "");
+const API_BASE_URL = "http://localhost:8787";
 
 /* =========================
    TYPES
@@ -137,15 +137,15 @@ export const fetchBillingCheckout = async (
     },
     body: plan ? JSON.stringify({ plan }) : undefined,
   });
+  const json = await response.json();
   if (!response.ok) {
-    const json = await response.json();
     if (json.error === "You already have a subscription") {
       onReloadAuth();
-    } else {
-      throw new Error("Failed to handle billing checkout");
+      return { url: '' };
     }
+    throw new Error(json.error || json.message || "Failed to start checkout. Please try again.");
   }
-  return response.json();
+  return json;
 };
 
 export const fetchBillingPortal = async (
