@@ -4,6 +4,7 @@ import { Artist, Track, fetchTrackById } from '../../services/api';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
+import { useSwipeToClose } from '../../hooks/useSwipeToClose';
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
   const navigate = useNavigate();
   const { setModalArtist, setIsModalArtistOpen } = useAppContext();
   const [fullTrack, setFullTrack] = useState<Track | null>(null);
+  const panelRef = useSwipeToClose(isOpen, onClose);
 
   useEffect(() => {
     if (isOpen && track?.id) {
@@ -97,7 +99,8 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
     <div className="track-modal" onClick={onClose}>
       <div className="track-modal__backdrop" />
       
-      <div className="track-modal__content" onClick={(e) => e.stopPropagation()}>
+      <div className="track-modal__content" ref={panelRef} onClick={(e) => e.stopPropagation()}>
+        <div className="track-modal__drag-handle" />
         <button className="track-modal__close" onClick={onClose}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>

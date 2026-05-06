@@ -7,6 +7,7 @@ import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import { lenis } from '../../index';
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
+import Loader from "../../components/Loader/Loader";
 
 const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () => void; hidden?: boolean }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -104,8 +105,6 @@ const Artists = () => {
     }, 1000);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <section className={`artists main-content ${isFadingOut ? 'fade-out' : ''}`}>
 
@@ -126,7 +125,9 @@ const Artists = () => {
         </button>
       </div>
 
-      {isMember ? (
+      {isLoading && <Loader />}
+
+      {!isLoading && isMember ? (
         <div className="artists__content">
           <div className="artists__mobile__alphabet">
             <nav className="artists__mobile__alphabet__letters">
@@ -170,7 +171,7 @@ const Artists = () => {
             </nav>
           , document.body)}
         </div>
-      ) : (
+      ) : !isLoading && (
         <>
           <p className="artists__preview-notice">
             A glimpse into the archive. Become a member to explore every artist.

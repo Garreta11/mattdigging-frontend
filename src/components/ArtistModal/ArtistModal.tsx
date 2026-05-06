@@ -6,6 +6,7 @@ import { FiX } from "react-icons/fi";
 import { Artist, Track, fetchTracksByArtist } from "../../services/api";
 import ImageStorage from "../ImageStorage/ImageStorage";
 import { useState, useEffect } from "react";
+import { useSwipeToClose } from "../../hooks/useSwipeToClose";
 
 interface ArtistModalProps {
   artist: Artist;
@@ -16,6 +17,7 @@ interface ArtistModalProps {
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
   const { setIsTrackModalOpen, setTrack, setPlayerTrackList, isMember } = useAppContext();
   const [tracks, setTracks] = useState<Track[]>([]);
+  const panelRef = useSwipeToClose(isOpen, onClose);
 
   useEffect(() => {
     if (isOpen && artist?.id) {
@@ -42,8 +44,10 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
       <div className="modal__backdrop" />
       <div
         className="modal__content"
+        ref={panelRef}
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="modal__drag-handle" />
 
         {artist.photo_url && (
           <div className="modal__image">

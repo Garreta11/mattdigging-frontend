@@ -66,6 +66,20 @@
     }
   }
 
+  // ─── Drag handle (mobile only) ────────────────────────────
+  &__drag-handle {
+    display: none;
+
+    @include respond-to(md) {
+      display: block;
+      width: 36px;
+      height: 4px;
+      background: rgba(245, 241, 232, 0.25);
+      border-radius: 2px;
+      margin: 12px auto 0;
+    }
+  }
+
   &__close {
     position: absolute;
     padding: 0;

@@ -216,9 +216,6 @@ const SelectionsPage = () => {
 
   const formatWeekYear = (weekNumber: number, year: number) => `Week ${weekNumber}, ${year}`;
 
-  // ─── Loading state ────────────────────────────────────────
-  if (isLoading) return <Loader />;
-
   // ─── Render ───────────────────────────────────────────────
   return (
     <div className={`selectionsPage main-content ${isFadingOut ? "fade-out" : ""}`}>
@@ -240,9 +237,13 @@ const SelectionsPage = () => {
         </button>
       </div>
 
-      {selectionParam ? (
+      {isLoading && <Loader />}
+
+      {!isLoading && selectionParam ? (
         /* ── Active selection view (members and non-members) ── */
         <>
+          {isLoadingTracks && <Loader />}
+
           {!isLoadingTracks && (
             <button className="selectionsPage__selectionView__clear-filter-btn" onClick={() => navigate("/selections")}>
               <svg width="17" height="5.5" viewBox="0 0 34 11" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -283,7 +284,7 @@ const SelectionsPage = () => {
             </div>
           )}
         </>
-      ) : !isMember ? (
+      ) : !isLoading && !isMember ? (
         /* ── Browse view (non-member, first 3 selections) ── */
         <>
           {publishedSelections.slice(0, 3).length > 0 && (
@@ -335,7 +336,7 @@ const SelectionsPage = () => {
             </section>
           )}
         </>
-      ) : (
+      ) : !isLoading && (
         /* ── Browse view ── */
         <>
           <div className="selectionsPage__header">

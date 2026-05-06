@@ -10,7 +10,10 @@
       "Bash(npm install:*)",
       "Bash(set CI=false)",
       "Bash(npx react-scripts *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npx eslint *)",
+      "Bash(C:/Users/jordi/Documents/00_Projectes/2025/Mattdigging/mattdigging/backend/node_modules/.bin/eslint *)",
+      "PowerShell(npm run *)"
     ]
   }
 }
