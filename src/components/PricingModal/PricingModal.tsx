@@ -95,7 +95,12 @@ const PricingModal = () => {
       if (!token) return;
       const { url } = await fetchBillingCheckout(token, initializeAuth, selectedPlan);
       if (url) {
-        closeModal(() => window.open(url, '_blank'));
+        // Same-tab redirect. window.open('_blank') after an await (and from a
+        // GSAP callback) is blocked by iOS Safari's popup blocker — it only
+        // allows popups synchronously inside a user gesture. Stripe Checkout
+        // returns to the app via its success/cancel URLs.
+        setIsPricingModalOpen(false);
+        window.location.assign(url);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

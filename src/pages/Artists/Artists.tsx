@@ -43,10 +43,12 @@ const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () =
 };
 
 const Artists = () => {
-  const { setModalArtist, setIsModalArtistOpen, isMember, setIsPricingModalOpen, user } = useAppContext();
+  const { setModalArtist, setIsModalArtistOpen, isMember, setIsPricingModalOpen, user, authReady } = useAppContext();
 
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  // Treat unresolved subscription status as loading so membership UI never flashes
+  const isLoading = dataLoading || !authReady;
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   const navigate = useNavigate();
@@ -58,13 +60,13 @@ const Artists = () => {
 
     const loadArtists = async () => {
       try {
-        setIsLoading(true);
+        setDataLoading(true);
         const data = await fetchArtists();
         setArtists(data);
       } catch (err) {
         console.error('Error loading artists:', err);
       } finally {
-        setIsLoading(false);
+        setDataLoading(false);
       }
     };
 

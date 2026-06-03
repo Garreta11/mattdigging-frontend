@@ -71,48 +71,71 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const pricingModalTriggered = useRef(false);
 
-  const initializeAuth = async () => {
-    let session = null;
-    try {
-      const { data } = await supabase.auth.getSession();
-      session = data.session;
-    } catch (error) {
-      console.error("Error getting session:", error);
-      setLoading(false);
-      return;
-    }
-
+  // Single source of truth for subscription status: fetch the backend auth
+  // profile, merge with the Supabase session, and only mark auth ready once
+  // everything has resolved. Consumers read `isMember`/`authReady` — they
+  // never fetch status themselves.
+  const loadAuth = async (session: Session | null) => {
     if (session?.access_token) {
       try {
         const authData = await fetchAuth(session.access_token);
         setAuth(authData);
       } catch (error) {
         console.error("Error fetching auth data:", error);
-        // Backend unreachable — continue with Supabase session data only
+        // Backend unreachable — fall back to Supabase session metadata only
+        setAuth(null);
       }
+    } else {
+      setAuth(null);
     }
 
     updateUserState(session);
     setAuthReady(true);
+    setLoading(false);
+  };
+
+  const initializeAuth = async () => {
+    setLoading(true);
+    let session = null;
+    try {
+      const { data } = await supabase.auth.getSession();
+      session = data.session;
+    } catch (error) {
+      console.error("Error getting session:", error);
+      setAuth(null);
+      updateUserState(null);
+      setAuthReady(true);
+      setLoading(false);
+      return;
+    }
+
+    await loadAuth(session);
   };
 
   useEffect(() => {
-    // Check active session on mount
+    // Resolve session + subscription status once on mount
     initializeAuth();
 
-    // Listen for auth changes
+    // Keep it in sync with auth changes. Re-fetch the backend auth profile so
+    // membership stays authoritative without per-component fetches.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       // On sign out, clear state immediately without waiting for any server call
       if (event === "SIGNED_OUT") {
+        setAuth(null);
         setUser(null);
         setIsAuthed(false);
+        setAuthReady(true);
         setLoading(false);
         return;
       }
 
-      updateUserState(session);
+      // Mount already handles the initial session via initializeAuth()
+      if (event === "INITIAL_SESSION") return;
+
+      // SIGNED_IN / TOKEN_REFRESHED / USER_UPDATED → refresh membership
+      loadAuth(session);
     });
 
     return () => subscription.unsubscribe();
@@ -143,20 +166,21 @@ setUser({
       setUser(null);
       setIsAuthed(false);
     }
-    setLoading(false);
   };
 
   const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
   const isAdmin = isAuthed && user?.isAdmin === true;
 
   useEffect(() => {
-    if (!loading && auth !== null && !pricingModalTriggered.current) {
+    // Only decide once subscription status has fully resolved — avoids the
+    // modal flashing open then closing while auth is still loading.
+    if (authReady && !pricingModalTriggered.current) {
       pricingModalTriggered.current = true;
       if (isAuthed && !isMember) {
         setIsPricingModalOpen(true);
       }
     }
-  }, [loading, auth, isAuthed, isMember]);
+  }, [authReady, isAuthed, isMember]);
 
   return (
     <AppContext.Provider

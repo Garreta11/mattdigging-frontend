@@ -111,7 +111,7 @@ const getSelectionCovers = (selection: Selections) =>
 
 // ─── SelectionsPage ───────────────────────────────────────────────────────────
 const SelectionsPage = () => {
-  const { setPlayerTrackList, setPlaylist, setTrack, isMember, setIsPricingModalOpen, user } = useAppContext();
+  const { setPlayerTrackList, setPlaylist, setTrack, isMember, setIsPricingModalOpen, user, authReady } = useAppContext();
   const { track: currentTrack } = useAppContext();
   const [searchParams] = useSearchParams();
   const selectionParam = searchParams.get("selection");
@@ -119,7 +119,9 @@ const SelectionsPage = () => {
   const [selections, setSelections] = useState<Selections[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  // Treat unresolved subscription status as loading so membership UI never flashes
+  const isLoading = dataLoading || !authReady;
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -135,7 +137,7 @@ const SelectionsPage = () => {
       } catch (error) {
         console.error("Error fetching selections:", error);
       } finally {
-        setIsLoading(false);
+        setDataLoading(false);
       }
     };
     loadSelections();
