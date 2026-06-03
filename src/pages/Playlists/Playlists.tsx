@@ -25,14 +25,16 @@ const SEASONS: Season[] = [
 type DropdownKey = 'genre' | 'mood' | 'country' | 'season' | 'year' | null;
 
 const PlaylistsPage = () => {
-  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist, isMember } = useAppContext();
-  
+  const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist, isMember, authReady } = useAppContext();
+
   const [genres, setGenres] = useState<Genre[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
   const [years, setYears] = useState<Year[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  // Treat unresolved subscription status as loading so membership UI never flashes
+  const isLoading = dataLoading || !authReady;
   const [error, setError] = useState<string | null>(null);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
@@ -70,7 +72,7 @@ const PlaylistsPage = () => {
 
     const loadData = async () => {
       try {
-        setIsLoading(true);
+        setDataLoading(true);
         
         if (genreParam || moodParam || yearParam || seasonParam || countryParam) {
           const params = new URLSearchParams();
@@ -97,7 +99,7 @@ const PlaylistsPage = () => {
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
-        setIsLoading(false);
+        setDataLoading(false);
       }
     };
 
@@ -128,7 +130,7 @@ const PlaylistsPage = () => {
 
   const applyFilter = async (params: Record<string, string>) => {
     try {
-      setIsLoading(true);
+      setDataLoading(true);
       setOpenDropdown(null);
       const query = new URLSearchParams(params);
       const data = await fetchTracks(`?${query.toString()}`);
@@ -137,7 +139,7 @@ const PlaylistsPage = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load tracks');
     } finally {
-      setIsLoading(false);
+      setDataLoading(false);
     }
   };
 

@@ -122,7 +122,9 @@ const Profile = () => {
     const token = session?.access_token;
     if (!token) return;
     const { url } = await fetchBillingPortal(token);
-    window.open(url, "_blank");
+    // Same-tab redirect — window.open('_blank') after an await is blocked by
+    // iOS Safari's popup blocker (no user-gesture context). Stripe returns here.
+    window.location.assign(url);
   };
 
   const initials = user?.name

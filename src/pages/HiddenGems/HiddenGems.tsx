@@ -14,8 +14,10 @@ const HiddenGemsPage = () => {
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [hiddenGemsSelection, setHiddenGemsSelection] = useState<Selections | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isMember } = useAppContext();
+  const [dataLoading, setDataLoading] = useState(true);
+  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isMember, authReady } = useAppContext();
+  // Treat unresolved subscription status as loading so membership UI never flashes
+  const isLoading = dataLoading || !authReady;
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +34,7 @@ const HiddenGemsPage = () => {
       } catch (err) {
         console.error("Error loading Hidden Gems:", err);
       } finally {
-        setIsLoading(false);
+        setDataLoading(false);
       }
     };
 
