@@ -179,7 +179,7 @@
     padding: 1.25rem 0 1.5rem;
  
     &-title {
-      font-size: 0.6rem;
+      font-size: 1rem;
       font-weight: 600;
       letter-spacing: 0.16em;
       text-transform: uppercase;
@@ -263,7 +263,7 @@
         }
  
         &__title {
-          font-size: 0.9rem;
+          font-size: 1rem;
           font-weight: 400;
           color: rgba(245, 241, 232, 0.85);
           margin: 0;
@@ -280,7 +280,7 @@
  
         &__album,
         &__year {
-          font-size: 0.72rem;
+          font-size: 1rem;
           color: rgba(245, 241, 232, 0.3);
           white-space: nowrap;
         }
@@ -297,7 +297,7 @@
         }
  
         &__description {
-          font-size: 0.72rem;
+          font-size: 1rem;
           color: rgba(245, 241, 232, 0.28);
           font-style: italic;
           margin: 0;

@@ -154,7 +154,7 @@
         // Section label inside dropdown
         &__label {
           display: block;
-          font-size: 0.6rem;
+          font-size: 1rem;
           font-weight: 600;
           letter-spacing: 0.16em;
           text-transform: uppercase;
@@ -171,7 +171,7 @@
           margin: 0 0.35rem;
           border-radius: 8px;
           color: rgba(255, 255, 255, 0.7);
-          font-size: 0.875rem;
+          font-size:1rem;
           font-weight: 400;
           text-decoration: none;
           transition: background 0.18s ease, color 0.18s ease;
@@ -221,7 +221,7 @@
           background: transparent;
           border: none;
           color: var(--color-red, #ff4d4d);
-          font-size: 0.875rem;
+          font-size: 1rem;
           font-weight: 400;
           cursor: pointer;
           width: calc(100% - 0.7rem);
@@ -330,7 +330,7 @@
     // ─── Section Label ────────────────────────────────────
     &__section-label {
       display: block;
-      font-size: 0.65rem;
+      font-size: 1rem;
       font-weight: 600;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -363,7 +363,7 @@
       position: relative;
 
       &__index {
-        font-size: 0.6rem;
+        font-size: 1rem;
         font-weight: 500;
         letter-spacing: 0.08em;
         color: rgba(255, 255, 255, 0.25);
@@ -412,7 +412,7 @@
       padding-top: 1rem;
 
       &__index {
-        font-size: 0.75rem;
+        font-size: 1rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.25);
         min-width: 1.5rem;
@@ -444,7 +444,7 @@
         padding: 0.8rem 0.75rem;
         border-radius: 8px;
         color: rgba(255, 255, 255, 0.7);
-        font-size: 0.875rem;
+        font-size: 1rem;
         font-weight: 400;
         text-decoration: none;
         transition: all 0.2s ease;
@@ -486,7 +486,7 @@
         background: transparent;
         border: none;
         color: var(--color-red, #ff4d4d);
-        font-size: 0.875rem;
+        font-size: 1rem;
         font-weight: 400;
         cursor: pointer;
         width: 100%;
