@@ -65,6 +65,16 @@ const PricingModal = () => {
       );
   }, [isPricingModalOpen]);
 
+  // Lock background scroll while open (mirrors TrackModal) so the overlay is
+  // the only scroll surface — prevents double-scroll/rubber-band on mobile.
+  useEffect(() => {
+    if (!isPricingModalOpen) return;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isPricingModalOpen]);
+
   const closeModal = (callback?: () => void) => {
     const tl = gsap.timeline({
       onComplete: () => {
@@ -121,6 +131,7 @@ const PricingModal = () => {
       className="pricing-modal-overlay"
       ref={overlayRef}
       onClick={() => closeModal()}
+      data-lenis-prevent
     >
       <div
         className="pricing-modal"

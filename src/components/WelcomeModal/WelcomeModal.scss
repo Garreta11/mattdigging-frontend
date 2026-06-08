@@ -1,0 +1,130 @@
+@import '../../_breakpoints.scss';
+
+.welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 17, 17, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-4);
+}
+
+.welcome-modal {
+  background: var(--color-black);
+  border: 1px solid rgba(245, 241, 232, 0.09);
+  border-radius: var(--border-radius-small);
+  max-width: 460px;
+  width: 100%;
+  margin: auto;
+  padding: var(--space-8);
+  position: relative;
+  text-align: center;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(245, 241, 232, 0.04) inset;
+
+  @include respond-to(md) {
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--border-radius-x-small);
+  }
+
+  // ─── Close ───────────────────────────────────────
+  &__close {
+    position: absolute;
+    top: var(--space-5);
+    right: var(--space-5);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(245, 241, 232, 0.05);
+    border: 1px solid rgba(245, 241, 232, 0.1);
+    color: rgba(245, 241, 232, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+
+    &:hover {
+      background: rgba(245, 241, 232, 0.1);
+      border-color: rgba(245, 241, 232, 0.22);
+      color: rgba(245, 241, 232, 0.85);
+    }
+  }
+
+  // ─── Check ───────────────────────────────────────
+  &__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-5);
+    border-radius: 50%;
+    background: rgba(55, 93, 44, 0.25);
+    border: 1px solid rgba(55, 93, 44, 0.45);
+    color: var(--color-green);
+    filter: brightness(1.5);
+  }
+
+  // ─── Copy ────────────────────────────────────────
+  &__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--color-white);
+    margin: 0 0 var(--space-3);
+    letter-spacing: -0.01em;
+    -webkit-text-stroke: 0.4px var(--color-white);
+  }
+
+  &__subtitle {
+    font-size: var(--font-size-sm);
+    color: rgba(245, 241, 232, 0.4);
+    margin: 0 0 var(--space-6);
+    line-height: 1.6;
+  }
+
+  // ─── CTA ─────────────────────────────────────────
+  &__cta {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--border-radius);
+    background: var(--color-green);
+    border: 1px solid rgba(245, 241, 232, 0.12);
+    color: rgba(245, 241, 232, 0.88);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.2s ease, border-color 0.2s ease, color 0.2s ease, gap 0.2s ease;
+
+    svg {
+      opacity: 0.6;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    &:hover {
+      filter: brightness(1.15);
+      border-color: rgba(245, 241, 232, 0.22);
+      color: var(--color-white);
+      gap: 0.9rem;
+
+      svg {
+        opacity: 1;
+        transform: translateX(3px);
+      }
+    }
+  }
+}

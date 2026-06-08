@@ -43,6 +43,12 @@ interface AppContextType {
   isPricingModalOpen: boolean;
   setIsPricingModalOpen: (isOpen: boolean) => void;
 
+  isWelcomeModalOpen: boolean;
+  setIsWelcomeModalOpen: (isOpen: boolean) => void;
+
+  isCancelModalOpen: boolean;
+  setIsCancelModalOpen: (isOpen: boolean) => void;
+
   auth: Auth | null;
   setAuth: (auth: Auth | null) => void;
 
@@ -69,6 +75,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const pricingModalTriggered = useRef(false);
 
   // Single source of truth for subscription status: fetch the backend auth
@@ -171,15 +179,62 @@ setUser({
   const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
   const isAdmin = isAuthed && user?.isAdmin === true;
 
+  // Remove the ?checkout=... marker Stripe appended on return so a refresh
+  // can't re-run the post-payment flow. Done via the History API because the
+  // provider sits outside <Router> and has no useNavigate.
+  const stripCheckoutParam = () => {
+    window.history.replaceState({}, "", window.location.pathname);
+  };
+
+  // After a successful checkout, is_member is set asynchronously by the Stripe
+  // webhook, so it may still be false on return. Poll the backend auth profile
+  // until membership lands, then show the welcome modal.
+  const pollMembershipThenWelcome = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) {
+      stripCheckoutParam();
+      return;
+    }
+    for (let i = 0; i < 8; i++) {
+      try {
+        const authData = await fetchAuth(token);
+        if (authData?.profile?.is_member === true) {
+          setAuth(authData);
+          setIsWelcomeModalOpen(true);
+          stripCheckoutParam();
+          return;
+        }
+      } catch (error) {
+        console.error("Error polling membership:", error);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    // Webhook didn't land in time — clean the URL and let the user retry.
+    stripCheckoutParam();
+  };
+
   useEffect(() => {
     // Only decide once subscription status has fully resolved — avoids the
     // modal flashing open then closing while auth is still loading.
-    if (authReady && !pricingModalTriggered.current) {
-      pricingModalTriggered.current = true;
-      if (isAuthed && !isMember) {
-        setIsPricingModalOpen(true);
-      }
+    if (!authReady || pricingModalTriggered.current) return;
+    pricingModalTriggered.current = true;
+
+    const checkout = new URLSearchParams(window.location.search).get("checkout");
+    if (checkout === "success") {
+      // Returned from a paid checkout — confirm membership, don't nag.
+      pollMembershipThenWelcome();
+    } else if (checkout === "cancel") {
+      // Returned from an abandoned checkout — tell the user nothing was charged
+      // and offer to retry from plan selection.
+      setIsCancelModalOpen(true);
+      stripCheckoutParam();
+    } else if (isAuthed && !isMember) {
+      setIsPricingModalOpen(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authReady, isAuthed, isMember]);
 
   return (
@@ -212,6 +267,10 @@ setUser({
         setIsSearchModalOpen,
         isPricingModalOpen,
         setIsPricingModalOpen,
+        isWelcomeModalOpen,
+        setIsWelcomeModalOpen,
+        isCancelModalOpen,
+        setIsCancelModalOpen,
         auth,
         setAuth,
         authReady,
