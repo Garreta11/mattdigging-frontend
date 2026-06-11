@@ -1,11 +1,31 @@
 import './Player.scss';
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
+
+const MarqueeText: React.FC<{ text: string }> = ({ text }) => {
+  const spanRef = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const span = spanRef.current;
+    if (!span) return;
+    const parent = span.parentElement!;
+    const overflow = span.scrollWidth - parent.clientWidth;
+    if (overflow > 0) {
+      span.style.setProperty('--marquee-offset', `-${overflow}px`);
+      span.style.animationName = '';
+    } else {
+      span.style.removeProperty('--marquee-offset');
+      span.style.animationName = 'none';
+    }
+  }, [text]);
+
+  return <span ref={spanRef} className="marquee-text">{text}</span>;
+};
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds)) return '0:00';
@@ -36,7 +56,6 @@ const Player = () => {
   const isInitialPlaylistLoad = useRef(true);
   const previousTrackId = useRef<string | null>(null);
   const isManualTrackChange = useRef(false);
-  const titleRef = useRef<HTMLHeadingElement>(null);
   const isPlayingRef = useRef(false);
 
   // Keep isPlayingRef in sync with isPlaying state
@@ -263,18 +282,6 @@ const Player = () => {
     };
   }, [currentTrack]);
 
-  useEffect(() => {
-    const span = titleRef.current;
-    if (!span) return;
-    const parent = span.parentElement!;
-    const overflow = span.scrollWidth - parent.clientWidth;
-    if (overflow > 0) {
-      span.style.setProperty("--marquee-offset", `-${overflow}px`);
-    } else {
-      span.style.removeProperty("--marquee-offset");
-      span.style.animation = "none";
-    }
-  }, [currentTrack?.title]);
 
   // --------------------------------
   // Actualizar el track en el contexto cuando cambie currentTrack
@@ -444,7 +451,9 @@ const Player = () => {
       </div>
 
       {currentTrack && (
-        <FavoriteButton track={currentTrack} />
+        <div className="player__favorite--desktop">
+          <FavoriteButton track={currentTrack} />
+        </div>
       )}
 
       <div className='player__info'>
@@ -460,8 +469,8 @@ const Player = () => {
               {playlist?.name && (
                 <p className='player__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)}>{playlist?.name}</p>
               )}
-              <h3>{currentTrack.title}</h3>
-              <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}>{currentTrack?.artist?.name}</p>
+              <h3><MarqueeText text={currentTrack.title} /></h3>
+              <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
             </div>
           </>
         ) : (
@@ -578,8 +587,8 @@ const Player = () => {
                   {playlist?.name && (
                     <p className='player__mobile__content__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)}>{playlist?.name}</p>
                   )}
-                  <h3 ref={titleRef}><span>{currentTrack.title}</span></h3>
-                  <p>{currentTrack?.artist?.name}</p>
+                  <h3><MarqueeText text={currentTrack.title} /></h3>
+                  <p><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
                 </div>
               </>
             ) : (
@@ -589,8 +598,36 @@ const Player = () => {
               </div>
             )}
           </div>
+          <div className='player__mobile__progress'>
+            <div
+              className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
+              onClick={(e) => {
+                if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const ratio = (e.clientX - rect.left) / rect.width;
+                const newTime = ratio * duration;
+                audioRef.current.currentTime = newTime;
+                setCurrentTime(newTime);
+              }}
+              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+              onMouseUp={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+              onMouseMove={(e) => { e.preventDefault(); e.stopPropagation(); if (isDragging) handleSeek(e); }}
+            >
+              <div className='player__controls__progress__track'>
+                <div
+                  className='player__controls__progress__fill'
+                  style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                />
+                <div
+                  className='player__controls__progress__thumb'
+                  style={{ left: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className='player__mobile__content__buttons'>
-            {/* Shuffle button */}
+            {/* Left: Shuffle */}
             <button
               onClick={toggleShuffle}
               disabled={controlsDisabled || !isPlayerReady}
@@ -601,78 +638,54 @@ const Player = () => {
               </svg>
             </button>
 
-            {/* Previous button */}
-            <button
-              onClick={playPreviousTrack}
-              disabled={controlsDisabled || history.length === 0 || !isPlayerReady}
-              className='player__btn player__btn--prev'
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M9.5 12L18 6V18L9.5 12Z" fill="currentColor"/>
-              </svg>
-            </button>
-
-            {/* Play/Pause button */}
-            <button
-              onClick={togglePlayPause}
-              disabled={controlsDisabled || !isPlayerReady}
-              className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
-            >
-              {!isPlayerReady ? (
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
-                </svg>
-              ) : isPlaying ? (
+            {/* Center: Prev / Play / Next */}
+            <div className='player__mobile__content__buttons__center'>
+              <button
+                onClick={playPreviousTrack}
+                disabled={controlsDisabled || history.length === 0 || !isPlayerReady}
+                className='player__btn player__btn--prev'
+              >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
-                  <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                  <path d="M6 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M9.5 12L18 6V18L9.5 12Z" fill="currentColor"/>
                 </svg>
-              ) : (
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
-                </svg>
-              )}
-            </button>
+              </button>
 
-            {/* Next button */}
-            <button
-              onClick={playNextTrack}
-              disabled={controlsDisabled || !isPlayerReady}
-              className='player__btn player__btn--next'
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14.5 12L6 18V6L14.5 12Z" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div className='player__mobile__progress'>
-          <div
-            className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
-            onClick={(e) => {
-              if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const ratio = (e.clientX - rect.left) / rect.width;
-              const newTime = ratio * duration;
-              audioRef.current.currentTime = newTime;
-              setCurrentTime(newTime);
-            }}
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
-            onMouseUp={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
-            onMouseMove={(e) => { e.preventDefault(); e.stopPropagation(); if (isDragging) handleSeek(e); }}
-          >
-            <div className='player__controls__progress__track'>
-              <div
-                className='player__controls__progress__fill'
-                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
-              <div
-                className='player__controls__progress__thumb'
-                style={{ left: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
+              <button
+                onClick={togglePlayPause}
+                disabled={controlsDisabled || !isPlayerReady}
+                className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
+              >
+                {!isPlayerReady ? (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
+                  </svg>
+                ) : isPlaying ? (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                    <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                  </svg>
+                ) : (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={playNextTrack}
+                disabled={controlsDisabled || !isPlayerReady}
+                className='player__btn player__btn--next'
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M14.5 12L6 18V6L14.5 12Z" fill="currentColor"/>
+                </svg>
+              </button>
             </div>
+
+            {/* Right: Like */}
+            {currentTrack && <FavoriteButton track={currentTrack} />}
           </div>
         </div>
       </div>
