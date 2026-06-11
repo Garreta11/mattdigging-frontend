@@ -43,6 +43,9 @@ interface AppContextType {
   isPricingModalOpen: boolean;
   setIsPricingModalOpen: (isOpen: boolean) => void;
 
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
+
   auth: Auth | null;
   setAuth: (auth: Auth | null) => void;
 
@@ -69,6 +72,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pricingModalTriggered = useRef(false);
 
   // Single source of truth for subscription status: fetch the backend auth
@@ -212,6 +216,8 @@ setUser({
         setIsSearchModalOpen,
         isPricingModalOpen,
         setIsPricingModalOpen,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
         auth,
         setAuth,
         authReady,

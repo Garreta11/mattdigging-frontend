@@ -13,6 +13,7 @@ const Room: React.FC = () => {
     isTrackModalOpen,
     setIsFullscreen,
     isSearchModalOpen,
+    isMobileMenuOpen,
   } = useAppContext();
 
   const isMobile = useIsMobile();
@@ -82,9 +83,9 @@ const Room: React.FC = () => {
   }, [coverUrl]);
 
   useEffect(() => {
-    const shouldDisable = isSearchModalOpen || isTrackModalOpen || (isMobile && pathname !== '/');
+    const shouldDisable = isSearchModalOpen || isTrackModalOpen || isMobileMenuOpen || (isMobile && pathname !== '/');
     outputRef.current?.setInteractionsEnabled(!shouldDisable);
-  }, [isSearchModalOpen, isTrackModalOpen, isMobile, pathname]);
+  }, [isSearchModalOpen, isTrackModalOpen, isMobileMenuOpen, isMobile, pathname]);
 
   // ─── Optimized Tooltip Movement ─────────────────────────────
   useEffect(() => {

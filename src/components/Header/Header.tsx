@@ -9,7 +9,7 @@ import UserInfo from '../UserInfo/UserInfo';
 import ContactDialog from '../ContactDialog/ContactDialog';
 
 const Header = () => {
-  const { user, isAuthed, isFullscreen, setIsFullscreen } = useAppContext();
+  const { user, isAuthed, isFullscreen, setIsFullscreen, setIsMobileMenuOpen } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -63,6 +63,7 @@ const Header = () => {
   }, [location]);
 
   useEffect(() => {
+    setIsMobileMenuOpen(isOpen);
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -71,7 +72,7 @@ const Header = () => {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, setIsMobileMenuOpen]);
 
   const handleLogout = () => {
     Object.keys(localStorage)
