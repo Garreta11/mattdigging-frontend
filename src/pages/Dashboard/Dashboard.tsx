@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
-import { createClient } from '@supabase/supabase-js';
 import './Dashboard.scss';
+import { supabase } from '../../lib/supabase';
 import {
   fetchTracks,
   fetchArtists,
   fetchGenres,
   fetchMoods,
   fetchSelections,
+  fetchDashboardUsers,
+  DashboardUser,
   Track,
   Artist,
   Genre,
@@ -20,33 +22,7 @@ const DASHBOARD_PASSWORD =
   process.env.REACT_APP_DASHBOARD_PASSWORD || 'mattdigging2025';
 const SESSION_KEY = 'md_dashboard_auth';
 
-// Admin Supabase client — uses the service_role key to bypass RLS
-// Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in your .env file
-const supabaseAdmin = createClient(
-  process.env.REACT_APP_SUPABASE_URL as string,
-  (process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.REACT_APP_SUPABASE_ANON_KEY) as string,
-  { auth: { autoRefreshToken: false, persistSession: false } },
-);
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-/** Combined auth user + profile row */
-interface DashboardUser {
-  id: string;
-  email: string;
-  email_confirmed_at?: string;
-  last_sign_in_at?: string;
-  created_at: string;
-  // from user_metadata or profiles table
-  username?: string;
-  is_member?: boolean;
-  subscription_type?: string;
-  subscription_expires_at?: string;
-  member_since?: string;
-}
-
-// Keep Profile as an alias so existing code compiles
+// Alias so existing code compiles
 type Profile = DashboardUser;
 
 type Tab = 'overview' | 'users' | 'tracks' | 'artists' | 'tags' | 'selections';
@@ -72,7 +48,7 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Record<string, T[]> {
   );
 }
 
-function formatDate(dateStr?: string): string {
+function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -1164,75 +1140,20 @@ function DashboardContent() {
     setLoading(true);
     setError(null);
     try {
-      const [tracks, artists, genres, moods, selections] = await Promise.all([
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Not authenticated — please log in as admin');
+
+      const [tracks, artists, genres, moods, selections, users] = await Promise.all([
         fetchTracks(),
         fetchArtists(),
         fetchGenres(),
         fetchMoods(),
         fetchSelections(),
+        fetchDashboardUsers(token),
       ]);
 
-      // Fetch ALL users via admin API (requires service_role key to bypass RLS)
-      let users: DashboardUser[] = [];
-      try {
-        // Try admin.listUsers() first — returns full auth.users data
-        const { data: authData, error: authError } =
-          await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-
-        if (authError) throw authError;
-
-        // Also fetch profiles table for subscription metadata
-        const { data: profileRows } = await supabaseAdmin
-          .from('profiles')
-          .select('id, username, is_member, subscription_type, subscription_expires_at, member_since');
-
-        const profileMap: Record<string, Record<string, unknown>> = {};
-        (profileRows || []).forEach((p: Record<string, unknown>) => {
-          if (typeof p.id === 'string') profileMap[p.id] = p;
-        });
-
-        users = authData.users.map((u) => {
-          const meta = u.user_metadata || {};
-          const prof = profileMap[u.id] || {};
-          return {
-            id: u.id,
-            email: u.email || '',
-            email_confirmed_at: u.email_confirmed_at ?? undefined,
-            last_sign_in_at: u.last_sign_in_at ?? undefined,
-            created_at: u.created_at,
-            username: (prof.username as string) || (meta.username as string) || undefined,
-            is_member:
-              (prof.is_member as boolean) ?? (meta.is_member as boolean) ?? false,
-            subscription_type:
-              (prof.subscription_type as string) ||
-              (meta.subscription_type as string) ||
-              undefined,
-            subscription_expires_at:
-              (prof.subscription_expires_at as string) ||
-              (meta.subscription_expires_at as string) ||
-              undefined,
-            member_since:
-              (prof.member_since as string) || (meta.member_since as string) || undefined,
-          };
-        });
-      } catch (e) {
-        console.warn('Admin user fetch failed — falling back to profiles table:', e);
-        // Fallback: query profiles directly (works if RLS allows it)
-        const { data: profilesData } = await supabaseAdmin
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
-        users = (profilesData as DashboardUser[]) || [];
-      }
-
-      setData({
-        profiles: users,
-        tracks,
-        artists,
-        genres,
-        moods,
-        selections,
-      });
+      setData({ profiles: users, tracks, artists, genres, moods, selections });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {

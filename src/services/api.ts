@@ -112,6 +112,30 @@ export type Auth = {
 
 // AUTHENTICATION
 
+export interface DashboardUser {
+  id: string;
+  email: string;
+  email_confirmed_at: string | null;
+  last_sign_in_at: string | null;
+  created_at: string;
+  username: string | null;
+  is_member: boolean;
+  subscription_type: string | null;
+  subscription_expires_at: string | null;
+  member_since: string | null;
+}
+
+export const fetchDashboardUsers = async (token: string): Promise<DashboardUser[]> => {
+  const response = await fetch(`${API_BASE_URL}/admin/dashboard/users`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch dashboard users");
+  return response.json();
+};
+
 export const fetchAuth = async (token: string): Promise<Auth> => {
   const response = await fetch(`${API_BASE_URL}/auth`, {
     headers: {
@@ -207,6 +231,12 @@ export const fetchSelections = async (): Promise<Selections[]> => {
   return response.json();
 };
 
+export const fetchHiddenGems = async (): Promise<{ selection: Selections; tracks: Track[] }> => {
+  const response = await fetch(`${API_BASE_URL}/selections/hidden-gems`);
+  if (!response.ok) throw new Error("Failed to fetch Hidden Gems");
+  return response.json();
+};
+
 export const fetchTracksBySelection = async (
   selectionId: string,
 ): Promise<Track[]> => {
@@ -288,10 +318,4 @@ export const searchGenres = async (query: string): Promise<Genre[]> => {
   return response.json();
 };
 
-export const searchMoods = async (query: string): Promise<Mood[]> => {
-  const response = await fetch(
-    `${API_BASE_URL}/tracks/moods/search?q=${encodeURIComponent(query)}`,
-  );
-  if (!response.ok) throw new Error("Failed to search moods");
-  return response.json();
-};
+expor

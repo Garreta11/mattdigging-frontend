@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import './HiddenGems.scss';
 import { useNavigate } from "react-router-dom";
-import { fetchSelections, fetchTracksBySelection, Selections, Track } from "../../services/api";
-import { useAppContext } from "../../context/AppContext";
+import { fetchHiddenGems, Selections, Track } from "../../services/api";
+import { useAuthContext } from "../../context/AppContext";
+import { usePlayerContext } from "../../context/PlayerContext";
 import TrackItem from "../../components/TrackItem/TrackItem";
 import Loader from "../../components/Loader/Loader";
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
@@ -15,33 +16,21 @@ const HiddenGemsPage = () => {
   const [hiddenGemsSelection, setHiddenGemsSelection] = useState<Selections | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack, isMember, authReady } = useAppContext();
-  // Treat unresolved subscription status as loading so membership UI never flashes
+  const { setPlayerTrackList, setPlaylist, setTrack, track: currentTrack } = usePlayerContext();
+  const { isMember, authReady } = useAuthContext();
   const isLoading = dataLoading || !authReady;
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const selections = await fetchSelections();
-        const hiddenGems = selections.find(
-          (s) => s.title.toLowerCase() === "hidden gems"
-        );
-        if (hiddenGems) {
-          setHiddenGemsSelection(hiddenGems);
-          const trackData = await fetchTracksBySelection(hiddenGems.id);
-          setTracks(trackData);
-        }
-      } catch (err) {
-        console.error("Error loading Hidden Gems:", err);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    load();
+    fetchHiddenGems()
+      .then(({ selection, tracks }) => {
+        setHiddenGemsSelection(selection);
+        setTracks(tracks);
+      })
+      .catch((err) => console.error("Error loading Hidden Gems:", err))
+      .finally(() => setDataLoading(false));
   }, []);
 
-  const handleClose = async () => {
+  const handleClose = () => {
     setIsFadingOut(true);
     setTimeout(() => navigate('/'), 1000);
   };
@@ -81,7 +70,6 @@ const HiddenGemsPage = () => {
             </clipPath>
             </defs>
           </svg>
-
         </button>
       </div>
 

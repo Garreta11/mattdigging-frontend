@@ -3,7 +3,8 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
-import { useAppContext } from '../../context/AppContext';
+import { useAuthContext } from '../../context/AppContext';
+import { usePlayerContext } from '../../context/PlayerContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
 
@@ -37,12 +38,13 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen, isMember, loading, authReady } = useAppContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
+  const { isMember, loading, authReady } = useAuthContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playedIndices, setPlayedIndices] = useState<number[]>([]);
+  const [playedIndices, setPlayedIndices] = useState<Set<number>>(new Set());
   const [history, setHistory] = useState<number[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -79,7 +81,7 @@ const Player = () => {
         if (data.length > 0) {
           const randomIndex = Math.floor(Math.random() * data.length);
           setCurrentTrackIndex(randomIndex);
-          setPlayedIndices([randomIndex]);
+          setPlayedIndices(new Set([randomIndex]));
         }
       } catch (err) {
         console.error('Failed to load tracks:', err);
@@ -103,10 +105,10 @@ const Player = () => {
     if (isShuffleMode) {
       const randomIndex = Math.floor(Math.random() * playerTrackList.length);
       setCurrentTrackIndex(randomIndex);
-      setPlayedIndices([randomIndex]);
+      setPlayedIndices(new Set([randomIndex]));
     } else {
       setCurrentTrackIndex(0);
-      setPlayedIndices([0]);
+      setPlayedIndices(new Set([0]));
     }
     setHistory([]);
     // intentionally NOT setting isPlaying(false) here —
@@ -145,8 +147,8 @@ const Player = () => {
       
       setCurrentTrackIndex(trackIndex);
       
-      if (!playedIndices.includes(trackIndex)) {
-        setPlayedIndices(prev => [...prev, trackIndex]);
+      if (!playedIndices.has(trackIndex)) {
+        setPlayedIndices(prev => new Set([...prev, trackIndex]));
       }
       
       setIsPlaying(true);
@@ -306,17 +308,17 @@ const Player = () => {
   const getRandomUnplayedIndex = (): number | null => {
     if (playerTrackList.length === 0) return null;
 
-    if (playedIndices.length >= playerTrackList.length) {
-      setPlayedIndices([]);
+    if (playedIndices.size >= playerTrackList.length) {
+      setPlayedIndices(new Set());
       return Math.floor(Math.random() * playerTrackList.length);
     }
 
     const available = playerTrackList
       .map((_, i) => i)
-      .filter(i => !playedIndices.includes(i));
+      .filter(i => !playedIndices.has(i));
 
     if (available.length === 0) {
-      setPlayedIndices([]);
+      setPlayedIndices(new Set());
       return Math.floor(Math.random() * playerTrackList.length);
     }
 
@@ -343,7 +345,7 @@ const Player = () => {
     setCurrentTrackIndex(nextIndex);
   
     if (isShuffleMode) {
-      setPlayedIndices(prev => [...prev, nextIndex!]);
+      setPlayedIndices(prev => new Set([...prev, nextIndex!]));
     }
   
     setIsPlaying(true);
@@ -388,10 +390,10 @@ const Player = () => {
       const newValue = !prev;
   
       if (!newValue) {
-        setPlayedIndices([]);
+        setPlayedIndices(new Set());
       } else {
         if (currentTrackIndex !== null) {
-          setPlayedIndices([currentTrackIndex]);
+          setPlayedIndices(new Set([currentTrackIndex]));
         }
       }
   

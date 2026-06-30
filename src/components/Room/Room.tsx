@@ -1,20 +1,15 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { useAppContext } from '../../context/AppContext';
-import { useStorageUrl } from '../../pages/Admin/hooks/useStorageUrl';
+import { useAuthContext } from '../../context/AppContext';
+import { usePlayerContext } from '../../context/PlayerContext';
+import { useStorageUrl } from '../../hooks/useStorageUrl';
 import Output from './Output';
 import './Room.scss';
 
 const Room: React.FC = () => {
-  const {
-    track,
-    setIsTrackModalOpen,
-    isTrackModalOpen,
-    setIsFullscreen,
-    isSearchModalOpen,
-    isMobileMenuOpen,
-  } = useAppContext();
+  const { track, setIsFullscreen } = usePlayerContext();
+  const { setIsTrackModalOpen, isTrackModalOpen, isSearchModalOpen, isMobileMenuOpen } = useAuthContext();
 
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -25,7 +20,7 @@ const Room: React.FC = () => {
   const tipRef = useRef<HTMLDivElement>(null);
 
   const [tip, setTip] = useState<string>('');
-  const coverUrl = useStorageUrl('covers', track?.cover_url || null, null);
+  const coverUrl = useStorageUrl('covers', track?.cover_url || null, null, 600);
 
   // ─── Shared Navigation Logic ────────────────────────────────
   const fadeTo = useCallback((path: string) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useWindowVirtualizer } from '../../hooks/useWindowVirtualizer';
 import "./Playlists.scss";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchGenres, fetchMoods, fetchTracks, Genre, Mood, Track, fetchYears, fetchCountries, Year, Country } from '../../services/api';
@@ -43,7 +44,6 @@ const PlaylistsPage = () => {
   
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const hasFetched = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const genreParam = searchParams.get('genre');
@@ -52,7 +52,7 @@ const PlaylistsPage = () => {
   const seasonParam = searchParams.get('season');
   const countryParam = searchParams.get('country');
 
-  const isPlaylistLoaded = !isLoading && tracks.length > 0 && 
+  const isPlaylistLoaded = !isLoading && tracks.length > 0 &&
     (genreParam || moodParam || yearParam || seasonParam || countryParam);
 
   // Close dropdown on outside click
@@ -66,53 +66,9 @@ const PlaylistsPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Load filter options once on mount — runs in background, no loading indicator.
+  // With Cache-Control headers these are served from browser cache on repeat visits.
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    const loadData = async () => {
-      try {
-        setDataLoading(true);
-        
-        if (genreParam || moodParam || yearParam || seasonParam || countryParam) {
-          const params = new URLSearchParams();
-          if (genreParam) params.append('genre', genreParam);
-          if (moodParam) params.append('mood', moodParam);
-          if (yearParam) params.append('year', yearParam);
-          if (seasonParam) params.append('season', seasonParam);
-          if (countryParam) params.append('country', countryParam);
-          
-          const data = await fetchTracks(`?${params.toString()}`);
-          setTracks(data);
-        } else {
-          const [genresData, moodsData, yearsData, countriesData] = await Promise.all([
-            fetchGenres(),
-            fetchMoods(),
-            fetchYears(),
-            fetchCountries()
-          ]);
-          setGenres(genresData);
-          setMoods(moodsData);
-          setYears(yearsData);
-          setCountries(countriesData);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load data');
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    loadData();
-  }, [genreParam, moodParam, yearParam, seasonParam, countryParam]);
-
-  useEffect(() => {
-    hasFetched.current = false;
-  }, [genreParam, moodParam, yearParam, seasonParam, countryParam]);
-
-  // Always load filter options (for dropdowns to work even in filtered state)
-  useEffect(() => {
-    if (genres.length || moods.length || years.length || countries.length) return;
     Promise.all([fetchGenres(), fetchMoods(), fetchYears(), fetchCountries()])
       .then(([g, m, y, c]) => {
         setGenres(g);
@@ -123,24 +79,43 @@ const PlaylistsPage = () => {
       .catch(() => {});
   }, []);
 
+  // Load tracks whenever the active filter changes.
+  // Cancelled flag prevents stale state updates if the effect re-runs before
+  // the previous fetch completes (e.g. rapid filter switching).
+  useEffect(() => {
+    const hasFilter = !!(genreParam || moodParam || yearParam || seasonParam || countryParam);
+
+    if (!hasFilter) {
+      setTracks([]);
+      setDataLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const params = new URLSearchParams();
+    if (genreParam) params.append('genre', genreParam);
+    if (moodParam) params.append('mood', moodParam);
+    if (yearParam) params.append('year', yearParam);
+    if (seasonParam) params.append('season', seasonParam);
+    if (countryParam) params.append('country', countryParam);
+
+    setDataLoading(true);
+    fetchTracks(`?${params.toString()}`)
+      .then(data => { if (!cancelled) setTracks(data); })
+      .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load tracks'); })
+      .finally(() => { if (!cancelled) setDataLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [genreParam, moodParam, yearParam, seasonParam, countryParam]);
+
   const handleClose = () => {
     setIsFadingOut(true);
     setTimeout(() => navigate('/'), 1000);
   };
 
-  const applyFilter = async (params: Record<string, string>) => {
-    try {
-      setDataLoading(true);
-      setOpenDropdown(null);
-      const query = new URLSearchParams(params);
-      const data = await fetchTracks(`?${query.toString()}`);
-      setTracks(data);
-      navigate(`/playlists?${query.toString()}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tracks');
-    } finally {
-      setDataLoading(false);
-    }
+  const applyFilter = (params: Record<string, string>) => {
+    setOpenDropdown(null);
+    navigate(`/playlists?${new URLSearchParams(params).toString()}`);
   };
 
   const handleClearFilter = () => {
@@ -208,6 +183,11 @@ const PlaylistsPage = () => {
   }, [genreParam, moodParam, yearParam, seasonParam, countryParam, genres, moods]);
 
   const hasActiveFilter = !!(genreParam || moodParam || yearParam || seasonParam || countryParam);
+
+  // ── Virtualizer — only renders visible TrackItems ────────────────────────
+  // TrackItem height: 52px cover + 2×0.65rem padding ≈ 73px; round up to 76.
+  const { containerRef: trackListRef, visibleIndices, paddingTop, paddingBottom } =
+    useWindowVirtualizer(tracks.length, 76);
 
   const toggleDropdown = (key: DropdownKey) => {
     setOpenDropdown(prev => prev === key ? null : key);
@@ -401,21 +381,25 @@ const PlaylistsPage = () => {
       {isLoading && <Loader />}
       {error && <p className="error">{error}</p>}
 
-      {/* Tracks list */}
+      {/* Tracks list — virtualized: only renders visible rows */}
       {hasActiveFilter && !isLoading && isMember && (
-        <div className="playlistsPage__tracks">
+        <div ref={trackListRef} className="playlistsPage__tracks">
           {tracks.length === 0 ? (
             <p>Music coming soon</p>
           ) : (
-            tracks.map((track, index) => (
-              <TrackItem
-                key={track.id}
-                index={index}
-                track={track}
-                onClick={() => handleTrackClick(track)}
-                isPlaying={currentTrack?.id === track.id}
-              />
-            ))
+            <>
+              {paddingTop > 0 && <div style={{ height: paddingTop }} />}
+              {visibleIndices.map(index => (
+                <TrackItem
+                  key={tracks[index].id}
+                  index={index}
+                  track={tracks[index]}
+                  onClick={() => handleTrackClick(tracks[index])}
+                  isPlaying={currentTrack?.id === tracks[index].id}
+                />
+              ))}
+              {paddingBottom > 0 && <div style={{ height: paddingBottom }} />}
+            </>
           )}
         </div>
       )}

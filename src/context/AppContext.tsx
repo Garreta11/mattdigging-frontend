@@ -2,7 +2,8 @@ import { Session } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { User } from "../types/user";
 import { supabase } from "../lib/supabase";
-import { Artist, Auth, Playlist, Track, fetchAuth } from "../services/api";
+import { Auth, fetchAuth } from "../services/api";
+import { PlayerProvider, usePlayerContext } from "./PlayerContext";
 
 interface AppContextType {
   user: User | null;
@@ -13,29 +14,8 @@ interface AppContextType {
   loading: boolean;
   setIsAuthed: (isAuthed: boolean) => void;
 
-  track: Track | null;
-  setTrack: (track: Track | null) => void;
-
-  playerTrackList: Track[];
-  setPlayerTrackList: (trackList: Track[]) => void;
-
-  playlist: Playlist | null;
-  setPlaylist: (playlist: Playlist | null) => void;
-
-  playlistReady: boolean;
-  setPlaylistReady: (ready: boolean) => void;
-
-  modalArtist: Artist | null;
-  setModalArtist: (artist: Artist | null) => void;
-
-  isModalArtistOpen: boolean;
-  setIsModalArtistOpen: (isOpen: boolean) => void;
-
   isTrackModalOpen: boolean;
   setIsTrackModalOpen: (isOpen: boolean) => void;
-
-  isFullscreen: boolean;
-  setIsFullscreen: (isFullscreen: boolean) => void;
 
   isSearchModalOpen: boolean;
   setIsSearchModalOpen: (isOpen: boolean) => void;
@@ -45,6 +25,7 @@ interface AppContextType {
 
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
+
   isWelcomeModalOpen: boolean;
   setIsWelcomeModalOpen: (isOpen: boolean) => void;
 
@@ -55,26 +36,18 @@ interface AppContextType {
   setAuth: (auth: Auth | null) => void;
 
   authReady: boolean;
-
   initializeAuth: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
   const [auth, setAuth] = useState<Auth | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [track, setTrack] = useState<Track | null>(null);
-  const [playerTrackList, setPlayerTrackList] = useState<Track[]>([]);
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [playlistReady, setPlaylistReady] = useState(false);
-  const [modalArtist, setModalArtist] = useState<Artist | null>(null);
-  const [isModalArtistOpen, setIsModalArtistOpen] = useState(false);
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,10 +55,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const pricingModalTriggered = useRef(false);
 
-  // Single source of truth for subscription status: fetch the backend auth
-  // profile, merge with the Supabase session, and only mark auth ready once
-  // everything has resolved. Consumers read `isMember`/`authReady` — they
-  // never fetch status themselves.
   const loadAuth = async (session: Session | null) => {
     if (session?.access_token) {
       try {
@@ -93,13 +62,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setAuth(authData);
       } catch (error) {
         console.error("Error fetching auth data:", error);
-        // Backend unreachable — fall back to Supabase session metadata only
         setAuth(null);
       }
     } else {
       setAuth(null);
     }
-
     updateUserState(session);
     setAuthReady(true);
     setLoading(false);
@@ -119,20 +86,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
       return;
     }
-
     await loadAuth(session);
   };
 
   useEffect(() => {
-    // Resolve session + subscription status once on mount
     initializeAuth();
-
-    // Keep it in sync with auth changes. Re-fetch the backend auth profile so
-    // membership stays authoritative without per-component fetches.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      // On sign out, clear state immediately without waiting for any server call
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setAuth(null);
         setUser(null);
@@ -141,20 +100,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         return;
       }
-
-      // Mount already handles the initial session via initializeAuth()
       if (event === "INITIAL_SESSION") return;
-
-      // SIGNED_IN / TOKEN_REFRESHED / USER_UPDATED → refresh membership
       loadAuth(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   const updateUserState = (session: Session | null) => {
     if (session?.user) {
-setUser({
+      setUser({
         id: session.user.id,
         email: session.user.email || "",
         name: session.user.user_metadata?.name || "",
@@ -182,25 +136,14 @@ setUser({
   const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
   const isAdmin = isAuthed && user?.isAdmin === true;
 
-  // Remove the ?checkout=... marker Stripe appended on return so a refresh
-  // can't re-run the post-payment flow. Done via the History API because the
-  // provider sits outside <Router> and has no useNavigate.
   const stripCheckoutParam = () => {
     window.history.replaceState({}, "", window.location.pathname);
   };
 
-  // After a successful checkout, is_member is set asynchronously by the Stripe
-  // webhook, so it may still be false on return. Poll the backend auth profile
-  // until membership lands, then show the welcome modal.
   const pollMembershipThenWelcome = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
-    if (!token) {
-      stripCheckoutParam();
-      return;
-    }
+    if (!token) { stripCheckoutParam(); return; }
     for (let i = 0; i < 8; i++) {
       try {
         const authData = await fetchAuth(token);
@@ -215,23 +158,16 @@ setUser({
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
-    // Webhook didn't land in time — clean the URL and let the user retry.
     stripCheckoutParam();
   };
 
   useEffect(() => {
-    // Only decide once subscription status has fully resolved — avoids the
-    // modal flashing open then closing while auth is still loading.
     if (!authReady || pricingModalTriggered.current) return;
     pricingModalTriggered.current = true;
-
     const checkout = new URLSearchParams(window.location.search).get("checkout");
     if (checkout === "success") {
-      // Returned from a paid checkout — confirm membership, don't nag.
       pollMembershipThenWelcome();
     } else if (checkout === "cancel") {
-      // Returned from an abandoned checkout — tell the user nothing was charged
-      // and offer to retry from plan selection.
       setIsCancelModalOpen(true);
       stripCheckoutParam();
     } else if (isAuthed && !isMember) {
@@ -243,43 +179,17 @@ setUser({
   return (
     <AppContext.Provider
       value={{
-        user,
-        setUser,
-        isAuthed,
-        isMember,
-        isAdmin,
-        loading,
-        setIsAuthed,
-        track,
-        setTrack,
-        playerTrackList,
-        setPlayerTrackList,
-        playlist,
-        setPlaylist,
-        playlistReady,
-        setPlaylistReady,
-        modalArtist,
-        setModalArtist,
-        isModalArtistOpen,
-        setIsModalArtistOpen,
-        isTrackModalOpen,
-        setIsTrackModalOpen,
-        isFullscreen,
-        setIsFullscreen,
-        isSearchModalOpen,
-        setIsSearchModalOpen,
-        isPricingModalOpen,
-        setIsPricingModalOpen,
-        isMobileMenuOpen,
-        setIsMobileMenuOpen,
-        isWelcomeModalOpen,
-        setIsWelcomeModalOpen,
-        isCancelModalOpen,
-        setIsCancelModalOpen,
-        auth,
-        setAuth,
-        authReady,
-        initializeAuth,
+        user, setUser,
+        isAuthed, setIsAuthed,
+        isMember, isAdmin, loading,
+        isTrackModalOpen, setIsTrackModalOpen,
+        isSearchModalOpen, setIsSearchModalOpen,
+        isPricingModalOpen, setIsPricingModalOpen,
+        isMobileMenuOpen, setIsMobileMenuOpen,
+        isWelcomeModalOpen, setIsWelcomeModalOpen,
+        isCancelModalOpen, setIsCancelModalOpen,
+        auth, setAuth,
+        authReady, initializeAuth,
       }}
     >
       {children}
@@ -287,10 +197,27 @@ setUser({
   );
 };
 
+// Wraps both providers so components can use either hook.
+export const AppProvider = ({ children }: { children: React.ReactNode }) => (
+  <PlayerProvider>
+    <AppProviderInner>{children}</AppProviderInner>
+  </PlayerProvider>
+);
+
+// Backward-compatible hook — merges AppContext + PlayerContext.
+// Existing components keep working without changes.
 export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error("useAppContext must be used within an AppProvider");
-  }
-  return context;
+  const app = useContext(AppContext);
+  if (!app) throw new Error("useAppContext must be used within an AppProvider");
+  const player = usePlayerContext();
+  return { ...app, ...player };
+};
+
+// Focused hook: only auth + UI state. Does NOT subscribe to PlayerContext.
+// Use in components that need isMember/isAuthed but not player state —
+// they won't re-render on track/playlist changes.
+export const useAuthContext = () => {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error("useAuthContext must be used within an AppProvider");
+  return ctx;
 };

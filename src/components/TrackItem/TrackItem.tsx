@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import './TrackItem.scss';
 import { Track } from '../../services/api';
 import { StorageImage } from '../../pages/Admin/components/StorageImage';
@@ -13,7 +13,7 @@ interface TrackItemProps {
   index?: number;
 }
 
-const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index }) => {
+function TrackItemInner({ track, onClick, isPlaying, index }: TrackItemProps) {
   const navigate = useNavigate();
   const { setTrack, setIsTrackModalOpen } = useAppContext();
 
@@ -21,8 +21,8 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
     navigate(`/playlists?genre=${slug}`);
   };
 
-  const handleOpenTrackModal = (track: Track) => {
-    setTrack(track);
+  const handleOpenTrackModal = (t: Track) => {
+    setTrack(t);
     setIsTrackModalOpen(true);
   };
 
@@ -32,7 +32,6 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
       className={`track-item ${isPlaying ? 'track-item--playing' : ''}`}
     >
       <div className="track-item__left">
-        {/* Index or animated playing bars */}
         {index !== undefined && (
           <>
             <p className="track-item__index">{String(index + 1).padStart(2, '0')}</p>
@@ -98,6 +97,8 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onClick, isPlaying, index 
       </div>
     </div>
   );
-};
+}
+
+const TrackItem = memo(TrackItemInner);
 
 export default TrackItem;

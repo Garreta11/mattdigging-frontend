@@ -1,28 +1,31 @@
 import { useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 
+const IMAGE_BUCKETS = new Set(['covers', 'artists', 'images', 'photos']);
+
+// Default: 2x retina of the 52px cover thumbnail.
+const DEFAULT_WIDTH = 104;
+const DEFAULT_QUALITY = 75;
+
 export function useStorageUrl(
   bucket: string | null,
   path: string | null | undefined,
   localFile?: File | null,
+  imgWidth: number = DEFAULT_WIDTH,
 ): string | null {
   const url = useMemo(() => {
-    // Local file preview
     if (localFile) return URL.createObjectURL(localFile);
-
-    // No path or bucket
     if (!path || !bucket) return null;
-
-    // Already a full URL
     if (path.startsWith('http')) return path;
 
-    // Public URL with image transformation (no network call, instant)
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+
+    if (IMAGE_BUCKETS.has(bucket)) {
+      return data.publicUrl + '?width=' + imgWidth + '&quality=' + DEFAULT_QUALITY + '&resize=cover';
+    }
 
     return data.publicUrl;
-  }, [bucket, path, localFile]);
+  }, [bucket, path, localFile, imgWidth]);
 
   return url;
 }

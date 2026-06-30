@@ -1,7 +1,7 @@
 import { Track } from '../../services/api';
 import { useFavorites } from '../../hooks/useFavorites';
 import './FavoriteButton.scss';
-import { useAppContext } from '../../context/AppContext';
+import { useAuthContext } from '../../context/AppContext';
 
 interface FavoriteButtonProps {
   track: Track;
@@ -9,7 +9,7 @@ interface FavoriteButtonProps {
 }
 
 const FavoriteButton = ({ track, className = '' }: FavoriteButtonProps) => {
-  const { isMember } = useAppContext();
+  const { isMember } = useAuthContext();
   const { isFavorite, toggleFavorite } = useFavorites();
   const active = isFavorite(track.id);
 
