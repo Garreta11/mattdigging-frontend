@@ -318,4 +318,10 @@ export const searchGenres = async (query: string): Promise<Genre[]> => {
   return response.json();
 };
 
-expor
+export const searchMoods = async (query: string): Promise<Mood[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/tracks/moods/search?q=${encodeURIComponent(query)}`,
+  );
+  if (!response.ok) throw new Error("Failed to search moods");
+  return response.json();
+};
