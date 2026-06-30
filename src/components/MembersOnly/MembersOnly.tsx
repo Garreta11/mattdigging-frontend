@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../../context/AppContext";
+import { useAuthContext } from "../../context/AppContext";
 import './MembersOnly.scss';
 
 const MembersOnly = () => {
   const navigate = useNavigate();
-  const { isAuthed } = useAppContext();
+  const { isAuthed } = useAuthContext();
 
   return (
     <div className="members-only">

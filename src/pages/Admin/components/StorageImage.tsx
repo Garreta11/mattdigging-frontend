@@ -18,5 +18,5 @@ export function StorageImage({ bucket, path, alt, className, localFile }: Storag
 
   if (!url) return null;
 
-  return <img src={url} alt={alt} className={className} />;
+  return <img src={url} alt={alt} className={className} loading="lazy" />;
 }
