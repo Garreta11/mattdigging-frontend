@@ -136,6 +136,7 @@
       white-space: nowrap;
       transition: color 0.18s ease;
       position: relative;
+      width: fit-content;
 
       &::after {
         content: '';
@@ -176,6 +177,46 @@
       &:hover {
         opacity: 1;
         &::after { width: 100%; }
+      }
+    }
+
+    // Initial state — no track selected yet
+    &__empty {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      cursor: pointer;
+
+      &:hover &__icon {
+        color: rgba(245, 241, 232, 0.4);
+        border-color: rgba(245, 241, 232, 0.25);
+      }
+
+      &:hover &__text p { color: rgba(245, 241, 232, 0.5); }
+
+      &__icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        border: 1.5px dashed rgba(245, 241, 232, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: rgba(245, 241, 232, 0.15);
+        transition: color 0.18s ease, border-color 0.18s ease;
+      }
+
+      &__text {
+        p {
+          margin: 0;
+          font-size: 1.1rem;
+          color: rgba(245, 241, 232, 0.2);
+          font-style: italic;
+          font-weight: 300;
+          letter-spacing: 0.01em;
+          transition: color 0.18s ease;
+        }
       }
     }
 

@@ -77,12 +77,6 @@ const Player = () => {
       try {
         const data = isMember ? await fetchPlayerTracks() : await fetchPlayerFreeTracks();
         setPlayerTrackList(data);
-
-        if (data.length > 0) {
-          const randomIndex = Math.floor(Math.random() * data.length);
-          setCurrentTrackIndex(randomIndex);
-          setPlayedIndices(new Set([randomIndex]));
-        }
       } catch (err) {
         console.error('Failed to load tracks:', err);
       }
@@ -430,6 +424,15 @@ const Player = () => {
 
   const hasTrack = !!currentTrack;
   const isPlayerReady = hasTrack && isAudioReady;
+  const isInitialState = !hasTrack && playerTrackList.length > 0;
+
+  const playRandomTrack = () => {
+    if (playerTrackList.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * playerTrackList.length);
+    setCurrentTrackIndex(randomIndex);
+    setPlayedIndices(new Set([randomIndex]));
+    setIsPlaying(true);
+  };
 
   return (
     <div className={`player ${isFullscreen ? 'player--fullscreen' : ''}`}>
@@ -475,10 +478,23 @@ const Player = () => {
               <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
             </div>
           </>
-        ) : (
+        ) : playerTrackList.length === 0 ? (
           <div className='player__info__skeleton'>
             <div className='player__info__skeleton__title' />
             <div className='player__info__skeleton__artist' />
+          </div>
+        ) : (
+          <div className='player__info__empty' onClick={playRandomTrack}>
+            <div className='player__info__empty__icon'>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <div className='player__info__empty__text'>
+              <p>Play a random track</p>
+            </div>
           </div>
         )}
       </div>
@@ -512,9 +528,9 @@ const Player = () => {
           <button
             onClick={togglePlayPause}
             disabled={controlsDisabled || !isPlayerReady}
-            className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
+            className={`player__btn player__btn--play${!isPlayerReady && !isInitialState ? ' player__btn--loading' : ''}`}
           >
-            {!isPlayerReady ? (
+            {!isPlayerReady && !isInitialState ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
                 <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
               </svg>
@@ -593,6 +609,19 @@ const Player = () => {
                   <p><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
                 </div>
               </>
+            ) : !hasTrack && playerTrackList.length > 0 ? (
+              <div className='player__info__empty' onClick={playRandomTrack}>
+                <div className='player__info__empty__icon'>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className='player__info__empty__text'>
+                  <p>Play a random track</p>
+                </div>
+              </div>
             ) : (
               <div className='player__info__skeleton'>
                 <div className='player__info__skeleton__title' />
@@ -656,9 +685,9 @@ const Player = () => {
               <button
                 onClick={togglePlayPause}
                 disabled={controlsDisabled || !isPlayerReady}
-                className={`player__btn player__btn--play${!isPlayerReady ? ' player__btn--loading' : ''}`}
+                className={`player__btn player__btn--play${!isPlayerReady && !isInitialState ? ' player__btn--loading' : ''}`}
               >
-                {!isPlayerReady ? (
+                {!isPlayerReady && !isInitialState ? (
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className='player__btn--loading'>
                     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="40 20" strokeLinecap="round"/>
                   </svg>
