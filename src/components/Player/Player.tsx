@@ -493,7 +493,7 @@ const Player = () => {
               </svg>
             </div>
             <div className='player__info__empty__text'>
-              <p>Play a random track</p>
+              <p>Click to play a random track</p>
             </div>
           </div>
         )}
@@ -619,7 +619,7 @@ const Player = () => {
                   </svg>
                 </div>
                 <div className='player__info__empty__text'>
-                  <p>Play a random track</p>
+                  <p>Click to play a random track</p>
                 </div>
               </div>
             ) : (
