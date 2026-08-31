@@ -58,12 +58,6 @@ const Player = () => {
   const isInitialPlaylistLoad = useRef(true);
   const previousTrackId = useRef<string | null>(null);
   const isManualTrackChange = useRef(false);
-  const isPlayingRef = useRef(false);
-
-  // Keep isPlayingRef in sync with isPlaying state
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
 
   // --------------------------------
   // LOAD TRACKS INITIAL (solo una vez al montar)
@@ -198,7 +192,13 @@ const Player = () => {
 
       const handleLoadedMetadata  = () => updateDuration();
       const handleLoadedData      = () => updateDuration();
-      const handleCanPlay         = () => markReady();
+      const handleCanPlay         = () => {
+        markReady();
+        audio.play().catch((err) => {
+          console.error('Error auto-playing audio:', err);
+          setIsPlaying(false);
+        });
+      };
       const handleDurationChange  = () => updateDuration();
       const handleEnded           = () => playNextTrack();
       const handlePlay            = () => { setIsPlaying(true); updateDuration(); };
@@ -253,31 +253,6 @@ const Player = () => {
       audio.pause();
     }
   }, [isPlaying, currentTrack]);
-
-  // --------------------------------
-  // AUTO PLAY WHEN TRACK CHANGES
-  // Uses isPlayingRef to avoid stale closure capturing old isPlaying value
-  // --------------------------------
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
-
-    const handleCanPlay = () => {
-      // if (isPlayingRef.current) {
-        audio.play().catch((err) => {
-          console.error('Error auto-playing audio:', err);
-          setIsPlaying(false);
-        });
-      // }
-    };
-
-    audio.addEventListener("canplay", handleCanPlay);
-
-    return () => {
-      audio.removeEventListener("canplay", handleCanPlay);
-    };
-  }, [currentTrack]);
-
 
   // --------------------------------
   // Actualizar el track en el contexto cuando cambie currentTrack
@@ -434,6 +409,14 @@ const Player = () => {
     setIsPlaying(true);
   };
 
+  const handlePlayButtonClick = () => {
+    if (isInitialState) {
+      playRandomTrack();
+    } else {
+      togglePlayPause();
+    }
+  };
+
   return (
     <div className={`player ${isFullscreen ? 'player--fullscreen' : ''}`}>
       <AudioStorage
@@ -526,8 +509,8 @@ const Player = () => {
 
           {/* Play/Pause button */}
           <button
-            onClick={togglePlayPause}
-            disabled={controlsDisabled || !isPlayerReady}
+            onClick={handlePlayButtonClick}
+            disabled={!isInitialState && (controlsDisabled || !isPlayerReady)}
             className={`player__btn player__btn--play${!isPlayerReady && !isInitialState ? ' player__btn--loading' : ''}`}
           >
             {!isPlayerReady && !isInitialState ? (
@@ -683,8 +666,8 @@ const Player = () => {
               </button>
 
               <button
-                onClick={togglePlayPause}
-                disabled={controlsDisabled || !isPlayerReady}
+                onClick={handlePlayButtonClick}
+                disabled={!isInitialState && (controlsDisabled || !isPlayerReady)}
                 className={`player__btn player__btn--play${!isPlayerReady && !isInitialState ? ' player__btn--loading' : ''}`}
               >
                 {!isPlayerReady && !isInitialState ? (
