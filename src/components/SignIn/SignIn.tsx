@@ -4,7 +4,7 @@ import './SignIn.scss';
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 
-type Mode = 'login' | 'signup' | 'forgot';
+type Mode = 'login' | 'signup' | 'forgot' | 'sent';
 
 type FormState = {
   email: string;
@@ -30,6 +30,7 @@ const SignIn = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sentTo, setSentTo] = useState('');
   const navigate = useNavigate();
   const { setIsSearchModalOpen } = useAppContext();
 
@@ -78,9 +79,8 @@ const SignIn = () => {
       },
     });
     if (error) throw error;
-    setSuccess('Check your email to confirm your account, then log in.');
-    setForm(EMPTY_FORM);
-    setTimeout(() => switchMode('login'), 4000);
+    setSentTo(form.email);
+    switchMode('sent');
   };
 
   // ── Forgot Password ──────────────────────────────────────
@@ -112,6 +112,7 @@ const SignIn = () => {
 
   const isForgot = mode === 'forgot';
   const isSignup = mode === 'signup';
+  const isSent = mode === 'sent';
 
   return (
     <div className="signin">
@@ -125,8 +126,8 @@ const SignIn = () => {
           </svg>
         </button>
 
-        {/* Mode toggle — hidden on forgot screen */}
-        {!isForgot && (
+        {/* Mode toggle — hidden on forgot / sent screens */}
+        {!isForgot && !isSent && (
           <div className="signin__toggle">
             <button
               type="button"
@@ -146,6 +147,34 @@ const SignIn = () => {
           </div>
         )}
 
+        {isSent ? (
+          <div className="signin__sent">
+            <div className="signin__sent__icon" aria-hidden>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
+              </svg>
+            </div>
+            <h2>Check your inbox</h2>
+            <p>
+              We sent a confirmation link to <strong>{sentTo}</strong>.
+            </p>
+            <p>
+              Open that email and click the link to activate your account. Then come back here and log in.
+            </p>
+            <p className="signin__sent__hint">
+              Nothing there? Check your spam or junk folder.
+            </p>
+            <button
+              type="button"
+              className="signin__form__button"
+              onClick={() => switchMode('login')}
+            >
+              Back to login
+            </button>
+          </div>
+        ) : (
+        <>
         {/* Heading */}
         <div className="signin__heading">
           {isForgot && (
@@ -316,9 +345,11 @@ const SignIn = () => {
             </button>
           </p>
         )}
+        </>
+        )}
       </div>
     </div>
   );
 };
 
-export default SignIn;
+export default SignIn;

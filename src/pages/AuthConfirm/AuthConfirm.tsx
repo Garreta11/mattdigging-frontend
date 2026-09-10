@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 
 const AuthConfirm = () => {
   useEffect(() => {
-    // Optional: after a short delay, send users back to Join
+    // After a short delay, send users to login
     const timer = setTimeout(() => {
-      window.location.replace('/join');
+      window.location.replace('/login');
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
