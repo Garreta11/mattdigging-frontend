@@ -345,6 +345,54 @@
     }
   }
 
+  // ─── Sent (check inbox) ─────────────────────────────────
+  &__sent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-3);
+
+    &__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(0, 255, 135, 0.85);
+      background: rgba(0, 255, 135, 0.08);
+      border: 1px solid rgba(0, 255, 135, 0.2);
+      margin-bottom: var(--space-2);
+    }
+
+    h2 {
+      margin: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: var(--font-size-md);
+      line-height: 1.6;
+      color: rgba(245, 241, 232, 0.7);
+
+      strong {
+        color: var(--color-white);
+        word-break: break-all;
+      }
+    }
+
+    &__hint {
+      font-size: var(--font-size-sm) !important;
+      color: rgba(245, 241, 232, 0.45) !important;
+    }
+
+    .signin__form__button {
+      margin-top: var(--space-3);
+      width: 100%;
+    }
+  }
+
   // ─── Footer switch ──────────────────────────────────────
   &__switch {
     font-size: var(--font-size-md);
@@ -393,4 +441,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
+}

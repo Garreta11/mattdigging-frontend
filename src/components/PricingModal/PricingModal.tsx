@@ -102,7 +102,10 @@ const PricingModal = () => {
         data: { session },
       } = await supabase.auth.getSession();
       const token = session?.access_token;
-      if (!token) return;
+      if (!token) {
+        setError('Your session has expired. Please log in again and retry.');
+        return;
+      }
       const { url } = await fetchBillingCheckout(token, initializeAuth, selectedPlan);
       if (url) {
         // Same-tab redirect. window.open('_blank') after an await (and from a
