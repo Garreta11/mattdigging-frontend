@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import HiddenGems from './pages/HiddenGems/HiddenGems';
 import Terms from './pages/Terms/Terms';
+import Privacy from './pages/Privacy/Privacy';
 import Profile from './pages/Profile/Profile';
 import Login from './pages/Login/Login';
 
@@ -69,6 +70,7 @@ function App() {
       {/* Public route for password reset */}
       <Route path="/auth/reset-password" element={<ResetPassword />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
 
       {/* Admin route - separate layout */}
       <Route

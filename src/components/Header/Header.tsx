@@ -156,6 +156,20 @@ const Header = () => {
                     </svg>
                   </Link>
 
+                  <Link
+                    to="/privacy"
+                    className="header__links__user__dropdown__item"
+                    onClick={(e) => { handleNavigate(e, '/privacy'); setIsUserDropdownOpen(false); }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                    </svg>
+                    Privacy Policy
+                    <svg className="header__links__user__dropdown__item__external" width="9" height="9" viewBox="0 0 16 16" fill="none">
+                      <path d="M15.707 0.999999C15.707 0.447715 15.2593 -2.87362e-07 14.707 -5.40243e-07L5.70703 2.60547e-07C5.15475 -7.66277e-08 4.70703 0.447715 4.70703 1C4.70703 1.55228 5.15475 2 5.70703 2L13.707 2L13.707 10C13.707 10.5523 14.1547 11 14.707 11C15.2593 11 15.707 10.5523 15.707 10L15.707 0.999999ZM0.707031 15L1.41414 15.7071L15.4141 1.70711L14.707 1L13.9999 0.292893L-7.55191e-05 14.2929L0.707031 15Z" fill="currentColor" />
+                    </svg>
+                  </Link>
+
                   <button
                     className="header__links__user__dropdown__item"
                     onClick={() => { setIsContactOpen(true); setIsUserDropdownOpen(false); }}
@@ -288,6 +302,20 @@ const Header = () => {
                   <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
                 </svg>
                 Terms & Conditions
+                <svg className="header__mobile-menu__account__item__external" width="9" height="9" viewBox="0 0 16 16" fill="none">
+                  <path d="M15.707 0.999999C15.707 0.447715 15.2593 -2.87362e-07 14.707 -5.40243e-07L5.70703 2.60547e-07C5.15475 -7.66277e-08 4.70703 0.447715 4.70703 1C4.70703 1.55228 5.15475 2 5.70703 2L13.707 2L13.707 10C13.707 10.5523 14.1547 11 14.707 11C15.2593 11 15.707 10.5523 15.707 10L15.707 0.999999ZM0.707031 15L1.41414 15.7071L15.4141 1.70711L14.707 1L13.9999 0.292893L-7.55191e-05 14.2929L0.707031 15Z" fill="currentColor" />
+                </svg>
+              </Link>
+
+              <Link
+                className="header__mobile-menu__account__item"
+                to="/privacy"
+                onClick={(e) => { handleNavigate(e, '/privacy'); closeSidebar(); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                </svg>
+                Privacy Policy
                 <svg className="header__mobile-menu__account__item__external" width="9" height="9" viewBox="0 0 16 16" fill="none">
                   <path d="M15.707 0.999999C15.707 0.447715 15.2593 -2.87362e-07 14.707 -5.40243e-07L5.70703 2.60547e-07C5.15475 -7.66277e-08 4.70703 0.447715 4.70703 1C4.70703 1.55228 5.15475 2 5.70703 2L13.707 2L13.707 10C13.707 10.5523 14.1547 11 14.707 11C15.2593 11 15.707 10.5523 15.707 10L15.707 0.999999ZM0.707031 15L1.41414 15.7071L15.4141 1.70711L14.707 1L13.9999 0.292893L-7.55191e-05 14.2929L0.707031 15Z" fill="currentColor" />
                 </svg>
