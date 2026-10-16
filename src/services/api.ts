@@ -259,6 +259,26 @@ export const fetchTrackById = async (id: string): Promise<Track> => {
   return response.json();
 };
 
+// Error with the HTTP status, so callers can react to 401 (log in) / 403 (members only).
+export class ApiError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+  }
+}
+
+export type StreamUrl = { url: string; expiresInSeconds?: number };
+
+// Signed, short-lived audio URL for a track. Free tracks work for everyone;
+// other tracks need a logged-in member's token.
+export const fetchStreamUrl = async (trackId: string, token?: string): Promise<StreamUrl> => {
+  const response = await fetch(`${API_BASE_URL}/tracks/${trackId}/stream`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  const json = await response.json().catch(() => null);
+  if (!response.ok) throw new ApiError(json?.error || "Failed to load audio", response.status);
+  return json;
+};
+
 export const fetchTracksByArtist = async (artistId: string, maxSelections?: number): Promise<Track[]> => {
   const params = maxSelections ? `?max_selections=${maxSelections}` : '';
   const response = await fetch(`${API_BASE_URL}/artists/${artistId}/tracks${params}`);

@@ -7,6 +7,7 @@ import { useAuthContext } from '../../context/AppContext';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
+import { useStreamUrl } from '../../hooks/useStreamUrl';
 
 const MarqueeText: React.FC<{ text: string }> = ({ text }) => {
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -39,10 +40,12 @@ const Player = () => {
   const navigate = useNavigate();
 
   const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
-  const { isMember, loading, authReady } = useAuthContext();
+  const { isMember, loading, authReady, user, setIsPricingModalOpen } = useAuthContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  // Signed audio URL from the backend (/tracks/:id/stream), not a public Storage URL.
+  const { url: streamUrl, error: streamError } = useStreamUrl(currentTrack?.id, user?.id, currentTrack?.audio_url);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playedIndices, setPlayedIndices] = useState<Set<number>>(new Set());
   const [history, setHistory] = useState<number[]>([]);
@@ -236,7 +239,19 @@ const Player = () => {
     return () => {
       cleanupFn?.();
     };
-  }, [currentTrack]);
+    // streamUrl: the <audio> element only exists once the signed URL has arrived.
+  }, [currentTrack, streamUrl]);
+
+  // --------------------------------
+  // STREAM ERRORS — member tracks need a logged-in member
+  // --------------------------------
+  useEffect(() => {
+    if (!streamError) return;
+    setIsPlaying(false);
+    if (streamError.status === 401) navigate('/login');
+    else if (streamError.status === 403) setIsPricingModalOpen(true);
+    else console.error('Error loading audio:', streamError.message);
+  }, [streamError, navigate, setIsPricingModalOpen]);
 
   // --------------------------------
   // PLAY / PAUSE CONTROL
@@ -422,7 +437,7 @@ const Player = () => {
       <AudioStorage
         ref={audioRef}
         bucket="tracks"
-        path={currentTrack ? currentTrack.audio_url : ''}
+        path={streamUrl ?? ''}
         preload="auto"
       />
 

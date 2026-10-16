@@ -237,6 +237,7 @@ export function TrackPanel({
               bucket="tracks"
               path={trackForm.audio_url}
               localFile={trackForm.audio}
+              trackId={trackForm.id}
               audioRef={audioRef}
             />
           )}
