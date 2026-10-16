@@ -1,5 +1,9 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+// Playfair Display is served from mattdigging.com itself (no request to Google Fonts).
+import '@fontsource/playfair-display/400.css';
+import '@fontsource/playfair-display/400-italic.css';
+import '@fontsource/playfair-display/600.css';
 import './index.scss';
 import Lenis from '@studio-freight/lenis';
 
