@@ -468,12 +468,14 @@ const Player = () => {
       aria-label="Play a random track"
       title="Play a random track"
     >
-      {/* A die, so it is not confused with the shuffle toggle (crossed arrows) */}
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-        <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
-        <circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
-        <circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none" />
+      {/* The record from the Mattdigging logo (without the tonearm): a disc with the label
+          cut out (label radius ≈ 33% of the disc, as in the logo) and the centre hole. */}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path
+          fillRule="evenodd"
+          d="M12 1.5a10.5 10.5 0 1 0 0 21a10.5 10.5 0 1 0 0-21ZM12 8.55a3.45 3.45 0 1 0 0 6.9a3.45 3.45 0 1 0 0-6.9Z"
+        />
+        <circle cx="12" cy="12" r="0.9" />
       </svg>
       <span>{label}</span>
     </button>
