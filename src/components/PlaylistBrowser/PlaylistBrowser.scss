@@ -52,6 +52,8 @@
   // input/button styles (green border, padding, large text) that would leak in.
   &__filter {
     display: flex;
+    // It is a <label>: Admin.scss styles all labels as a column, so set the direction explicitly.
+    flex-direction: row;
     align-items: center;
     gap: var(--space-3);
     height: 46px;
