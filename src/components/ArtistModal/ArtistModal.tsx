@@ -56,6 +56,9 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
               path={artist.photo_url}
               alt={artist.name}
               className="modal__image"
+              // Full-width banner: resized by width only, original proportions kept
+              size={900}
+              square={false}
             />
             <button className="modal__close" onClick={onClose}>
               <FiX size={24} />

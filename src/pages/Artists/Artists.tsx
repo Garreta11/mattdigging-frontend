@@ -9,33 +9,26 @@ import { lenis } from '../../index';
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
 import Loader from "../../components/Loader/Loader";
 
-const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () => void; hidden?: boolean }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+// The photo shown when hovering a name is 300px, so 600px keeps it sharp on retina screens.
+// The originals are ~1.7 MB PNGs; this resized WebP is ~20 KB.
+const ARTIST_PHOTO_SIZE = 600;
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+const ArtistItem = ({ artist, onClick, hidden }: { artist: Artist; onClick: () => void; hidden?: boolean }) => {
+  // Load the photo only when the pointer enters this artist's row (just before it reaches
+  // the name), not for every artist that scrolls into view: otherwise dozens of downloads
+  // queue up and the photo you are hovering arrives last. Once loaded, it stays.
+  const [wantPhoto, setWantPhoto] = useState(false);
 
   return (
-    <div ref={ref} className="artists__content__artistItem">
+    <div className="artists__content__artistItem" onMouseEnter={() => setWantPhoto(true)}>
       <p className={`artists__content__artistName${hidden ? ' artists__content__artistName--hidden' : ''}`} onClick={onClick}>{artist.name}</p>
-      {visible && (
+      {wantPhoto && (
         <ImageStorage
           bucket="artist_photos"
           path={artist.photo_url}
           alt={artist.name}
           className="artists__content__artistImage"
+          size={ARTIST_PHOTO_SIZE}
         />
       )}
     </div>
