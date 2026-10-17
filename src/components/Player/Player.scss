@@ -76,16 +76,63 @@
   }
 
   // ─── Favorite button (desktop only) ────────────────────
-  &__favorite--desktop {
+  // ─── Right-hand actions (desktop): random track, favourite, fullscreen ──
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+
     @include respond-to(md) { display: none; }
   }
 
-  // ─── Fullscreen toggle ──────────────────────────────────
+  // "🎲 Random": a quiet outlined pill inside the player, green on hover.
+  &__random {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    flex-shrink: 0;
+
+    font-family: 'Website', sans-serif;
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    color: rgba(245, 241, 232, 0.75);
+    background: transparent;
+    border: 1px solid rgba(245, 241, 232, 0.18);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+
+    &:hover:not(:disabled) {
+      color: var(--color-white);
+      border-color: var(--color-green);
+      background-color: rgba(55, 93, 44, 0.35);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-white);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    // In the mobile info row, pushed to the right of the title
+    &--mobile {
+      margin-left: auto;
+      padding: 0.35rem 0.7rem;
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  // ─── Fullscreen toggle (now part of the actions group) ──
   &__fullscreen {
     cursor: pointer;
-    position: absolute;
-    top: var(--space-4);
-    right: var(--space-4);
+    display: flex;
+    align-items: center;
     color: rgba(245, 241, 232, 0.3);
     transition: color 0.18s ease, transform 0.18s ease;
 
@@ -100,12 +147,14 @@
   }
 
   // ─── Track info ─────────────────────────────────────────
+  // Left zone: takes the space the controls and actions leave
   &__info {
     display: flex;
     align-items: center;
     gap: 0.85rem;
     text-align: left;
-    width: 50%;
+    flex: 1 1 0;
+    min-width: 0;
 
     @include respond-to(md) {
       width: 100%;
@@ -256,8 +305,10 @@
   }
 
   // ─── Controls ───────────────────────────────────────────
+  // Centre zone: transport buttons and progress
   &__controls {
-    width: 50%;
+    width: 42%;
+    flex-shrink: 0;
 
     @include respond-to(md) {
       width: 100%;
@@ -564,13 +615,23 @@
   cursor: pointer;
 
   transition:
-    bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    visibility 0s linear 0s,
     background-color 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
+    box-shadow 0.2s ease;
 
-  &--raised {
-    bottom: calc(var(--space-4) + var(--player-height, 0px) + var(--space-3));
+  // A track is playing: the action moves inside the player, so the floating
+  // button fades out and sinks slightly behind the arriving player bar.
+  &--hidden {
+    opacity: 0;
+    transform: translate(-50%, var(--space-4)) scale(0.96);
+    pointer-events: none;
+    visibility: hidden;
+    transition:
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.35s ease,
+      visibility 0s linear 0.45s;
   }
 
   &:hover:not(:disabled) {

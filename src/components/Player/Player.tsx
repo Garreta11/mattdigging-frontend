@@ -1,6 +1,5 @@
 import './Player.scss';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
-import type { CSSProperties } from 'react';
 import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
@@ -65,9 +64,6 @@ const Player = () => {
   const allTracksRef = useRef<Track[]>([]);
   // Set by the random button: the next playlist change must start on a random track, even with shuffle off.
   const forceRandomStartRef = useRef(false);
-  // Height of the player bar, so the random button can sit just above it.
-  const playerRef = useRef<HTMLDivElement | null>(null);
-  const [playerHeight, setPlayerHeight] = useState(0);
   const isManualTrackChange = useRef(false);
 
   // --------------------------------
@@ -454,16 +450,34 @@ const Player = () => {
     setIsPlaying(true);
   };
 
-  // --------------------------------
-  // PLAYER HEIGHT — keeps the random button just above the bar (desktop, mobile, fullscreen)
-  // --------------------------------
-  useEffect(() => {
-    const el = playerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => setPlayerHeight(el.offsetHeight));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  // "Play a random track" button, used in three places: floating (nothing playing yet),
+  // in the desktop player's actions and in the mobile player's info row.
+  const randomButton = (className: string, label = 'Random', hidden = false) => (
+    <button
+      type="button"
+      className={className}
+      // The 3D room listens to clicks, taps and mouse moves on the whole window: keep this
+      // button's events from reaching it (the floating button sits right over the chest).
+      onClick={(e) => { e.stopPropagation(); playAnyRandomTrack(); }}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onMouseMove={(e) => e.stopPropagation()}
+      disabled={playerTrackList.length === 0}
+      aria-hidden={hidden}
+      tabIndex={hidden ? -1 : undefined}
+      aria-label="Play a random track"
+      title="Play a random track"
+    >
+      {/* A die, so it is not confused with the shuffle toggle (crossed arrows) */}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+        <circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none" />
+      </svg>
+      <span>{label}</span>
+    </button>
+  );
 
   const handlePlayButtonClick = () => {
     if (isInitialState) {
@@ -475,33 +489,12 @@ const Player = () => {
 
   return (
     <>
-    {/* Always visible. Sits at the bottom until a track starts, then rises above the player. */}
-    <button
-      type="button"
-      className={`random-play ${hasTrack ? 'random-play--raised' : ''}`}
-      style={{ '--player-height': `${playerHeight}px` } as CSSProperties}
-      // The 3D room listens to clicks, taps and mouse moves on the whole window: keep this
-      // button's events from reaching it (the button sits right over the chest).
-      onClick={(e) => { e.stopPropagation(); playAnyRandomTrack(); }}
-      onTouchStart={(e) => e.stopPropagation()}
-      onTouchEnd={(e) => e.stopPropagation()}
-      onMouseMove={(e) => e.stopPropagation()}
-      disabled={playerTrackList.length === 0}
-      aria-label="Play a random track"
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <polyline points="16 3 21 3 21 8" />
-        <line x1="4" y1="20" x2="21" y2="3" />
-        <polyline points="21 16 21 21 16 21" />
-        <line x1="15" y1="15" x2="21" y2="21" />
-        <line x1="4" y1="4" x2="9" y2="9" />
-      </svg>
-      Play a random track
-    </button>
+    {/* Nothing playing yet: the floating button. Once a track plays it fades out and
+        the same action lives inside the player (see player__actions / player__mobile). */}
+    {randomButton(`random-play ${hasTrack ? 'random-play--hidden' : ''}`, 'Play a random track', hasTrack)}
 
     {/* Hidden until a track is selected, then slides up from the bottom. */}
     <div
-      ref={playerRef}
       className={`player ${isFullscreen ? 'player--fullscreen' : ''} ${hasTrack ? '' : 'player--hidden'}`}
       aria-hidden={!hasTrack}
     >
@@ -511,24 +504,6 @@ const Player = () => {
         path={streamUrl ?? ''}
         preload="auto"
       />
-
-      <div className='player__fullscreen' onClick={() => handleFullscreen(!isFullscreen)}>
-        {isFullscreen ? (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5.5 0.75C5.5 0.33579 5.16421 0 4.75 0C4.33579 0 4 0.33579 4 0.75V3.25C4 3.66421 3.66421 4 3.25 4H0.75C0.33579 4 0 4.33579 0 4.75C0 5.16421 0.33579 5.5 0.75 5.5H3.25C4.49264 5.5 5.5 4.49264 5.5 3.25V0.75ZM5.5 17.25C5.5 17.6642 5.16421 18 4.75 18C4.33579 18 4 17.6642 4 17.25V14.75C4 14.3358 3.66421 14 3.25 14H0.75C0.33579 14 0 13.6642 0 13.25C0 12.8358 0.33579 12.5 0.75 12.5H3.25C4.49264 12.5 5.5 13.5074 5.5 14.75V17.25ZM13.25 0C12.8358 0 12.5 0.33579 12.5 0.75V3.25C12.5 4.49264 13.5074 5.5 14.75 5.5H17.25C17.6642 5.5 18 5.16421 18 4.75C18 4.33579 17.6642 4 17.25 4H14.75C14.3358 4 14 3.66421 14 3.25V0.75C14 0.33579 13.6642 0 13.25 0ZM12.5 17.25C12.5 17.6642 12.8358 18 13.25 18C13.6642 18 14 17.6642 14 17.25V14.75C14 14.3358 14.3358 14 14.75 14H17.25C17.6642 14 18 13.6642 18 13.25C18 12.8358 17.6642 12.5 17.25 12.5H14.75C13.5074 12.5 12.5 13.5074 12.5 14.75V17.25Z" fill="var(--color-white)"/>
-          </svg>
-        ) : (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.5 2.75C1.5 2.05964 2.05964 1.5 2.75 1.5H4.75C5.16421 1.5 5.5 1.16421 5.5 0.75C5.5 0.33579 5.16421 0 4.75 0H2.75C1.23122 0 0 1.23122 0 2.75V4.75C0 5.16421 0.33579 5.5 0.75 5.5C1.16421 5.5 1.5 5.16421 1.5 4.75V2.75ZM1.5 15.25C1.5 15.9404 2.05964 16.5 2.75 16.5H4.75C5.16421 16.5 5.5 16.8358 5.5 17.25C5.5 17.6642 5.16421 18 4.75 18H2.75C1.23122 18 0 16.7688 0 15.25V13.25C0 12.8358 0.33579 12.5 0.75 12.5C1.16421 12.5 1.5 12.8358 1.5 13.25V15.25ZM15.25 1.5C15.9404 1.5 16.5 2.05964 16.5 2.75V4.75C16.5 5.16421 16.8358 5.5 17.25 5.5C17.6642 5.5 18 5.16421 18 4.75V2.75C18 1.23122 16.7688 0 15.25 0H13.25C12.8358 0 12.5 0.33579 12.5 0.75C12.5 1.16421 12.8358 1.5 13.25 1.5H15.25ZM16.5 15.25C16.5 15.9404 15.9404 16.5 15.25 16.5H13.25C12.8358 16.5 12.5 16.8358 12.5 17.25C12.5 17.6642 12.8358 18 13.25 18H15.25C16.7688 18 18 16.7688 18 15.25V13.25C18 12.8358 17.6642 12.5 17.25 12.5C16.8358 12.5 16.5 12.8358 16.5 13.25V15.25Z" fill="var(--color-white)"/>
-          </svg>
-        )}
-      </div>
-
-      {currentTrack && (
-        <div className="player__favorite--desktop">
-          <FavoriteButton track={currentTrack} />
-        </div>
-      )}
 
       <div className='player__info'>
         {hasTrack ? (
@@ -659,6 +634,23 @@ const Player = () => {
         </div>
       </div>
 
+      {/* Right: actions (desktop) — random track, favourite, fullscreen */}
+      <div className='player__actions'>
+        {randomButton('player__random')}
+        {currentTrack && <FavoriteButton track={currentTrack} />}
+        <div className='player__fullscreen' onClick={() => handleFullscreen(!isFullscreen)}>
+          {isFullscreen ? (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.5 0.75C5.5 0.33579 5.16421 0 4.75 0C4.33579 0 4 0.33579 4 0.75V3.25C4 3.66421 3.66421 4 3.25 4H0.75C0.33579 4 0 4.33579 0 4.75C0 5.16421 0.33579 5.5 0.75 5.5H3.25C4.49264 5.5 5.5 4.49264 5.5 3.25V0.75ZM5.5 17.25C5.5 17.6642 5.16421 18 4.75 18C4.33579 18 4 17.6642 4 17.25V14.75C4 14.3358 3.66421 14 3.25 14H0.75C0.33579 14 0 13.6642 0 13.25C0 12.8358 0.33579 12.5 0.75 12.5H3.25C4.49264 12.5 5.5 13.5074 5.5 14.75V17.25ZM13.25 0C12.8358 0 12.5 0.33579 12.5 0.75V3.25C12.5 4.49264 13.5074 5.5 14.75 5.5H17.25C17.6642 5.5 18 5.16421 18 4.75C18 4.33579 17.6642 4 17.25 4H14.75C14.3358 4 14 3.66421 14 3.25V0.75C14 0.33579 13.6642 0 13.25 0ZM12.5 17.25C12.5 17.6642 12.8358 18 13.25 18C13.6642 18 14 17.6642 14 17.25V14.75C14 14.3358 14.3358 14 14.75 14H17.25C17.6642 14 18 13.6642 18 13.25C18 12.8358 17.6642 12.5 17.25 12.5H14.75C13.5074 12.5 12.5 13.5074 12.5 14.75V17.25Z" fill="var(--color-white)"/>
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1.5 2.75C1.5 2.05964 2.05964 1.5 2.75 1.5H4.75C5.16421 1.5 5.5 1.16421 5.5 0.75C5.5 0.33579 5.16421 0 4.75 0H2.75C1.23122 0 0 1.23122 0 2.75V4.75C0 5.16421 0.33579 5.5 0.75 5.5C1.16421 5.5 1.5 5.16421 1.5 4.75V2.75ZM1.5 15.25C1.5 15.9404 2.05964 16.5 2.75 16.5H4.75C5.16421 16.5 5.5 16.8358 5.5 17.25C5.5 17.6642 5.16421 18 4.75 18H2.75C1.23122 18 0 16.7688 0 15.25V13.25C0 12.8358 0.33579 12.5 0.75 12.5C1.16421 12.5 1.5 12.8358 1.5 13.25V15.25ZM15.25 1.5C15.9404 1.5 16.5 2.05964 16.5 2.75V4.75C16.5 5.16421 16.8358 5.5 17.25 5.5C17.6642 5.5 18 5.16421 18 4.75V2.75C18 1.23122 16.7688 0 15.25 0H13.25C12.8358 0 12.5 0.33579 12.5 0.75C12.5 1.16421 12.8358 1.5 13.25 1.5H15.25ZM16.5 15.25C16.5 15.9404 15.9404 16.5 15.25 16.5H13.25C12.8358 16.5 12.5 16.8358 12.5 17.25C12.5 17.6642 12.8358 18 13.25 18H15.25C16.7688 18 18 16.7688 18 15.25V13.25C18 12.8358 17.6642 12.5 17.25 12.5C16.8358 12.5 16.5 12.8358 16.5 13.25V15.25Z" fill="var(--color-white)"/>
+            </svg>
+          )}
+        </div>
+      </div>
+
       <div className='player__mobile'>
         <div className='player__mobile__content'>
           <div className='player__mobile__content__info'>
@@ -677,6 +669,7 @@ const Player = () => {
                   <h3><MarqueeText text={currentTrack.title} /></h3>
                   <p><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
                 </div>
+                {randomButton('player__random player__random--mobile')}
               </>
             ) : !hasTrack && playerTrackList.length > 0 ? (
               <div className='player__info__empty' onClick={playRandomTrack}>
