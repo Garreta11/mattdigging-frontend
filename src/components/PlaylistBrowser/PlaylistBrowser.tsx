@@ -55,21 +55,33 @@ const PlaylistBrowser = ({ tab, onTabChange, options, onSelect }: PlaylistBrowse
 
       {all.length >= MIN_OPTIONS_FOR_FILTER && (
         <label className="playlistBrowser__filter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <svg className="playlistBrowser__filter__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
-            type="text"
+            type="search"
             value={filter}
             onChange={e => setFilter(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Escape') setFilter(''); }}
             placeholder={`Filter ${all.length} ${current.plural}…`}
             aria-label={`Filter ${current.plural}`}
+            autoComplete="off"
+            spellCheck={false}
           />
-          {filter && (
-            <button type="button" className="playlistBrowser__filter__clear" onClick={() => setFilter('')} aria-label="Clear filter">
-              ×
-            </button>
+          {needle && (
+            <>
+              {/* How much the filter narrows the list, e.g. "6 of 145" */}
+              <span className="playlistBrowser__filter__count" aria-live="polite">
+                {visible.length} of {all.length}
+              </span>
+              <button type="button" className="playlistBrowser__filter__clear" onClick={() => setFilter('')} aria-label="Clear filter">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                </svg>
+              </button>
+            </>
           )}
         </label>
       )}

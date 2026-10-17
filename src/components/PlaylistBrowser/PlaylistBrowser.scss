@@ -48,49 +48,109 @@
   }
 
   // ─── Filter field ───────────────────────────────────────
+  // A thin outlined search pill; green ring while typing. Resets the site's global
+  // input/button styles (green border, padding, large text) that would leak in.
   &__filter {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: 0 var(--space-4);
-    min-height: 44px;
+    gap: var(--space-3);
+    height: 46px;
+    padding: 0 var(--space-2) 0 var(--space-4);
+
+    border: 1px solid rgba(245, 241, 232, 0.12);
     border-radius: var(--border-radius);
-    background: rgba(245, 241, 232, 0.05);
-    color: rgba(245, 241, 232, 0.35);
+    background: rgba(245, 241, 232, 0.03);
+    cursor: text;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: rgba(245, 241, 232, 0.22);
+    }
+
+    &:focus-within {
+      border-color: var(--color-green);
+      background: rgba(245, 241, 232, 0.05);
+      box-shadow: 0 0 0 3px rgba(55, 93, 44, 0.35);
+
+      .playlistBrowser__filter__icon {
+        color: var(--color-white);
+      }
+    }
+
+    &__icon {
+      display: block;
+      flex-shrink: 0;
+      color: rgba(245, 241, 232, 0.4);
+      transition: color 0.2s ease;
+    }
 
     input {
       flex: 1;
       min-width: 0;
+      height: 100%;
+      margin: 0;
       padding: 0;
+
+      font-family: 'Website', sans-serif;
+      font-size: 1rem; // 16px: stops iOS from zooming in on focus
+      font-weight: 400;
+      line-height: 1;
+      color: var(--color-white);
+      background: transparent;
       border: none;
       border-radius: 0;
-      background: transparent;
-      color: var(--color-white);
-      font-family: 'Website', sans-serif;
-      font-size: var(--font-size-md);
-      font-weight: 400;
       outline: none;
+      appearance: none;
 
       &::placeholder {
         color: rgba(245, 241, 232, 0.35);
       }
+
+      // Hide the browser's own clear button for type="search"; we draw ours.
+      &::-webkit-search-cancel-button,
+      &::-webkit-search-decoration {
+        -webkit-appearance: none;
+        appearance: none;
+      }
     }
 
-    &:focus-within {
-      background: rgba(245, 241, 232, 0.08);
+    &__count {
+      flex-shrink: 0;
+      font-size: var(--font-size-xs);
+      letter-spacing: 0.04em;
+      color: rgba(245, 241, 232, 0.45);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
     &__clear {
-      padding: 0 var(--space-1);
-      font-size: 1.3rem;
-      line-height: 1;
-      color: rgba(245, 241, 232, 0.5);
-      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+
+      color: rgba(245, 241, 232, 0.7);
+      background: rgba(245, 241, 232, 0.08);
       border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: color 0.18s ease, background-color 0.18s ease;
+
+      svg {
+        display: block;
+      }
 
       &:hover {
-        background: transparent;
         color: var(--color-white);
+        background: rgba(245, 241, 232, 0.16);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
       }
     }
   }
