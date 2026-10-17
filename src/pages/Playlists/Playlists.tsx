@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWindowVirtualizer } from '../../hooks/useWindowVirtualizer';
 import "./Playlists.scss";
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import TrackModal from '../../components/TrackModal/TrackModal';
 import { useAppContext } from '../../context/AppContext';
 import Loader from "../../components/Loader/Loader";
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
+import PlaylistBrowser, { PLAYLIST_FILTERS, PlaylistFilter } from "../../components/PlaylistBrowser/PlaylistBrowser";
 
 interface Season {
   slug: string;
@@ -22,8 +23,6 @@ const SEASONS: Season[] = [
   { slug: 'summer', name: 'Summer' },
   { slug: 'autumn', name: 'Autumn' },
 ];
-
-type DropdownKey = 'genre' | 'mood' | 'country' | 'season' | 'year' | null;
 
 const PlaylistsPage = () => {
   const { track: currentTrack, setPlayerTrackList, setTrack, setPlaylist, isMember, authReady } = useAppContext();
@@ -40,11 +39,9 @@ const PlaylistsPage = () => {
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<DropdownKey>(null);
   
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const genreParam = searchParams.get('genre');
   const moodParam = searchParams.get('mood');
@@ -52,19 +49,13 @@ const PlaylistsPage = () => {
   const seasonParam = searchParams.get('season');
   const countryParam = searchParams.get('country');
 
+  // Active category tab in the browser, kept in the URL (?tab=genre)
+  const tabParam = searchParams.get('tab');
+  const tab: PlaylistFilter = PLAYLIST_FILTERS.some(f => f.key === tabParam) ? (tabParam as PlaylistFilter) : 'mood';
+  const setTab = (next: PlaylistFilter) => navigate(`/playlists?tab=${next}`, { replace: true });
+
   const isPlaylistLoaded = !isLoading && tracks.length > 0 &&
     (genreParam || moodParam || yearParam || seasonParam || countryParam);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpenDropdown(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Load filter options once on mount — runs in background, no loading indicator.
   // With Cache-Control headers these are served from browser cache on repeat visits.
@@ -114,13 +105,14 @@ const PlaylistsPage = () => {
   };
 
   const applyFilter = (params: Record<string, string>) => {
-    setOpenDropdown(null);
     navigate(`/playlists?${new URLSearchParams(params).toString()}`);
   };
 
+  // "Discover": back to the browser, on the tab of the playlist you were looking at
   const handleClearFilter = () => {
     setTracks([]);
-    navigate('/playlists');
+    const activeType = genreParam ? 'genre' : moodParam ? 'mood' : yearParam ? 'year' : seasonParam ? 'season' : countryParam ? 'country' : tab;
+    navigate(`/playlists?tab=${activeType}`);
   };
 
   const handleTrackClick = async (track: Track) => {
@@ -189,10 +181,6 @@ const PlaylistsPage = () => {
   const { containerRef: trackListRef, visibleIndices, paddingTop, paddingBottom } =
     useWindowVirtualizer(tracks.length, 76);
 
-  const toggleDropdown = (key: DropdownKey) => {
-    setOpenDropdown(prev => prev === key ? null : key);
-  };
-
   return (
     <section className={`playlistsPage main-content ${isFadingOut ? 'fade-out' : ''}`}>
       <div className="main-content__close">
@@ -212,143 +200,21 @@ const PlaylistsPage = () => {
         </button>
       </div>
 
-      {/* Filter bar — always visible */}
+      {/* Browse: category tabs, filter field and list (like the mobile app) */}
       {!hasActiveFilter && !isLoading && (
-        <div className="playlistsPage__filters" ref={dropdownRef}>
-          {/* Genre dropdown */}
-          <div className={`playlistsPage__dropdown ${openDropdown === 'genre' ? 'is-open' : ''} ${genreParam ? 'is-active' : ''}`}>
-            <button
-              className="playlistsPage__dropdown__trigger"
-              onClick={() => toggleDropdown('genre')}
-            >
-              {genreParam ? genres.find(g => g.slug === genreParam)?.name || 'Genre' : 'Genre'}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3.34469 7.34471C3.07842 7.61091 3.05422 8.02761 3.27207 8.32121L3.34469 8.40531L11.5947 16.6553C11.8609 16.9216 12.2776 16.9458 12.5712 16.728L12.6553 16.6553L20.9053 8.40531C21.1982 8.11241 21.1982 7.63761 20.9053 7.34471C20.6391 7.07841 20.2224 7.05421 19.9288 7.27211L19.8447 7.34471L12.125 15.0643L4.40535 7.34471C4.11246 7.05181 3.63758 7.05181 3.34469 7.34471Z" fill="var(--color-white)"/>
-              </svg>
-
-            </button>
-            {openDropdown === 'genre' && (
-              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
-                {genres.map(genre => (
-                  <li
-                    key={genre.id}
-                    className={genre.slug === genreParam ? 'is-selected' : ''}
-                    onClick={() => applyFilter({ genre: genre.slug })}
-                  >
-                    {genre.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Mood dropdown */}
-          <div className={`playlistsPage__dropdown ${openDropdown === 'mood' ? 'is-open' : ''} ${moodParam ? 'is-active' : ''}`}>
-            <button
-              className="playlistsPage__dropdown__trigger"
-              onClick={() => toggleDropdown('mood')}
-            >
-              {moodParam ? moods.find(m => m.slug === moodParam)?.name || 'Mood' : 'Mood'}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3.34469 7.34471C3.07842 7.61091 3.05422 8.02761 3.27207 8.32121L3.34469 8.40531L11.5947 16.6553C11.8609 16.9216 12.2776 16.9458 12.5712 16.728L12.6553 16.6553L20.9053 8.40531C21.1982 8.11241 21.1982 7.63761 20.9053 7.34471C20.6391 7.07841 20.2224 7.05421 19.9288 7.27211L19.8447 7.34471L12.125 15.0643L4.40535 7.34471C4.11246 7.05181 3.63758 7.05181 3.34469 7.34471Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
-            {openDropdown === 'mood' && (
-              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
-                {moods.map(mood => (
-                  <li
-                    key={mood.id}
-                    className={mood.slug === moodParam ? 'is-selected' : ''}
-                    onClick={() => applyFilter({ mood: mood.slug })}
-                  >
-                    {mood.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Country dropdown */}
-          <div className={`playlistsPage__dropdown ${openDropdown === 'country' ? 'is-open' : ''} ${countryParam ? 'is-active' : ''}`}>
-            <button
-              className="playlistsPage__dropdown__trigger"
-              onClick={() => toggleDropdown('country')}
-            >
-              {countryParam || 'Country'}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3.34469 7.34471C3.07842 7.61091 3.05422 8.02761 3.27207 8.32121L3.34469 8.40531L11.5947 16.6553C11.8609 16.9216 12.2776 16.9458 12.5712 16.728L12.6553 16.6553L20.9053 8.40531C21.1982 8.11241 21.1982 7.63761 20.9053 7.34471C20.6391 7.07841 20.2224 7.05421 19.9288 7.27211L19.8447 7.34471L12.125 15.0643L4.40535 7.34471C4.11246 7.05181 3.63758 7.05181 3.34469 7.34471Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
-            {openDropdown === 'country' && (
-              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
-                {countries.map(c => (
-                  <li
-                    key={c.country}
-                    className={c.country === countryParam ? 'is-selected' : ''}
-                    onClick={() => applyFilter({ country: c.country })}
-                  >
-                    {c.country}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Season dropdown */}
-          <div className={`playlistsPage__dropdown ${openDropdown === 'season' ? 'is-open' : ''} ${seasonParam ? 'is-active' : ''}`}>
-            <button
-              className="playlistsPage__dropdown__trigger"
-              onClick={() => toggleDropdown('season')}
-            >
-              {seasonParam ? SEASONS.find(s => s.slug === seasonParam)?.name || 'Season' : 'Season'}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3.34469 7.34471C3.07842 7.61091 3.05422 8.02761 3.27207 8.32121L3.34469 8.40531L11.5947 16.6553C11.8609 16.9216 12.2776 16.9458 12.5712 16.728L12.6553 16.6553L20.9053 8.40531C21.1982 8.11241 21.1982 7.63761 20.9053 7.34471C20.6391 7.07841 20.2224 7.05421 19.9288 7.27211L19.8447 7.34471L12.125 15.0643L4.40535 7.34471C4.11246 7.05181 3.63758 7.05181 3.34469 7.34471Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
-            {openDropdown === 'season' && (
-              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
-                {SEASONS.map(season => (
-                  <li
-                    key={season.slug}
-                    className={season.slug === seasonParam ? 'is-selected' : ''}
-                    onClick={() => applyFilter({ season: season.slug })}
-                  >
-                    {season.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Year dropdown */}
-          <div className={`playlistsPage__dropdown ${openDropdown === 'year' ? 'is-open' : ''} ${yearParam ? 'is-active' : ''}`}>
-            <button
-              className="playlistsPage__dropdown__trigger"
-              onClick={() => toggleDropdown('year')}
-            >
-              {yearParam || 'Year'}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3.34469 7.34471C3.07842 7.61091 3.05422 8.02761 3.27207 8.32121L3.34469 8.40531L11.5947 16.6553C11.8609 16.9216 12.2776 16.9458 12.5712 16.728L12.6553 16.6553L20.9053 8.40531C21.1982 8.11241 21.1982 7.63761 20.9053 7.34471C20.6391 7.07841 20.2224 7.05421 19.9288 7.27211L19.8447 7.34471L12.125 15.0643L4.40535 7.34471C4.11246 7.05181 3.63758 7.05181 3.34469 7.34471Z" fill="var(--color-white)"/>
-              </svg>
-            </button>
-            {openDropdown === 'year' && (
-              <ul className="playlistsPage__dropdown__menu" data-lenis-prevent>
-                {years.map(y => (
-                  <li
-                    key={y.year}
-                    className={String(y.year) === yearParam ? 'is-selected' : ''}
-                    onClick={() => applyFilter({ year: String(y.year) })}
-                  >
-                    {y.year}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-        </div>
+        <PlaylistBrowser
+          tab={tab}
+          onTabChange={setTab}
+          onSelect={(type, value) => applyFilter({ [type]: value })}
+          options={{
+            mood: moods.map(m => ({ value: m.slug, label: m.name })),
+            genre: genres.map(g => ({ value: g.slug, label: g.name })),
+            country: countries.map(c => ({ value: c.country, label: c.country })),
+            year: years.map(y => ({ value: String(y.year), label: String(y.year) })),
+            season: SEASONS.map(se => ({ value: se.slug, label: se.name })),
+          }}
+        />
       )}
-
       {/* Clear filter */}
       {hasActiveFilter && !isLoading &&(
         <button className="playlistsPage__clear-filter-btn" onClick={handleClearFilter}>
@@ -406,13 +272,6 @@ const PlaylistsPage = () => {
 
       {hasActiveFilter && !isLoading && !isMember && (
         <MembersOnly />
-      )}
-
-      {/* Empty state when no filter selected */}
-      {!hasActiveFilter && !isLoading && (
-        <div className="playlistsPage__empty">
-          <p>Select a filter to explore the archive.</p>
-        </div>
       )}
 
       <TrackModal
