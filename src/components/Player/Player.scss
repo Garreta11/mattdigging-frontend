@@ -23,28 +23,25 @@
 }
 
 // ─────────────────────────────────────────────────────────────
-// Desktop: a taller card with stacked rows —
-// [cover · title/artist ··· random · ♥ · fullscreen] / [controls] / [progress]
+// Desktop: a full-width bar at the bottom of the screen, like YouTube Music —
+// thin progress line on the top edge, then
+// [⏮ ▶ ⏭ 0:05 / 3:16]   [cover · title / artist · ♥]   [🎲 Random · shuffle · fullscreen]
+// Mobile (md and below) keeps its own floating card layout (see @include respond-to(md)).
 .player {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-4);
   position: fixed;
   left: 50%;
-  bottom: var(--space-4);
+  bottom: 0;
   transform: translateX(-50%);
-  width: 80dvh;
-  min-width: min(560px, 92vw);
+  width: 100vw;
 
-  background: rgba(8, 12, 12, 0);
+  background: rgba(10, 17, 17, 0.94);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(245, 241, 232, 0.1);
-  padding: var(--space-5) var(--space-6);
-  border-radius: 20px;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.6),
-    0 0 0 0.5px rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(245, 241, 232, 0.08);
+  padding: 0 var(--space-5);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
 
   z-index: 100;
   // Same quick transitions as before, plus a slower, eased slide for showing / hiding the bar.
@@ -60,113 +57,106 @@
     pointer-events: none;
   }
 
-  &--fullscreen {
-    width: 100dvw;
-    min-width: 0;
-    padding-inline: max(var(--space-6), calc((100dvw - 900px) / 2));
-    bottom: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-  }
+  // The bar is already full width; fullscreen only enlarges the room (Home).
+  &--fullscreen {}
 
+  // Mobile: the floating card, as before.
   @include respond-to(md) {
-    padding: var(--space-2) var(--space-4);
+    bottom: var(--space-4);
     width: 95dvw;
-    min-width: 0;
-    flex-direction: column;
+    padding: var(--space-2) var(--space-4);
     gap: 0;
+    background: rgba(8, 12, 12, 0);
+    border: 1px solid rgba(245, 241, 232, 0.1);
     border-radius: 14px;
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.6),
+      0 0 0 0.5px rgba(255, 255, 255, 0.04);
   }
 
-  // ─── Top row (desktop): track info left, actions right ──
-  &__top {
-    display: flex;
+  // ─── Desktop bar: three zones in one 72px row ───────────
+  &__bar {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr) minmax(240px, 1fr);
     align-items: center;
     gap: var(--space-4);
+    height: 72px;
 
     @include respond-to(md) { display: none; }
+
+    // The progress bar becomes a thin line along the top edge of the whole bar
+    // (positioned against .player), thicker with a dot on hover.
+    .player__controls__progress {
+      position: absolute;
+      top: -6px;
+      left: 0;
+      right: 0;
+
+      &__time { display: none; }
+
+      &__bar { padding: 5px 0; }
+
+      &__track {
+        height: 3px;
+        border-radius: 0;
+        transition: height 0.15s ease;
+      }
+
+      &__fill { border-radius: 0; }
+
+      &__thumb {
+        opacity: 0;
+        transition: opacity 0.15s ease, transform 0.12s ease;
+      }
+
+      &__bar:hover .player__controls__progress__track { height: 5px; }
+      &__bar:hover .player__controls__progress__thumb { opacity: 1; }
+    }
   }
 
-  // ─── Right-hand actions (desktop): random track, favourite, fullscreen ──
-  &__actions {
+  // Left: previous · play/pause · next · time
+  &__left {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    flex-shrink: 0;
+    gap: var(--space-1);
 
-    @include respond-to(md) { display: none; }
+    .player__btn--play svg {
+      width: 30px;
+      height: 30px;
+    }
   }
 
-  // "🎲 Random": a quiet outlined pill inside the player, green on hover.
-  &__random {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.85rem;
-    flex-shrink: 0;
-
-    font-family: 'Website', sans-serif;
+  &__time {
+    margin-left: var(--space-3);
     font-size: var(--font-size-sm);
+    color: rgba(245, 241, 232, 0.55);
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    color: rgba(245, 241, 232, 0.75);
-    background: transparent;
-    border: 1px solid rgba(245, 241, 232, 0.18);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
-
-    &:hover:not(:disabled) {
-      color: var(--color-white);
-      border-color: var(--color-green);
-      background-color: rgba(55, 93, 44, 0.35);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-white);
-      outline-offset: 2px;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-
-    // In the mobile info row, pushed to the right of the title
-    &--mobile {
-      margin-left: auto;
-      padding: 0.35rem 0.7rem;
-      font-size: var(--font-size-xs);
-    }
   }
 
-  // ─── Fullscreen toggle (now part of the actions group) ──
-  &__fullscreen {
-    cursor: pointer;
+  // Centre: cover, title / artist, favourite
+  &__center {
     display: flex;
     align-items: center;
-    color: rgba(245, 241, 232, 0.3);
-    transition: color 0.18s ease, transform 0.18s ease;
-
-    @include respond-to(md) { display: none; }
-
-    svg path { fill: currentColor; }
-
-    &:hover {
-      color: rgba(245, 241, 232, 0.8);
-      transform: scale(1.1);
-    }
+    justify-content: center;
+    gap: var(--space-3);
+    min-width: 0;
   }
 
-  // ─── Track info ─────────────────────────────────────────
-  // Left zone: takes the space the controls and actions leave
+  // Right: random, shuffle, fullscreen
+  &__right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+
   &__info {
     display: flex;
     align-items: center;
     gap: 0.85rem;
     text-align: left;
-    flex: 1 1 0;
+    flex: 0 1 auto;
     min-width: 0;
 
     @include respond-to(md) {
@@ -176,10 +166,10 @@
     }
 
     &__cover {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 6px;
       flex-shrink: 0;
       border: 1px solid rgba(245, 241, 232, 0.08);
     }
@@ -319,22 +309,8 @@
 
   // ─── Controls ───────────────────────────────────────────
   // Centre zone: transport buttons and progress
+  // Progress bar styles (used by the desktop bar and the mobile card)
   &__controls {
-    width: 100%;
-
-    @include respond-to(md) {
-      width: 100%;
-      display: none;
-    }
-
-    &__buttons {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      justify-content: center;
-      margin-bottom: var(--space-2);
-    }
-
     // Progress bar
     &__progress {
       display: flex;
