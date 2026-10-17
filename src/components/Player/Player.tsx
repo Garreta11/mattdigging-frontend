@@ -456,12 +456,9 @@ const Player = () => {
     <button
       type="button"
       className={className}
-      // The 3D room listens to clicks, taps and mouse moves on the whole window: keep this
-      // button's events from reaching it (the floating button sits right over the chest).
-      onClick={(e) => { e.stopPropagation(); playAnyRandomTrack(); }}
-      onTouchStart={(e) => e.stopPropagation()}
-      onTouchEnd={(e) => e.stopPropagation()}
-      onMouseMove={(e) => e.stopPropagation()}
+      // The 3D room ignores clicks on UI drawn over it (Room/Output.js isRoomEvent),
+      // so this button does not also open the chest behind it.
+      onClick={playAnyRandomTrack}
       disabled={playerTrackList.length === 0}
       aria-hidden={hidden}
       tabIndex={hidden ? -1 : undefined}

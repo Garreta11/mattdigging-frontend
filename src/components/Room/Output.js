@@ -505,11 +505,29 @@ export default class Output {
     this.updateDebugOverlay();
   }
 
+  // The room listens on window (its canvas sits behind the page frame), so every click,
+  // tap or mouse move anywhere on the page reaches it. Only react when the event lands on
+  // the room itself or on page background that contains it — never on UI drawn on top of
+  // it (player, its buttons and progress bar, the random button, header, modals…).
+  isRoomEvent(event) {
+    const target = event.target;
+    if (!(target instanceof Node)) return true;
+    return this.container.contains(target) || target.contains(this.container);
+  }
+
+  clearPointer() {
+    this.mouseSquare.set(-1, -1);
+    this.parallaxMouse.set(0, 0);
+  }
+
   onMouseMove(event) {
+    // Over other UI: behave as if the pointer left the room (no hover, chest closes).
+    if (!this.isRoomEvent(event)) return this.clearPointer();
     this.updatePointerPosition(event.clientX, event.clientY);
   }
 
   onTouchMove(event) {
+    if (!this.isRoomEvent(event)) return this.clearPointer();
     if (event.touches.length > 0) {
       const touch = event.touches[0];
       this.updatePointerPosition(touch.clientX, touch.clientY);
@@ -519,6 +537,7 @@ export default class Output {
 
   onTouchStart(event) {
     if (!this.interactionsEnabled) return;
+    if (!this.isRoomEvent(event)) return this.clearPointer();
     if (event.touches.length > 0) {
       const touch = event.touches[0];
       this.updatePointerPosition(touch.clientX, touch.clientY);
@@ -526,7 +545,8 @@ export default class Output {
   }
 
   onTouchEnd(event) {
-    if (!this.interactionsEnabled) {
+    // A tap on other UI (e.g. a player button) must not also open a room object.
+    if (!this.interactionsEnabled || !this.isRoomEvent(event)) {
       this.mouseSquare.set(-1, -1);
       this.parallaxMouse.set(0, 0);
       return;
@@ -549,6 +569,7 @@ export default class Output {
 
   onClick(event) {
     if (!this.interactionsEnabled) return;
+    if (!this.isRoomEvent(event)) return;
     this.updatePointerPosition(event.clientX, event.clientY);
 
     // Handle clicks
