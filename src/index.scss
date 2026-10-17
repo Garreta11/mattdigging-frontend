@@ -170,34 +170,37 @@ input {
     top: 0;
     z-index: 1000;
 
+    // Round × button (CloseButton component): quiet until hovered.
     &__button {
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0; // stays round while the panel animates open
       padding: 0;
+      color: rgba(245, 241, 232, 0.45);
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
+      border-radius: 50%;
       cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(245, 241, 232, 0.35);
-      transition: color 0.2s ease, gap 0.2s ease;
+      transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 
       svg {
-        opacity: 0.4;
-        transition: opacity 0.2s ease;
+        display: block;
         flex-shrink: 0;
       }
 
       &:hover {
-        color: rgba(245, 241, 232, 0.75);
-        gap: 0.9rem;
+        color: var(--color-white);
+        background-color: rgba(245, 241, 232, 0.06);
+        border-color: rgba(245, 241, 232, 0.12);
+        transform: rotate(90deg);
+      }
 
-        svg {
-          opacity: 0.75;
-        }
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
       }
     }
 

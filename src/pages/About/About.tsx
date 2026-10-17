@@ -2,6 +2,7 @@ import './About.scss';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiX } from 'react-icons/fi';
+import CloseButton from "../../components/CloseButton/CloseButton";
 
 
 const About = () => {
@@ -23,22 +24,7 @@ const About = () => {
 
   return (
     <section className={`about main-content ${isFadingOut ? 'fade-out' : ''}`} style={{ '--bg-image': `url('/about.JPEG')` } as React.CSSProperties}>
-      <div className="main-content__close">
-        <button className="main-content__close__button main-content__close__button--reverse" onClick={handleClose}>
-          HOME
-          <svg width="17" height="6" viewBox="0 0 17 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clipPath="url(#clip0_47_2)">
-              <path d="M16.898 3.1701C17.0347 3.03342 17.0347 2.81181 16.898 2.67513L14.6706 0.447756C14.5339 0.311057 14.3123 0.311057 14.1756 0.447757C14.0389 0.584422 14.0389 0.806031 14.1756 0.942716L16.1555 2.92261L14.1756 4.90251C14.0389 5.0392 14.0389 5.2608 14.1756 5.39749C14.3123 5.53417 14.5339 5.53417 14.6706 5.39749L16.898 3.1701ZM0.0567477 2.92261L0.0567477 3.27261L16.6505 3.27261L16.6505 2.92261L16.6505 2.57261L0.0567477 2.57261L0.0567477 2.92261Z" fill="var(--color-white)"/>
-            </g>
-            <defs>
-            <clipPath id="clip0_47_2">
-            <rect width="17" height="5.5" fill="white" transform="translate(17 5.5) rotate(180)"/>
-            </clipPath>
-            </defs>
-          </svg>
-
-        </button>
-      </div>
+      <CloseButton onClick={handleClose} />
       
       <div className="about__content">
         <div className="about__content__image">
