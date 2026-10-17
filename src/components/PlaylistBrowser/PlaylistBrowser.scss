@@ -7,6 +7,12 @@
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
+  // Room below the page's "HOME" link (desktop only; it is hidden on mobile).
+  margin-top: var(--space-6);
+
+  @include respond-to(md) {
+    margin-top: 0;
+  }
 
   // ─── Category tabs ──────────────────────────────────────
   &__tabs {
