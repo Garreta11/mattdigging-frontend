@@ -1,5 +1,6 @@
 import './Player.scss';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import type { CSSProperties } from 'react';
 import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
@@ -39,7 +40,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setPlaylist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
   const { isMember, loading, authReady, user, setIsPricingModalOpen } = useAuthContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
@@ -60,6 +61,13 @@ const Player = () => {
   const hasInitialized = useRef(false);
   const isInitialPlaylistLoad = useRef(true);
   const previousTrackId = useRef<string | null>(null);
+  // The full list the random button picks from (all published tracks for members, free ones otherwise).
+  const allTracksRef = useRef<Track[]>([]);
+  // Set by the random button: the next playlist change must start on a random track, even with shuffle off.
+  const forceRandomStartRef = useRef(false);
+  // Height of the player bar, so the random button can sit just above it.
+  const playerRef = useRef<HTMLDivElement | null>(null);
+  const [playerHeight, setPlayerHeight] = useState(0);
   const isManualTrackChange = useRef(false);
 
   // --------------------------------
@@ -73,6 +81,7 @@ const Player = () => {
     const loadTracks = async () => {
       try {
         const data = isMember ? await fetchPlayerTracks() : await fetchPlayerFreeTracks();
+        allTracksRef.current = data;
         setPlayerTrackList(data);
       } catch (err) {
         console.error('Failed to load tracks:', err);
@@ -93,7 +102,8 @@ const Player = () => {
       return;
     }
     
-    if (isShuffleMode) {
+    if (isShuffleMode || forceRandomStartRef.current) {
+      forceRandomStartRef.current = false;
       const randomIndex = Math.floor(Math.random() * playerTrackList.length);
       setCurrentTrackIndex(randomIndex);
       setPlayedIndices(new Set([randomIndex]));
@@ -418,11 +428,42 @@ const Player = () => {
 
   const playRandomTrack = () => {
     if (playerTrackList.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * playerTrackList.length);
+    let randomIndex = Math.floor(Math.random() * playerTrackList.length);
+    // Never "randomly" pick the track that is already playing.
+    if (playerTrackList.length > 1 && randomIndex === currentTrackIndex) {
+      randomIndex = (randomIndex + 1) % playerTrackList.length;
+    }
+    if (currentTrackIndex !== null) setHistory(prev => [...prev, currentTrackIndex]);
     setCurrentTrackIndex(randomIndex);
     setPlayedIndices(new Set([randomIndex]));
     setIsPlaying(true);
   };
+
+  // "Play a random track" button: any track the user can play, like the mobile app.
+  // If a selection or playlist is playing, go back to the full list first.
+  const playAnyRandomTrack = () => {
+    const all = allTracksRef.current;
+    if (all.length === 0) return;
+    if (playerTrackList === all) {
+      playRandomTrack();
+      return;
+    }
+    forceRandomStartRef.current = true; // the playlist-change effect picks the random track
+    setPlaylist(null);
+    setPlayerTrackList(all);
+    setIsPlaying(true);
+  };
+
+  // --------------------------------
+  // PLAYER HEIGHT — keeps the random button just above the bar (desktop, mobile, fullscreen)
+  // --------------------------------
+  useEffect(() => {
+    const el = playerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setPlayerHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handlePlayButtonClick = () => {
     if (isInitialState) {
@@ -433,7 +474,37 @@ const Player = () => {
   };
 
   return (
-    <div className={`player ${isFullscreen ? 'player--fullscreen' : ''}`}>
+    <>
+    {/* Always visible. Sits at the bottom until a track starts, then rises above the player. */}
+    <button
+      type="button"
+      className={`random-play ${hasTrack ? 'random-play--raised' : ''}`}
+      style={{ '--player-height': `${playerHeight}px` } as CSSProperties}
+      // The 3D room listens to clicks, taps and mouse moves on the whole window: keep this
+      // button's events from reaching it (the button sits right over the chest).
+      onClick={(e) => { e.stopPropagation(); playAnyRandomTrack(); }}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onMouseMove={(e) => e.stopPropagation()}
+      disabled={playerTrackList.length === 0}
+      aria-label="Play a random track"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="16 3 21 3 21 8" />
+        <line x1="4" y1="20" x2="21" y2="3" />
+        <polyline points="21 16 21 21 16 21" />
+        <line x1="15" y1="15" x2="21" y2="21" />
+        <line x1="4" y1="4" x2="9" y2="9" />
+      </svg>
+      Play a random track
+    </button>
+
+    {/* Hidden until a track is selected, then slides up from the bottom. */}
+    <div
+      ref={playerRef}
+      className={`player ${isFullscreen ? 'player--fullscreen' : ''} ${hasTrack ? '' : 'player--hidden'}`}
+      aria-hidden={!hasTrack}
+    >
       <AudioStorage
         ref={audioRef}
         bucket="tracks"
@@ -719,6 +790,7 @@ const Player = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
