@@ -65,6 +65,9 @@ const Player = () => {
   // Set by the random button: the next playlist change must start on a random track, even with shuffle off.
   const forceRandomStartRef = useRef(false);
   const isManualTrackChange = useRef(false);
+  // Always the latest playNextTrack, so a track ending uses the current shuffle mode and history
+  // (the audio listeners are only attached when the track changes).
+  const playNextTrackRef = useRef<() => void>(() => {});
 
   // --------------------------------
   // LOAD TRACKS INITIAL (solo una vez al montar)
@@ -110,6 +113,8 @@ const Player = () => {
     setHistory([]);
     // intentionally NOT setting isPlaying(false) here —
     // play state is owned by track-change effect and user actions only
+    // Only a new playlist restarts playback; toggling shuffle must not jump to another track.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerTrackList]);
 
   // --------------------------------
@@ -196,7 +201,7 @@ const Player = () => {
 
       const handleTimeUpdate = () => {
         setCurrentTime(audio.currentTime);
-        if (duration === 0 && audio.duration) updateDuration();
+        updateDuration(); // no re-render when the value is unchanged
       };
 
       const handleLoadedMetadata  = () => updateDuration();
@@ -209,7 +214,7 @@ const Player = () => {
         });
       };
       const handleDurationChange  = () => updateDuration();
-      const handleEnded           = () => playNextTrack();
+      const handleEnded           = () => playNextTrackRef.current();
       const handlePlay            = () => { setIsPlaying(true); updateDuration(); };
       const handlePause           = () => setIsPlaying(false);
 
@@ -337,9 +342,10 @@ const Player = () => {
     if (isShuffleMode) {
       setPlayedIndices(prev => new Set([...prev, nextIndex!]));
     }
-  
+
     setIsPlaying(true);
   };
+  playNextTrackRef.current = playNextTrack;
 
   // --------------------------------
   // PREVIOUS

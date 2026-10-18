@@ -23,6 +23,8 @@ const TrackModal: React.FC<TrackModalProps> = ({ isOpen, onClose, track }) => {
       setFullTrack(null);
       fetchTrackById(track.id).then(setFullTrack).catch(() => setFullTrack(track));
     }
+    // Refetch only when a different track opens; `track` is just the fallback if the fetch fails.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, track?.id]);
 
   // Cerrar con ESC

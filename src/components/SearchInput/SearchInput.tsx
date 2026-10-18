@@ -73,7 +73,7 @@ const SearchInput = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [query]);
+  }, [query, setIsSearchModalOpen]);
 
   /* =========================
      SEARCH FUNCTION

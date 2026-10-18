@@ -9,7 +9,7 @@ const Login = () => {
 
   useEffect(() => {
     setIsSearchModalOpen(true)
-  }, []);
+  }, [setIsSearchModalOpen]);
 
   return (
     <div className="login">

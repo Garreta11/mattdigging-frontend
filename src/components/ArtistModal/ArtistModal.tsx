@@ -27,6 +27,8 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
         .then(setTracks)
         .catch(() => setTracks(artist.tracks ?? []));
     }
+    // Refetch only when a different artist opens; `artist.tracks` is just the fallback if the fetch fails.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, artist?.id, isMember]);
 
   if (!isOpen || !artist) return null;

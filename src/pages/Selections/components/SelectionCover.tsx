@@ -11,8 +11,11 @@ interface SelectionCoverProps {
 export const SelectionCover = ({ coverUrls, size = 80 }: SelectionCoverProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const validUrls = coverUrls.filter(Boolean).slice(0, 3) as string[];
+  // A string, so the cover is only redrawn when the actual images change (not on every new array).
+  const urlsKey = validUrls.join(",");
 
   useEffect(() => {
+    const validUrls = urlsKey ? urlsKey.split(",") : [];
     const canvas = canvasRef.current;
     if (!canvas || validUrls.length === 0) return;
     const ctx = canvas.getContext("2d");
@@ -73,7 +76,7 @@ export const SelectionCover = ({ coverUrls, size = 80 }: SelectionCoverProps) =>
     };
 
     draw();
-  }, [validUrls.join(","), size]);
+  }, [urlsKey, size]);
 
   if (validUrls.length === 0) {
     return <div style={{ width: size, height: size, background: "#1a1a1a", borderRadius: "50%", flexShrink: 0 }} />;

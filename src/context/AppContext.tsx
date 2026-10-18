@@ -104,6 +104,8 @@ const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
       loadAuth(session);
     });
     return () => subscription.unsubscribe();
+    // Once on mount: load the session and subscribe to auth changes a single time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateUserState = (session: Session | null) => {
