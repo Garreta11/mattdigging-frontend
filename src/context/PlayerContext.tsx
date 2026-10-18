@@ -1,5 +1,17 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { Artist, Playlist, Track } from '../services/api';
+
+// Browser fullscreen (the whole page), used together with the player's fullscreen room view.
+// Must be called from a click handler; not available everywhere (e.g. iPhone Safari), so it fails quietly.
+export const enterBrowserFullscreen = () => {
+  const el = document.documentElement;
+  if (document.fullscreenElement || !el.requestFullscreen) return;
+  el.requestFullscreen().catch(() => {});
+};
+
+const exitBrowserFullscreen = () => {
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+};
 
 interface PlayerContextType {
   track: Track | null;
@@ -28,6 +40,20 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [modalArtist, setModalArtist] = useState<Artist | null>(null);
   const [isModalArtistOpen, setIsModalArtistOpen] = useState(false);
+
+  // Leaving the fullscreen view (player button, logo, room clicks…) also leaves browser fullscreen.
+  useEffect(() => {
+    if (!isFullscreen) exitBrowserFullscreen();
+  }, [isFullscreen]);
+
+  // Leaving browser fullscreen (Esc) also leaves the fullscreen view.
+  useEffect(() => {
+    const onChange = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
 
   return (
     <PlayerContext.Provider

@@ -4,7 +4,7 @@ import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../s
 import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAuthContext } from '../../context/AppContext';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerContext, enterBrowserFullscreen } from '../../context/PlayerContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
 import { useStreamUrl } from '../../hooks/useStreamUrl';
@@ -403,6 +403,8 @@ const Player = () => {
   };
 
   const handleFullscreen = (_isFullscreen: boolean) => {
+    // Right away, inside the click: browsers only allow fullscreen during a user gesture.
+    if (_isFullscreen) enterBrowserFullscreen();
     const el = document.querySelector('.main-content');
     if (el) {
       el.classList.add('fade-out');
