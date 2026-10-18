@@ -12,6 +12,7 @@ import Loader from "../../components/Loader/Loader";
 import MembersOnly from "../../components/MembersOnly/MembersOnly";
 import PlaylistBrowser, { PLAYLIST_FILTERS, PlaylistFilter } from "../../components/PlaylistBrowser/PlaylistBrowser";
 import CloseButton from "../../components/CloseButton/CloseButton";
+import PlayAllButton from "../../components/PlayAllButton/PlayAllButton";
 
 interface Season {
   slug: string;
@@ -217,11 +218,7 @@ const PlaylistsPage = () => {
               dangerouslySetInnerHTML={{ __html: getPageTitle }}
             />
             {isMember && (
-              <button className="playlistsPage__play-playlist" onClick={handlePlayPlaylist}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-                </svg>
-              </button>
+              <PlayAllButton label="Play playlist" onClick={handlePlayPlaylist} />
             )}
           </div>
         </div>

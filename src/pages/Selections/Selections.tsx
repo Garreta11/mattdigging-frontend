@@ -9,6 +9,7 @@ import { useAppContext } from "../../context/AppContext";
 import TrackItem from "../../components/TrackItem/TrackItem";
 import Loader from "../../components/Loader/Loader";
 import CloseButton from "../../components/CloseButton/CloseButton";
+import PlayAllButton from "../../components/PlayAllButton/PlayAllButton";
 import { SelectionCover, getSelectionCovers } from "./components/SelectionCover";
 import SelectionCard, { selectionDateRange } from "./components/SelectionCard";
 import SelectionsCalendar from "./components/SelectionsCalendar";
@@ -132,10 +133,7 @@ const SelectionsPage = () => {
                 <p className="selectionsPage__hero__date">{selectionDateRange(activeSelection)}</p>
                 {activeSelection.description && <p className="selectionsPage__hero__description">{activeSelection.description}</p>}
                 {!isLoadingTracks && tracks.length > 0 && (
-                  <button className="selectionsPage__playAll" onClick={handlePlaySelection}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14286V18.8571L19 12L8 5.14286Z" /></svg>
-                    Play selection
-                  </button>
+                  <PlayAllButton className="selectionsPage__playAll" label="Play selection" onClick={handlePlaySelection} />
                 )}
               </div>
             </div>

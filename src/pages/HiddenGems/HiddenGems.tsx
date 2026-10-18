@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import './HiddenGems.scss';
+import PlayAllButton from '../../components/PlayAllButton/PlayAllButton';
 import { useNavigate } from "react-router-dom";
 import { fetchHiddenGems, Selections, Track } from "../../services/api";
 import { useAuthContext } from "../../context/AppContext";
@@ -62,17 +63,11 @@ const HiddenGemsPage = () => {
 
       {isMember ? (
         <div className="hidden-gems__content">
-          <div className="selectionsPage__selectionView__header">
-            <div className="selectionsPage__selectionView__header__title">
-              <h2>Hidden Gems</h2>
-              <p>new additions every first of the month</p>
-            </div>
+          <div className="hidden-gems__header">
+            <h2 className="hidden-gems__title">Hidden Gems</h2>
+            <p className="hidden-gems__subtitle">new additions every first of the month</p>
             {tracks.length > 0 && (
-              <button className="selectionsPage__selectionView__header__play-playlist" onClick={handlePlaySelection}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="var(--color-white)"/>
-                </svg>
-              </button>
+              <PlayAllButton className="hidden-gems__play" label="Play Hidden Gems" onClick={handlePlaySelection} />
             )}
           </div>
 
