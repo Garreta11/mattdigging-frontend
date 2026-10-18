@@ -596,12 +596,6 @@ const Player = () => {
                   className='player__info__cover'
                 />
                 <div className='player__info__text'>
-                  {playlist?.name && (
-                    <button type='button' className='player__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)} title='Go to playlist'>
-                      <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' aria-hidden='true'><line x1='4' y1='6' x2='20' y2='6' /><line x1='4' y1='12' x2='20' y2='12' /><line x1='4' y1='18' x2='13' y2='18' /></svg>
-                      <span>{playlist?.name}</span>
-                    </button>
-                  )}
                   <h3><MarqueeText text={currentTrack.title} /></h3>
                   <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
                 </div>
@@ -627,6 +621,12 @@ const Player = () => {
             )}
           </div>
           {currentTrack && <FavoriteButton track={currentTrack} />}
+          {hasTrack && playlist?.name && (
+            <button type='button' className='player__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)} title='Go to playlist'>
+              <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' aria-hidden='true'><line x1='4' y1='6' x2='20' y2='6' /><line x1='4' y1='12' x2='20' y2='12' /><line x1='4' y1='18' x2='13' y2='18' /></svg>
+              <span>{playlist?.name}</span>
+            </button>
+          )}
         </div>
         <div className='player__right'>
           {randomButton('player__random')}
