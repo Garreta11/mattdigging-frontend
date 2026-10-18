@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import SignIn from '../SignIn/SignIn';
 import { useAppContext } from '../../context/AppContext';
 import Loader from '../Loader/Loader';
 
@@ -11,7 +10,7 @@ type Props = {
 };
 
 const RequireAuth = ({ children }: Props) => {
-  const { isAuthed, loading } = useAppContext();
+  const { loading } = useAppContext();
   const [minElapsed, setMinElapsed] = useState(false);
   const [fading, setFading] = useState(false);
   const [gone, setGone] = useState(false);

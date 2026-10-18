@@ -6,7 +6,6 @@ import { useFavorites } from "../../hooks/useFavorites";
 import { supabase } from "../../lib/supabase";
 import {
   Track,
-  fetchBillingCheckout,
   fetchBillingPortal,
 } from "../../services/api";
 import "./Profile.scss";

@@ -38,7 +38,7 @@ const PlaylistsPage = () => {
   const isLoading = dataLoading || !authReady;
   const [error, setError] = useState<string | null>(null);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [selectedTrack] = useState<Track | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   
   const [searchParams] = useSearchParams();
@@ -54,9 +54,6 @@ const PlaylistsPage = () => {
   const tabParam = searchParams.get('tab');
   const tab: PlaylistFilter = PLAYLIST_FILTERS.some(f => f.key === tabParam) ? (tabParam as PlaylistFilter) : 'mood';
   const setTab = (next: PlaylistFilter) => navigate(`/playlists?tab=${next}`, { replace: true });
-
-  const isPlaylistLoaded = !isLoading && tracks.length > 0 &&
-    (genreParam || moodParam || yearParam || seasonParam || countryParam);
 
   // Load filter options once on mount — runs in background, no loading indicator.
   // With Cache-Control headers these are served from browser cache on repeat visits.

@@ -15,7 +15,7 @@ interface ArtistModalProps {
 }
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
-  const { setIsTrackModalOpen, setTrack, setPlayerTrackList, isMember } = useAppContext();
+  const { setTrack, setPlayerTrackList, isMember } = useAppContext();
   const [tracks, setTracks] = useState<Track[]>([]);
   const panelRef = useSwipeToClose(isOpen, onClose);
 

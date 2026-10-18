@@ -6,7 +6,6 @@ import { createPortal } from 'react-dom';
 import { fetchArtists, Artist } from '../../services/api';
 import ImageStorage from "../../components/ImageStorage/ImageStorage";
 import { lenis } from '../../index';
-import MembersOnly from "../../components/MembersOnly/MembersOnly";
 import Loader from "../../components/Loader/Loader";
 import CloseButton from "../../components/CloseButton/CloseButton";
 

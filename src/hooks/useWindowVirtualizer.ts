@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useLayoutEffect } from 'react';
 
 /**
  * Minimal window-scroll virtualizer for lists with fixed item height.
