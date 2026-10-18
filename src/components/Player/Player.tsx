@@ -39,7 +39,7 @@ const formatTime = (seconds: number): string => {
 const Player = () => {
   const navigate = useNavigate();
 
-  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
+  const { track, setTrack, playerTrackList, setPlayerTrackList, playlist, setPlaylist, setModalArtist, setIsModalArtistOpen, isFullscreen, setIsFullscreen } = usePlayerContext();
   const { isMember, loading, authReady, user, setIsPricingModalOpen } = useAuthContext();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
@@ -60,6 +60,10 @@ const Player = () => {
   const hasInitialized = useRef(false);
   const isInitialPlaylistLoad = useRef(true);
   const previousTrackId = useRef<string | null>(null);
+  // The full list the random button picks from (all published tracks for members, free ones otherwise).
+  const allTracksRef = useRef<Track[]>([]);
+  // Set by the random button: the next playlist change must start on a random track, even with shuffle off.
+  const forceRandomStartRef = useRef(false);
   const isManualTrackChange = useRef(false);
 
   // --------------------------------
@@ -73,6 +77,7 @@ const Player = () => {
     const loadTracks = async () => {
       try {
         const data = isMember ? await fetchPlayerTracks() : await fetchPlayerFreeTracks();
+        allTracksRef.current = data;
         setPlayerTrackList(data);
       } catch (err) {
         console.error('Failed to load tracks:', err);
@@ -93,7 +98,8 @@ const Player = () => {
       return;
     }
     
-    if (isShuffleMode) {
+    if (isShuffleMode || forceRandomStartRef.current) {
+      forceRandomStartRef.current = false;
       const randomIndex = Math.floor(Math.random() * playerTrackList.length);
       setCurrentTrackIndex(randomIndex);
       setPlayedIndices(new Set([randomIndex]));
@@ -418,11 +424,54 @@ const Player = () => {
 
   const playRandomTrack = () => {
     if (playerTrackList.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * playerTrackList.length);
+    let randomIndex = Math.floor(Math.random() * playerTrackList.length);
+    // Never "randomly" pick the track that is already playing.
+    if (playerTrackList.length > 1 && randomIndex === currentTrackIndex) {
+      randomIndex = (randomIndex + 1) % playerTrackList.length;
+    }
+    if (currentTrackIndex !== null) setHistory(prev => [...prev, currentTrackIndex]);
     setCurrentTrackIndex(randomIndex);
     setPlayedIndices(new Set([randomIndex]));
     setIsPlaying(true);
   };
+
+  // "Play a random track" button: any track the user can play, like the mobile app.
+  // If a selection or playlist is playing, go back to the full list first.
+  const playAnyRandomTrack = () => {
+    const all = allTracksRef.current;
+    if (all.length === 0) return;
+    if (playerTrackList === all) {
+      playRandomTrack();
+      return;
+    }
+    forceRandomStartRef.current = true; // the playlist-change effect picks the random track
+    setPlaylist(null);
+    setPlayerTrackList(all);
+    setIsPlaying(true);
+  };
+
+  // "Play a random track" button, used in three places: floating (nothing playing yet),
+  // in the desktop player's actions and in the mobile player's info row.
+  const randomButton = (className: string, label = 'Random', hidden = false) => (
+    <button
+      type="button"
+      className={className}
+      // The 3D room ignores clicks on UI drawn over it (Room/Output.js isRoomEvent),
+      // so this button does not also open the chest behind it.
+      onClick={playAnyRandomTrack}
+      disabled={playerTrackList.length === 0}
+      aria-hidden={hidden}
+      tabIndex={hidden ? -1 : undefined}
+      aria-label="Play a random track"
+      title="Play a random track"
+    >
+      {/* The record and tonearm from the Mattdigging logo (vinyl.svg), in the button's text colour. */}
+      <svg width="17" height="16" viewBox="0 0 290 271" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M9.08398 51.725C14.781 64.8 27.817 73.942 42.991 73.942C60.192 73.942 74.648 62.195 78.778 46.286H101.173C67.759 68.023 45.663 105.693 45.663 148.526C45.663 215.841 100.232 270.41 167.547 270.41C234.862 270.41 289.431 215.841 289.431 148.526C289.431 81.212 234.862 26.642 167.547 26.642C159.178 26.642 151.006 27.486 143.111 29.093C137.704 28.112 131.659 27.656 124.439 27.656H78.778C74.649 11.747 60.192 0 42.991 0C27.818 0 14.782 9.14198 9.08398 22.217H5.409H0V27.626V46.317V51.726H5.409L9.08398 51.725ZM167.546 188.514C145.461 188.514 127.558 170.611 127.558 148.526C127.558 126.441 145.461 108.538 167.546 108.538C189.631 108.538 207.534 126.441 207.534 148.526C207.534 170.611 189.631 188.514 167.546 188.514ZM5.409 27.625H23.067C24.137 25.348 25.605 23.249 27.438 21.417C31.592 17.263 37.116 14.975 42.991 14.975C48.866 14.975 54.39 17.263 58.544 21.417C61.762 24.635 63.859 28.675 64.642 33.064H124.439C146.167 33.064 156.142 37.444 169.069 46.646L169.122 46.684L188.674 61.101L190.738 58.267L223.461 82.396L214.692 94.438L181.969 70.309L184.075 67.417L164.512 52.992C152.738 44.614 144.15 40.877 124.439 40.877H64.642C63.86 45.266 61.763 49.306 58.544 52.524C54.39 56.678 48.866 58.966 42.991 58.966C37.116 58.966 31.592 56.678 27.438 52.524C25.606 50.692 24.137 48.593 23.067 46.316H5.409V27.625Z" fill="currentColor" />
+      </svg>
+      <span>{label}</span>
+    </button>
+  );
 
   const handlePlayButtonClick = () => {
     if (isInitialState) {
@@ -433,7 +482,16 @@ const Player = () => {
   };
 
   return (
-    <div className={`player ${isFullscreen ? 'player--fullscreen' : ''}`}>
+    <>
+    {/* Nothing playing yet: the floating button. Once a track plays it fades out and
+        the same action lives inside the player (see player__actions / player__mobile). */}
+    {randomButton(`random-play ${hasTrack ? 'random-play--hidden' : ''}`, 'Play a random track', hasTrack)}
+
+    {/* Hidden until a track is selected, then slides up from the bottom. */}
+    <div
+      className={`player ${isFullscreen ? 'player--fullscreen' : ''} ${hasTrack ? '' : 'player--hidden'}`}
+      aria-hidden={!hasTrack}
+    >
       <AudioStorage
         ref={audioRef}
         bucket="tracks"
@@ -441,75 +499,39 @@ const Player = () => {
         preload="auto"
       />
 
-      <div className='player__fullscreen' onClick={() => handleFullscreen(!isFullscreen)}>
-        {isFullscreen ? (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5.5 0.75C5.5 0.33579 5.16421 0 4.75 0C4.33579 0 4 0.33579 4 0.75V3.25C4 3.66421 3.66421 4 3.25 4H0.75C0.33579 4 0 4.33579 0 4.75C0 5.16421 0.33579 5.5 0.75 5.5H3.25C4.49264 5.5 5.5 4.49264 5.5 3.25V0.75ZM5.5 17.25C5.5 17.6642 5.16421 18 4.75 18C4.33579 18 4 17.6642 4 17.25V14.75C4 14.3358 3.66421 14 3.25 14H0.75C0.33579 14 0 13.6642 0 13.25C0 12.8358 0.33579 12.5 0.75 12.5H3.25C4.49264 12.5 5.5 13.5074 5.5 14.75V17.25ZM13.25 0C12.8358 0 12.5 0.33579 12.5 0.75V3.25C12.5 4.49264 13.5074 5.5 14.75 5.5H17.25C17.6642 5.5 18 5.16421 18 4.75C18 4.33579 17.6642 4 17.25 4H14.75C14.3358 4 14 3.66421 14 3.25V0.75C14 0.33579 13.6642 0 13.25 0ZM12.5 17.25C12.5 17.6642 12.8358 18 13.25 18C13.6642 18 14 17.6642 14 17.25V14.75C14 14.3358 14.3358 14 14.75 14H17.25C17.6642 14 18 13.6642 18 13.25C18 12.8358 17.6642 12.5 17.25 12.5H14.75C13.5074 12.5 12.5 13.5074 12.5 14.75V17.25Z" fill="var(--color-white)"/>
-          </svg>
-        ) : (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.5 2.75C1.5 2.05964 2.05964 1.5 2.75 1.5H4.75C5.16421 1.5 5.5 1.16421 5.5 0.75C5.5 0.33579 5.16421 0 4.75 0H2.75C1.23122 0 0 1.23122 0 2.75V4.75C0 5.16421 0.33579 5.5 0.75 5.5C1.16421 5.5 1.5 5.16421 1.5 4.75V2.75ZM1.5 15.25C1.5 15.9404 2.05964 16.5 2.75 16.5H4.75C5.16421 16.5 5.5 16.8358 5.5 17.25C5.5 17.6642 5.16421 18 4.75 18H2.75C1.23122 18 0 16.7688 0 15.25V13.25C0 12.8358 0.33579 12.5 0.75 12.5C1.16421 12.5 1.5 12.8358 1.5 13.25V15.25ZM15.25 1.5C15.9404 1.5 16.5 2.05964 16.5 2.75V4.75C16.5 5.16421 16.8358 5.5 17.25 5.5C17.6642 5.5 18 5.16421 18 4.75V2.75C18 1.23122 16.7688 0 15.25 0H13.25C12.8358 0 12.5 0.33579 12.5 0.75C12.5 1.16421 12.8358 1.5 13.25 1.5H15.25ZM16.5 15.25C16.5 15.9404 15.9404 16.5 15.25 16.5H13.25C12.8358 16.5 12.5 16.8358 12.5 17.25C12.5 17.6642 12.8358 18 13.25 18H15.25C16.7688 18 18 16.7688 18 15.25V13.25C18 12.8358 17.6642 12.5 17.25 12.5C16.8358 12.5 16.5 12.8358 16.5 13.25V15.25Z" fill="var(--color-white)"/>
-          </svg>
-        )}
-      </div>
-
-      {currentTrack && (
-        <div className="player__favorite--desktop">
-          <FavoriteButton track={currentTrack} />
-        </div>
-      )}
-
-      <div className='player__info'>
-        {hasTrack ? (
-          <>
-            <ImageStorage
-              path={currentTrack?.cover_url}
-              alt={currentTrack?.title}
-              bucket="covers"
-              className='player__info__cover'
-            />
-            <div className='player__info__text'>
-              {playlist?.name && (
-                <p className='player__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)}>{playlist?.name}</p>
-              )}
-              <h3><MarqueeText text={currentTrack.title} /></h3>
-              <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
-            </div>
-          </>
-        ) : playerTrackList.length === 0 ? (
-          <div className='player__info__skeleton'>
-            <div className='player__info__skeleton__title' />
-            <div className='player__info__skeleton__artist' />
-          </div>
-        ) : (
-          <div className='player__info__empty' onClick={playRandomTrack}>
-            <div className='player__info__empty__icon'>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-              </svg>
-            </div>
-            <div className='player__info__empty__text'>
-              <p>Click to play a random track</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className='player__controls'>
-        <div className='player__controls__buttons'>
-          {/* Shuffle button */}
-          <button
-            onClick={toggleShuffle}
-            disabled={controlsDisabled || !isPlayerReady}
-            className={`player__btn player__btn--shuffle ${isShuffleMode ? 'player__btn--shuffle--active' : ''}`}
+      {/* Desktop bar, YouTube Music style: a thin progress line along the top edge, then
+          transport + time (left) · track + favourite (centre) · random, shuffle, fullscreen (right). */}
+      <div className='player__bar'>
+        <div className='player__controls__progress'>
+          <span className='player__controls__progress__time'>{formatTime(currentTime)}</span>
+          <div
+            className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
+            onClick={(e) => {
+              if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const ratio = (e.clientX - rect.left) / rect.width;
+              const newTime = ratio * duration;
+              audioRef.current.currentTime = newTime;
+              setCurrentTime(newTime);
+            }}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+            onMouseUp={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+            onMouseMove={(e) => { e.preventDefault(); e.stopPropagation(); if (isDragging) handleSeek(e); }}
           >
-            <svg width="27" height="24" viewBox="0 0 75 66" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" clipRule="evenodd" d="M57.0552 1.15066C58.4927 -0.341536 60.8638 -0.388434 62.3599 1.0452L73.0119 11.2752C73.7502 11.9822 74.1642 12.9588 74.1642 13.9822C74.1642 15.0017 73.7501 15.9783 73.0119 16.6853L62.3599 26.9153C60.8638 28.3528 58.4927 28.302 57.0552 26.8098C55.6216 25.3176 55.6685 22.9426 57.1646 21.509L61.0982 17.7317H52.3716C49.7544 17.7317 47.27 18.9036 45.6099 20.927L35.7779 32.896L45.6959 44.919C47.3561 46.9346 49.8326 48.0987 52.4459 48.0987H61.1295L57.2076 44.3175C55.7154 42.88 55.6724 40.505 57.1099 39.0128C58.5474 37.5245 60.9224 37.4816 62.4146 38.9191L73.0196 49.1491C73.7501 49.8561 74.1641 50.8327 74.1641 51.8483C74.1641 52.8678 73.7501 53.8405 73.0196 54.5475L62.4146 64.7815C60.9224 66.219 58.5474 66.176 57.1099 64.6838C55.6724 63.1955 55.7154 60.8205 57.2076 59.383L61.1295 55.5978H52.4459C47.5943 55.5978 42.9967 53.4298 39.9109 49.6876L14.6059 19.0116C12.9457 16.996 10.4692 15.8319 7.85588 15.8319H3.75038C1.67618 15.8319 0.000380516 14.1522 0.000380516 12.0819C0.000380516 10.0077 1.67618 8.33192 3.75038 8.33192H7.85588C12.7075 8.33192 17.3051 10.4999 20.3909 14.2421L30.9139 27.0001L39.8123 16.1641C42.8982 12.4063 47.5076 10.2305 52.3713 10.2305H61.0979L57.1643 6.45322C55.6682 5.01962 55.6213 2.64462 57.0549 1.14852L57.0552 1.15066ZM20.9222 39.1667L25.7855 45.0612L20.4417 51.5651C17.3558 55.3229 12.7503 57.4987 7.8867 57.4987H3.75C1.6758 57.4987 0 55.8229 0 53.7487C0 51.6784 1.6758 49.9987 3.75 49.9987H7.8867C10.5039 49.9987 12.9844 48.8268 14.6484 46.8034L20.9222 39.1667Z" fill="var(--color-white)"/>
-            </svg>
-          </button>
-
+            <div className='player__controls__progress__track'>
+              <div
+                className='player__controls__progress__fill'
+                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
+              <div
+                className='player__controls__progress__thumb'
+                style={{ left: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+          <span className='player__controls__progress__time'>{formatTime(duration)}</span>
+        </div>
+        <div className='player__left'>
           {/* Previous button */}
           <button
             onClick={playPreviousTrack}
@@ -555,36 +577,71 @@ const Player = () => {
               <path d="M14.5 12L6 18V6L14.5 12Z" fill="currentColor"/>
             </svg>
           </button>
+          <span className='player__time'>{formatTime(currentTime)} / {formatTime(duration)}</span>
         </div>
-
-        <div className='player__controls__progress'>
-          <span className='player__controls__progress__time'>{formatTime(currentTime)}</span>
-          <div
-            className={`player__controls__progress__bar${controlsDisabled || !isPlayerReady ? ' player__controls__progress__bar--disabled' : ''}`}
-            onClick={(e) => {
-              if (controlsDisabled || !isPlayerReady || !audioRef.current || duration === 0) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const ratio = (e.clientX - rect.left) / rect.width;
-              const newTime = ratio * duration;
-              audioRef.current.currentTime = newTime;
-              setCurrentTime(newTime);
-            }}
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
-            onMouseUp={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
-            onMouseMove={(e) => { e.preventDefault(); e.stopPropagation(); if (isDragging) handleSeek(e); }}
-          >
-            <div className='player__controls__progress__track'>
-              <div
-                className='player__controls__progress__fill'
-                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
-              <div
-                className='player__controls__progress__thumb'
-                style={{ left: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
-            </div>
+        <div className='player__center'>
+          <div className='player__info'>
+            {hasTrack ? (
+              <>
+                <ImageStorage
+                  path={currentTrack?.cover_url}
+                  alt={currentTrack?.title}
+                  bucket="covers"
+                  className='player__info__cover'
+                />
+                <div className='player__info__text'>
+                  {playlist?.name && (
+                    <p className='player__info__playlist-name' onClick={() => handleSeePlaylist(playlist?.url)}>{playlist?.name}</p>
+                  )}
+                  <h3><MarqueeText text={currentTrack.title} /></h3>
+                  <p className='player__info__artist-name' onClick={() => handleArtistClick(currentTrack?.artist)}><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
+                </div>
+              </>
+            ) : playerTrackList.length === 0 ? (
+              <div className='player__info__skeleton'>
+                <div className='player__info__skeleton__title' />
+                <div className='player__info__skeleton__artist' />
+              </div>
+            ) : (
+              <div className='player__info__empty' onClick={playRandomTrack}>
+                <div className='player__info__empty__icon'>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className='player__info__empty__text'>
+                  <p>Click to play a random track</p>
+                </div>
+              </div>
+            )}
           </div>
-          <span className='player__controls__progress__time'>{formatTime(duration)}</span>
+          {currentTrack && <FavoriteButton track={currentTrack} />}
+        </div>
+        <div className='player__right'>
+          {randomButton('player__random')}
+          {/* Shuffle button */}
+          <button
+            onClick={toggleShuffle}
+            disabled={controlsDisabled || !isPlayerReady}
+            className={`player__btn player__btn--shuffle ${isShuffleMode ? 'player__btn--shuffle--active' : ''}`}
+          >
+            <svg width="27" height="24" viewBox="0 0 75 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M57.0552 1.15066C58.4927 -0.341536 60.8638 -0.388434 62.3599 1.0452L73.0119 11.2752C73.7502 11.9822 74.1642 12.9588 74.1642 13.9822C74.1642 15.0017 73.7501 15.9783 73.0119 16.6853L62.3599 26.9153C60.8638 28.3528 58.4927 28.302 57.0552 26.8098C55.6216 25.3176 55.6685 22.9426 57.1646 21.509L61.0982 17.7317H52.3716C49.7544 17.7317 47.27 18.9036 45.6099 20.927L35.7779 32.896L45.6959 44.919C47.3561 46.9346 49.8326 48.0987 52.4459 48.0987H61.1295L57.2076 44.3175C55.7154 42.88 55.6724 40.505 57.1099 39.0128C58.5474 37.5245 60.9224 37.4816 62.4146 38.9191L73.0196 49.1491C73.7501 49.8561 74.1641 50.8327 74.1641 51.8483C74.1641 52.8678 73.7501 53.8405 73.0196 54.5475L62.4146 64.7815C60.9224 66.219 58.5474 66.176 57.1099 64.6838C55.6724 63.1955 55.7154 60.8205 57.2076 59.383L61.1295 55.5978H52.4459C47.5943 55.5978 42.9967 53.4298 39.9109 49.6876L14.6059 19.0116C12.9457 16.996 10.4692 15.8319 7.85588 15.8319H3.75038C1.67618 15.8319 0.000380516 14.1522 0.000380516 12.0819C0.000380516 10.0077 1.67618 8.33192 3.75038 8.33192H7.85588C12.7075 8.33192 17.3051 10.4999 20.3909 14.2421L30.9139 27.0001L39.8123 16.1641C42.8982 12.4063 47.5076 10.2305 52.3713 10.2305H61.0979L57.1643 6.45322C55.6682 5.01962 55.6213 2.64462 57.0549 1.14852L57.0552 1.15066ZM20.9222 39.1667L25.7855 45.0612L20.4417 51.5651C17.3558 55.3229 12.7503 57.4987 7.8867 57.4987H3.75C1.6758 57.4987 0 55.8229 0 53.7487C0 51.6784 1.6758 49.9987 3.75 49.9987H7.8867C10.5039 49.9987 12.9844 48.8268 14.6484 46.8034L20.9222 39.1667Z" fill="var(--color-white)"/>
+            </svg>
+          </button>
+          <div className='player__fullscreen' onClick={() => handleFullscreen(!isFullscreen)}>
+            {isFullscreen ? (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.5 0.75C5.5 0.33579 5.16421 0 4.75 0C4.33579 0 4 0.33579 4 0.75V3.25C4 3.66421 3.66421 4 3.25 4H0.75C0.33579 4 0 4.33579 0 4.75C0 5.16421 0.33579 5.5 0.75 5.5H3.25C4.49264 5.5 5.5 4.49264 5.5 3.25V0.75ZM5.5 17.25C5.5 17.6642 5.16421 18 4.75 18C4.33579 18 4 17.6642 4 17.25V14.75C4 14.3358 3.66421 14 3.25 14H0.75C0.33579 14 0 13.6642 0 13.25C0 12.8358 0.33579 12.5 0.75 12.5H3.25C4.49264 12.5 5.5 13.5074 5.5 14.75V17.25ZM13.25 0C12.8358 0 12.5 0.33579 12.5 0.75V3.25C12.5 4.49264 13.5074 5.5 14.75 5.5H17.25C17.6642 5.5 18 5.16421 18 4.75C18 4.33579 17.6642 4 17.25 4H14.75C14.3358 4 14 3.66421 14 3.25V0.75C14 0.33579 13.6642 0 13.25 0ZM12.5 17.25C12.5 17.6642 12.8358 18 13.25 18C13.6642 18 14 17.6642 14 17.25V14.75C14 14.3358 14.3358 14 14.75 14H17.25C17.6642 14 18 13.6642 18 13.25C18 12.8358 17.6642 12.5 17.25 12.5H14.75C13.5074 12.5 12.5 13.5074 12.5 14.75V17.25Z" fill="var(--color-white)"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.5 2.75C1.5 2.05964 2.05964 1.5 2.75 1.5H4.75C5.16421 1.5 5.5 1.16421 5.5 0.75C5.5 0.33579 5.16421 0 4.75 0H2.75C1.23122 0 0 1.23122 0 2.75V4.75C0 5.16421 0.33579 5.5 0.75 5.5C1.16421 5.5 1.5 5.16421 1.5 4.75V2.75ZM1.5 15.25C1.5 15.9404 2.05964 16.5 2.75 16.5H4.75C5.16421 16.5 5.5 16.8358 5.5 17.25C5.5 17.6642 5.16421 18 4.75 18H2.75C1.23122 18 0 16.7688 0 15.25V13.25C0 12.8358 0.33579 12.5 0.75 12.5C1.16421 12.5 1.5 12.8358 1.5 13.25V15.25ZM15.25 1.5C15.9404 1.5 16.5 2.05964 16.5 2.75V4.75C16.5 5.16421 16.8358 5.5 17.25 5.5C17.6642 5.5 18 5.16421 18 4.75V2.75C18 1.23122 16.7688 0 15.25 0H13.25C12.8358 0 12.5 0.33579 12.5 0.75C12.5 1.16421 12.8358 1.5 13.25 1.5H15.25ZM16.5 15.25C16.5 15.9404 15.9404 16.5 15.25 16.5H13.25C12.8358 16.5 12.5 16.8358 12.5 17.25C12.5 17.6642 12.8358 18 13.25 18H15.25C16.7688 18 18 16.7688 18 15.25V13.25C18 12.8358 17.6642 12.5 17.25 12.5C16.8358 12.5 16.5 12.8358 16.5 13.25V15.25Z" fill="var(--color-white)"/>
+              </svg>
+            )}
+          </div>
         </div>
       </div>
 
@@ -606,6 +663,7 @@ const Player = () => {
                   <h3><MarqueeText text={currentTrack.title} /></h3>
                   <p><MarqueeText text={currentTrack?.artist?.name ?? ''} /></p>
                 </div>
+                {randomButton('player__random player__random--mobile')}
               </>
             ) : !hasTrack && playerTrackList.length > 0 ? (
               <div className='player__info__empty' onClick={playRandomTrack}>
@@ -719,6 +777,7 @@ const Player = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
