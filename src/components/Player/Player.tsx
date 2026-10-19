@@ -1,7 +1,6 @@
 import './Player.scss';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { fetchPlayerTracks, fetchPlayerFreeTracks, Track, Artist } from '../../services/api';
-import AudioStorage from '../AudioStorage/AudioStorage';
 import ImageStorage from '../ImageStorage/ImageStorage';
 import { useAuthContext } from '../../context/AppContext';
 import { usePlayerContext, enterBrowserFullscreen } from '../../context/PlayerContext';
@@ -265,6 +264,28 @@ const Player = () => {
   }, [streamError, navigate, setIsPricingModalOpen]);
 
   // --------------------------------
+  // ONE SONG AT A TIME
+  // --------------------------------
+  // While the next track's link loads, the previous song must not keep playing.
+  useEffect(() => {
+    if (!streamUrl) audioRef.current?.pause();
+  }, [streamUrl]);
+
+  // Across tabs too: when this tab starts playing, the site's other tabs pause.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('mattdigging-player');
+    const onPlay = () => channel.postMessage('playing');
+    channel.onmessage = () => audio.pause();
+    audio.addEventListener('play', onPlay);
+    return () => {
+      audio.removeEventListener('play', onPlay);
+      channel.close();
+    };
+  }, []);
+
+  // --------------------------------
   // PLAY / PAUSE CONTROL
   // --------------------------------
   useEffect(() => {
@@ -500,12 +521,9 @@ const Player = () => {
       className={`player ${isFullscreen ? 'player--fullscreen' : ''} ${hasTrack ? '' : 'player--hidden'}`}
       aria-hidden={!hasTrack}
     >
-      <AudioStorage
-        ref={audioRef}
-        bucket="tracks"
-        path={streamUrl ?? ''}
-        preload="auto"
-      />
+      {/* One permanent <audio>: only its source changes. (Re-creating it per track let a removed
+          element keep playing off-page while the next track started — two songs at once.) */}
+      <audio ref={audioRef} src={streamUrl ?? undefined} preload="auto" style={{ display: 'none' }} />
 
       {/* Desktop bar, YouTube Music style: a thin progress line along the top edge, then
           transport + time (left) · track + favourite (centre) · random, shuffle, fullscreen (right). */}
