@@ -152,6 +152,7 @@
 
     a {
       color: var(--color-white);
+      font-size: inherit; // the global `a` rule makes every link 20px
     }
   }
 }
