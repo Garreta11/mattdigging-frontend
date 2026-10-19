@@ -61,8 +61,9 @@ const Player = () => {
   const previousTrackId = useRef<string | null>(null);
   // The full list the random button picks from (all published tracks for members, free ones otherwise).
   const allTracksRef = useRef<Track[]>([]);
-  // Set by the random button: the next playlist change must start on a random track, even with shuffle off.
-  const forceRandomStartRef = useRef(false);
+  // Set by the random button: the track it already picked for the new playlist. The list and the
+  // index change together, so the player never shows the old position in the new list.
+  const pendingStartIndexRef = useRef<number | null>(null);
   const isManualTrackChange = useRef(false);
   // Always the latest playNextTrack, so a track ending uses the current shuffle mode and history
   // (the audio listeners are only attached when the track changes).
@@ -100,8 +101,11 @@ const Player = () => {
       return;
     }
     
-    if (isShuffleMode || forceRandomStartRef.current) {
-      forceRandomStartRef.current = false;
+    if (pendingStartIndexRef.current !== null) {
+      // The random button already set the index along with the list.
+      setPlayedIndices(new Set([pendingStartIndexRef.current]));
+      pendingStartIndexRef.current = null;
+    } else if (isShuffleMode) {
       const randomIndex = Math.floor(Math.random() * playerTrackList.length);
       setCurrentTrackIndex(randomIndex);
       setPlayedIndices(new Set([randomIndex]));
@@ -214,8 +218,10 @@ const Player = () => {
       };
       const handleDurationChange  = () => updateDuration();
       const handleEnded           = () => playNextTrackRef.current();
-      const handlePlay            = () => { setIsPlaying(true); updateDuration(); };
-      const handlePause           = () => setIsPlaying(false);
+      // Read the element's real state: 'play'/'pause' events arrive late, and trusting the event
+      // type made a late 'pause' and a late 'play' keep undoing each other (play/pause loop).
+      const handlePlay            = () => { setIsPlaying(!audio.paused); updateDuration(); };
+      const handlePause           = () => setIsPlaying(!audio.paused);
 
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -290,16 +296,18 @@ const Player = () => {
   // --------------------------------
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
+    // No link yet: nothing to play (the old song stays paused); 'canplay' starts the new one.
+    if (!audio || !currentTrack || !streamUrl) return;
 
-    if (isPlaying) {
+    // Only act when the element is not already in that state, so this never fights the events.
+    if (isPlaying && audio.paused) {
       audio.play().catch(() => {
-        setIsPlaying(false);
+        setIsPlaying(!audio.paused);
       });
-    } else {
+    } else if (!isPlaying && !audio.paused) {
       audio.pause();
     }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying, currentTrack, streamUrl]);
 
   // --------------------------------
   // Actualizar el track en el contexto cuando cambie currentTrack
@@ -473,8 +481,14 @@ const Player = () => {
       playRandomTrack();
       return;
     }
-    forceRandomStartRef.current = true; // the playlist-change effect picks the random track
+    // Pick now and set it together with the list (never the song that is already playing).
+    let randomIndex = Math.floor(Math.random() * all.length);
+    if (all.length > 1 && all[randomIndex].id === currentTrack?.id) {
+      randomIndex = (randomIndex + 1) % all.length;
+    }
+    pendingStartIndexRef.current = randomIndex;
     setPlaylist(null);
+    setCurrentTrackIndex(randomIndex);
     setPlayerTrackList(all);
     setIsPlaying(true);
   };
