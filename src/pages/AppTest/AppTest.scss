@@ -69,6 +69,12 @@
     border: 1px solid rgba(245, 241, 232, 0.1);
     border-radius: var(--border-radius-x-small);
 
+    // Small phones: tighter card so the buttons keep their full label on one line
+    @include respond-to(sm) {
+      gap: var(--space-3);
+      padding: var(--space-4);
+    }
+
     &__number {
       display: flex;
       align-items: center;
@@ -120,6 +126,14 @@
 
     &:hover {
       filter: brightness(1.15);
+    }
+
+    // Small phones: full-width, easy-to-tap buttons
+    @include respond-to(sm) {
+      align-self: stretch;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+      text-align: center;
     }
   }
 
