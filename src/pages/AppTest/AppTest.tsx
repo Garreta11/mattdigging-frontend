@@ -12,7 +12,7 @@ const ANDROID_STORE_URL = 'https://play.google.com/store/apps/details?id=com.mat
 
 // iOS: TestFlight. The public link comes from App Store Connect → TestFlight → an external
 // testing group → Public Link. Until it is set, the page asks people to email for an invite.
-const IOS_TESTFLIGHT_PUBLIC_URL = '';
+const IOS_TESTFLIGHT_PUBLIC_URL = 'https://testflight.apple.com/join/Se3GYqNQ';
 const TESTFLIGHT_APP_URL = 'https://apps.apple.com/app/testflight/id899247664';
 const CONTACT_EMAIL = 'mattdigging@gmx.de';
 
