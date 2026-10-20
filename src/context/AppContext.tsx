@@ -1,5 +1,5 @@
 import { Session } from "@supabase/supabase-js";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { User } from "../types/user";
 import { supabase } from "../lib/supabase";
 import { Auth, fetchAuth } from "../services/api";
@@ -21,7 +21,9 @@ interface AppContextType {
   setIsSearchModalOpen: (isOpen: boolean) => void;
 
   isPricingModalOpen: boolean;
-  setIsPricingModalOpen: (isOpen: boolean) => void;
+  // Opens the one-month-free modal instead while the user hasn't redeemed it,
+  // unless `skipTrial` is set (the trial modal's own "See all plans" link).
+  setIsPricingModalOpen: (isOpen: boolean, opts?: { skipTrial?: boolean }) => void;
 
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -31,6 +33,9 @@ interface AppContextType {
 
   isCancelModalOpen: boolean;
   setIsCancelModalOpen: (isOpen: boolean) => void;
+
+  isTrialModalOpen: boolean;
+  setIsTrialModalOpen: (isOpen: boolean) => void;
 
   auth: Auth | null;
   setAuth: (auth: Auth | null) => void;
@@ -49,10 +54,11 @@ const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isPricingModalOpen, setPricingModalOpenState] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
   const pricingModalTriggered = useRef(false);
 
   const loadAuth = async (session: Session | null) => {
@@ -138,6 +144,16 @@ const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
   const isMember = isAuthed && (auth?.profile?.is_member === true || user?.isMember === true);
   const isAdmin = isAuthed && user?.isAdmin === true;
 
+  const trialUsed = auth?.profile?.trial_used === true;
+
+  const setIsPricingModalOpen = useCallback((isOpen: boolean, opts?: { skipTrial?: boolean }) => {
+    if (isOpen && !trialUsed && !opts?.skipTrial) {
+      setIsTrialModalOpen(true);
+      return;
+    }
+    setPricingModalOpenState(isOpen);
+  }, [trialUsed]);
+
   const stripCheckoutParam = () => {
     window.history.replaceState({}, "", window.location.pathname);
   };
@@ -190,6 +206,7 @@ const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
         isMobileMenuOpen, setIsMobileMenuOpen,
         isWelcomeModalOpen, setIsWelcomeModalOpen,
         isCancelModalOpen, setIsCancelModalOpen,
+        isTrialModalOpen, setIsTrialModalOpen,
         auth, setAuth,
         authReady, initializeAuth,
       }}

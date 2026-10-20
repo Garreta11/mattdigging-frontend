@@ -103,6 +103,7 @@ export type Auth = {
     subscription_type: any;
     subscription_expires_at: any;
     member_since: any;
+    trial_used?: boolean;
   };
 };
 
@@ -152,6 +153,7 @@ export const fetchBillingCheckout = async (
   token: string,
   onReloadAuth: () => void,
   plan?: 'monthly' | 'annual',
+  trial?: boolean,
 ): Promise<{ url: string }> => {
   const response = await fetch(`${API_BASE_URL}/billing/checkout`, {
     method: "POST",
@@ -159,7 +161,7 @@ export const fetchBillingCheckout = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: plan ? JSON.stringify({ plan }) : undefined,
+    body: plan || trial ? JSON.stringify({ plan, trial }) : undefined,
   });
   const json = await response.json();
   if (!response.ok) {

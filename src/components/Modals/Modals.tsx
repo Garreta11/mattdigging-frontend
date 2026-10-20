@@ -6,9 +6,10 @@ import TrackModal from "../TrackModal/TrackModal";
 import PricingModal from "../PricingModal/PricingModal";
 import WelcomeModal from "../WelcomeModal/WelcomeModal";
 import CancelModal from "../CancelModal/CancelModal";
+import TrialModal from "../TrialModal/TrialModal";
 
 const Modals = () => {
-  const { modalArtist, isModalArtistOpen, setIsModalArtistOpen, track, isTrackModalOpen, setIsTrackModalOpen, isPricingModalOpen, isWelcomeModalOpen, isCancelModalOpen } = useAppContext();
+  const { modalArtist, isModalArtistOpen, setIsModalArtistOpen, track, isTrackModalOpen, setIsTrackModalOpen, isPricingModalOpen, isWelcomeModalOpen, isCancelModalOpen, isTrialModalOpen } = useAppContext();
 
   return (
     <>
@@ -29,6 +30,8 @@ const Modals = () => {
       {isWelcomeModalOpen && <WelcomeModal />}
 
       {isCancelModalOpen && <CancelModal />}
+
+      {isTrialModalOpen && <TrialModal />}
     </>
   );
 };
