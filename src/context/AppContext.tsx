@@ -188,7 +188,8 @@ const AppProviderInner = ({ children }: { children: React.ReactNode }) => {
     } else if (checkout === "cancel") {
       setIsCancelModalOpen(true);
       stripCheckoutParam();
-    } else if (isAuthed && !isMember) {
+    } else if (isAuthed && !isMember && window.location.pathname !== "/membership") {
+      // /membership already shows the offer or the plans as a page.
       setIsPricingModalOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

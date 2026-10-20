@@ -24,6 +24,7 @@ import Privacy from './pages/Privacy/Privacy';
 import AppTest from './pages/AppTest/AppTest';
 import Support from './pages/Support/Support';
 import Profile from './pages/Profile/Profile';
+import Membership from './pages/Membership/Membership';
 import Login from './pages/Login/Login';
 
 // Components
@@ -130,6 +131,7 @@ function App() {
                 <Route path="/playlists" element={<Playlists />} />
                 <Route path="/selections" element={<Selections />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/membership" element={<Membership />} />
               </Routes>
             </main>
 

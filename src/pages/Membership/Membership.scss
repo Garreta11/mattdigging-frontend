@@ -1,0 +1,348 @@
+@import '../../_breakpoints.scss';
+
+// Same look as the Trial / Pricing modals, laid out as a page like Profile.
+$text-muted: rgba(245, 241, 232, 0.5);
+$text-subtle: rgba(245, 241, 232, 0.35);
+$border: rgba(245, 241, 232, 0.12);
+$green-border: rgba(55, 93, 44, 0.85);
+$green-bg: rgba(55, 93, 44, 0.12);
+
+.membership {
+  background-color: var(--color-black);
+  padding: var(--space-16) var(--space-4) var(--space-20);
+
+  @include respond-to(md) {
+    padding-top: var(--space-24);
+  }
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  // ─── Header ──────────────────────────────────────
+  &__header {
+    margin-bottom: var(--space-6);
+  }
+
+  &__eyebrow {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-green);
+    filter: brightness(1.6);
+    margin-bottom: var(--space-3);
+  }
+
+  &__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--color-white);
+    margin: 0 0 var(--space-3);
+    letter-spacing: -0.01em;
+    -webkit-text-stroke: 0.4px var(--color-white);
+  }
+
+  &__subtitle {
+    font-size: var(--font-size-sm);
+    color: $text-muted;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  // ─── Code ────────────────────────────────────────
+  &__code {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    border: 1px dashed $green-border;
+    border-radius: var(--border-radius-x-small);
+    background: $green-bg;
+    box-shadow: 0 0 24px rgba(55, 93, 44, 0.18);
+
+    &__label {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 241, 232, 0.4);
+    }
+
+    &__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    &__value {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 6vw, 2rem);
+      letter-spacing: 0.12em;
+      color: var(--color-white);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    &__copy {
+      flex-shrink: 0;
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--border-radius);
+      background: rgba(245, 241, 232, 0.06);
+      border: 1px solid rgba(245, 241, 232, 0.16);
+      color: rgba(245, 241, 232, 0.75);
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+
+      &:hover {
+        background: rgba(245, 241, 232, 0.12);
+        color: var(--color-white);
+      }
+    }
+
+    &__hint {
+      font-size: 1rem;
+      color: rgba(245, 241, 232, 0.3);
+      line-height: 1.4;
+    }
+  }
+
+  // ─── Features ────────────────────────────────────
+  &__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  &__feature {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: var(--font-size-sm);
+    color: rgba(245, 241, 232, 0.6);
+    line-height: 1.5;
+
+    &__check {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(55, 93, 44, 0.25);
+      border: 1px solid rgba(55, 93, 44, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(245, 241, 232, 0.55);
+      filter: brightness(1.4);
+    }
+  }
+
+  // ─── Plans ───────────────────────────────────────
+  &__plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+
+    @include respond-to(sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__plan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-5);
+    border: 1px solid $border;
+    border-radius: var(--border-radius-x-small);
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+
+    &:hover {
+      border-color: rgba(245, 241, 232, 0.22);
+      background: rgba(245, 241, 232, 0.03);
+    }
+
+    &--selected {
+      border-color: rgba(245, 241, 232, 0.3);
+      background: rgba(245, 241, 232, 0.04);
+    }
+
+    &--annual {
+      border-color: rgba(55, 93, 44, 0.45);
+      background: rgba(55, 93, 44, 0.07);
+
+      &.membership__plan--selected {
+        border-color: $green-border;
+        background: rgba(55, 93, 44, 0.15);
+        box-shadow: 0 0 24px rgba(55, 93, 44, 0.2);
+      }
+    }
+
+    &__badge {
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-green);
+      color: rgba(245, 241, 232, 0.9);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--border-radius);
+      white-space: nowrap;
+    }
+
+    &__label {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: $text-subtle;
+      margin-bottom: var(--space-2);
+    }
+
+    &__amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: var(--color-white);
+      line-height: 1;
+    }
+
+    &__period {
+      font-size: 1rem;
+      color: rgba(245, 241, 232, 0.3);
+      line-height: 1.4;
+    }
+  }
+
+  // ─── Active membership details ───────────────────
+  &__details {
+    margin: 0 0 var(--space-6);
+    border: 1px solid $border;
+    border-radius: var(--border-radius-x-small);
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+
+      & + div {
+        border-top: 1px solid $border;
+      }
+    }
+
+    dt {
+      color: $text-muted;
+      font-size: var(--font-size-sm);
+    }
+
+    dd {
+      margin: 0;
+      color: var(--color-white);
+      font-size: var(--font-size-sm);
+      text-align: right;
+    }
+  }
+
+  // ─── Error ───────────────────────────────────────
+  &__error {
+    margin: 0 0 var(--space-3);
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--border-radius);
+    background: rgba(255, 99, 99, 0.1);
+    border: 1px solid rgba(255, 99, 99, 0.3);
+    color: #ff8080;
+    font-size: 1rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  // ─── CTA ─────────────────────────────────────────
+  &__cta {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--border-radius);
+    background: var(--color-green);
+    border: 1px solid rgba(245, 241, 232, 0.12);
+    color: rgba(245, 241, 232, 0.88);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.2s ease, color 0.2s ease, gap 0.2s ease;
+    margin-bottom: var(--space-4);
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.15);
+      color: var(--color-white);
+      gap: 0.9rem;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(245, 241, 232, 0.25);
+    border-top-color: rgba(245, 241, 232, 0.75);
+    border-radius: 50%;
+    animation: membershipSpinnerRotate 0.75s linear infinite;
+  }
+
+  &__link {
+    align-self: center;
+    background: transparent;
+    border: none;
+    color: rgba(245, 241, 232, 0.3);
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: var(--space-2);
+    letter-spacing: 0.04em;
+    transition: color 0.18s ease;
+
+    &:hover {
+      color: rgba(245, 241, 232, 0.6);
+    }
+  }
+}
+
+@keyframes membershipSpinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
