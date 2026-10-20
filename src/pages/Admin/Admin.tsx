@@ -6,6 +6,13 @@ import { ArtistPanel, TrackPanel, TagsPanel, SelectionsPanel } from './component
 import { useAppContext } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
 
+const TABS: { id: Tab; label: string; description: string }[] = [
+  { id: 'artists', label: 'Artists', description: 'Profiles, bios and photos of the artists in the catalogue.' },
+  { id: 'tracks', label: 'Tracks', description: 'Upload audio, covers and tag every track.' },
+  { id: 'tags', label: 'Tags', description: 'Genres and moods used to classify tracks.' },
+  { id: 'selections', label: 'Selections', description: 'Curate and publish the weekly selections.' },
+];
+
 const AdminLogin = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -29,8 +36,12 @@ const AdminLogin = () => {
   return (
     <div className="admin-gate">
       <div className="admin-gate__card">
-        <h1 className="admin-gate__title">Admin Access</h1>
-        <p className="admin-gate__message">This area is restricted to admin members only.</p>
+        <img className="admin-gate__logo" src="/svg/logo-color.svg" alt="Matt Digging" />
+        <div className="admin-gate__heading">
+          <span className="admin-eyebrow">Backoffice</span>
+          <h1 className="admin-gate__title">Admin access</h1>
+          <p className="admin-gate__message">This area is restricted to admin members only.</p>
+        </div>
         <form className="admin-gate__form" onSubmit={handleSubmit} noValidate>
           <label>
             Email
@@ -122,7 +133,7 @@ const AdminContent = () => {
     return (
       <div className={`admin-toast admin-toast--${status.type}`}>
         <span>{status.message}</span>
-        <button type="button" onClick={() => setStatus(null)}>
+        <button type="button" onClick={() => setStatus(null)} aria-label="Dismiss">
           ×
         </button>
       </div>
@@ -185,29 +196,49 @@ const AdminContent = () => {
     await supabase.auth.signOut();
   };
 
+  const counts: Record<Tab, number> = {
+    artists: artists.length,
+    tracks: tracks.length,
+    tags: genres.length + moods.length,
+    selections: selections.length,
+  };
+  const currentTab = TABS.find((tab) => tab.id === activeTab) ?? TABS[0];
+
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <h2>Admin</h2>
-        <nav>
-          <button className={activeTab === 'artists' ? 'active' : ''} onClick={() => setActiveTab('artists')}>
-            Artists
-          </button>
-          <button className={activeTab === 'tracks' ? 'active' : ''} onClick={() => setActiveTab('tracks')}>
-            Tracks
-          </button>
-          <button className={activeTab === 'tags' ? 'active' : ''} onClick={() => setActiveTab('tags')}>
-            Tags
-          </button>
-          <button className={activeTab === 'selections' ? 'active' : ''} onClick={() => setActiveTab('selections')}>
-            Selections
-          </button>
+        <div className="admin-sidebar__brand">
+          <a href="/" className="admin-sidebar__logo" aria-label="Back to site">
+            <img src="/svg/logo-color.svg" alt="Matt Digging" />
+          </a>
+          <span className="admin-eyebrow">Backoffice</span>
+        </div>
+        <nav className="admin-sidebar__nav">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`admin-sidebar__tab${activeTab === tab.id ? ' active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span>{tab.label}</span>
+              <span className="admin-sidebar__count">{counts[tab.id]}</span>
+            </button>
+          ))}
         </nav>
-        <button className="admin-sidebar__logout" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="admin-sidebar__footer">
+          <a href="/" className="admin-sidebar__link">View site</a>
+          <button type="button" className="admin-sidebar__logout" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </aside>
       <main className="admin-content">
+        <header className="admin-content__header">
+          <span className="admin-eyebrow">Admin</span>
+          <h1>{currentTab.label}</h1>
+          <p>{currentTab.description}</p>
+        </header>
         {renderStatus()}
         {renderActiveTab()}
       </main>
