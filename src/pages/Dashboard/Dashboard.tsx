@@ -482,6 +482,7 @@ function Badge({
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 function OverviewTab({ data }: { data: DashboardData }) {
   const members = data.profiles.filter((p) => p.is_member).length;
+  const trials = data.profiles.filter((p) => p.trial_used).length;
   const freeTracks = data.tracks.filter((t) => t.is_free).length;
   const paidTracks = data.tracks.length - freeTracks;
 
@@ -549,6 +550,13 @@ function OverviewTab({ data }: { data: DashboardData }) {
           value={members}
           sub={`${data.profiles.length ? Math.round((members / data.profiles.length) * 100) : 0}% of users`}
           icon="⭐"
+          color="var(--color-yellow)"
+        />
+        <StatCard
+          label="Free Trials"
+          value={trials}
+          sub={`${data.profiles.length ? Math.round((trials / data.profiles.length) * 100) : 0}% of users`}
+          icon="🎁"
           color="var(--color-yellow)"
         />
         <StatCard
@@ -651,12 +659,13 @@ function OverviewTab({ data }: { data: DashboardData }) {
 
 // ── Users Tab ─────────────────────────────────────────────────────────────────
 function UsersTab({ profiles }: { profiles: Profile[] }) {
-  const [filter, setFilter] = useState<'all' | 'members' | 'free'>('all');
+  const [filter, setFilter] = useState<'all' | 'members' | 'free' | 'trial'>('all');
   const [search, setSearch] = useState('');
 
   const filtered = profiles.filter((p) => {
     if (filter === 'members' && !p.is_member) return false;
     if (filter === 'free' && p.is_member) return false;
+    if (filter === 'trial' && !p.trial_used) return false;
     const q = search.toLowerCase();
     if (q && !p.username?.toLowerCase().includes(q) && !p.email?.toLowerCase().includes(q))
       return false;
@@ -692,6 +701,16 @@ function UsersTab({ profiles }: { profiles: Profile[] }) {
           <Badge variant="info">
             {r.subscription_type.charAt(0).toUpperCase() + r.subscription_type.slice(1)}
           </Badge>
+        ) : (
+          <span className="db-table__muted">—</span>
+        ),
+    },
+    {
+      key: 'trial_used',
+      label: 'Free Trial',
+      render: (r: DashboardUser) =>
+        r.trial_used ? (
+          <Badge variant="warning">Used</Badge>
         ) : (
           <span className="db-table__muted">—</span>
         ),
@@ -754,7 +773,7 @@ function UsersTab({ profiles }: { profiles: Profile[] }) {
             className="db-search"
           />
           <div className="db-filter-group">
-            {(['all', 'members', 'free'] as const).map((f) => (
+            {(['all', 'members', 'free', 'trial'] as const).map((f) => (
               <button
                 key={f}
                 className={`db-filter-btn ${filter === f ? 'db-filter-btn--active' : ''}`}

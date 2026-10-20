@@ -124,6 +124,7 @@ export interface DashboardUser {
   subscription_type: string | null;
   subscription_expires_at: string | null;
   member_since: string | null;
+  trial_used: boolean;
 }
 
 export const fetchDashboardUsers = async (token: string): Promise<DashboardUser[]> => {
