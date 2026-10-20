@@ -40,8 +40,8 @@
       transition: all 0.3s ease;
 
       @include respond-to(md) {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
       }
 
       &:hover {

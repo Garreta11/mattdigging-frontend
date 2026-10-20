@@ -1,17 +1,17 @@
 @import '../../_breakpoints.scss';
 
-.modal {
+// Layout mirrors TrackModal: square image on the left, info on the right.
+.artist-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
   padding: var(--space-4);
-  
 
   &__backdrop {
     position: absolute;
@@ -21,23 +21,25 @@
     bottom: 0;
     background: rgba(10, 17, 17, 0.3);
     backdrop-filter: blur(5px);
-    
+
     @include respond-to(md) {
       background: rgba(245, 241, 232, 0.3);
     }
   }
 
   &__content {
+    position: relative;
     background: var(--color-black);
     border-radius: var(--border-radius-super-small);
     max-width: 900px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    position: relative;
-    animation: slideUpModal 0.3s ease-in-out;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: artistModalSlideIn 0.3s ease-out;
 
     @include respond-to(md) {
+      animation: artistModalSlideInMobile 0.3s ease-out;
       position: fixed;
       bottom: 0;
       max-height: 80dvh;
@@ -46,22 +48,20 @@
       border-bottom-right-radius: 0;
     }
 
-    /* Custom scrollbar */
     &::-webkit-scrollbar {
       width: 8px;
     }
 
     &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
+      background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
 
       &:hover {
-        background: #555;
+        background: rgba(255, 255, 255, 0.3);
       }
     }
   }
@@ -80,11 +80,11 @@
     }
   }
 
+  // ─── Close button ─────────────────────────────────────────
   &__close {
     position: absolute;
-    padding: 0;
-    top: var(--space-4);
-    right: var(--space-4);
+    top: 1.1rem;
+    right: 1.1rem;
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -95,20 +95,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
+    z-index: 10;
     transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
     padding: 0;
- 
+
     @include respond-to(md) {
       display: none;
     }
- 
+
     svg {
       width: 14px;
       height: 14px;
       display: block;
     }
- 
+
     &:hover {
       background: rgba(245, 241, 232, 0.1);
       border-color: rgba(245, 241, 232, 0.25);
@@ -116,262 +116,242 @@
     }
   }
 
-  &__image {
-    width: 100%;
-    height: 350px;
+  // ─── Header: photo + name, country, bio ───────────────────
+  &__header {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'photo info'
+      'photo bio';
+    column-gap: var(--space-6);
+    row-gap: var(--space-4);
+    padding: var(--space-6);
+
+    // On phones the photo becomes a small square next to the name, bio full width below
+    @include respond-to(md) {
+      grid-template-columns: 96px 1fr;
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        'photo info'
+        'bio bio';
+      column-gap: var(--space-4);
+      padding: var(--space-5) var(--space-5) var(--space-4);
+    }
+
+    &--no-photo {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        'info'
+        'bio';
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          'info'
+          'bio';
+      }
+    }
+  }
+
+  &__photo {
+    grid-area: photo;
+    aspect-ratio: 1;
+    border-radius: var(--border-radius-x-small);
     overflow: hidden;
-    position: sticky;
-    top: 0;
-    z-index: 10000;
+    background: rgba(245, 241, 232, 0.04);
+
+    @include respond-to(md) {
+      border-radius: var(--border-radius-super-small);
+    }
 
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+  }
+
+  &__info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    // keep the name clear of the close button
+    padding-right: var(--space-7);
+
+    @include respond-to(md) {
+      justify-content: center;
+      gap: var(--space-2);
+      padding-right: 0;
+    }
+  }
+
+  &__name {
+    font-size: var(--font-size-2-5xl);
+    line-height: 1.1;
+    margin: 0;
+    overflow-wrap: anywhere;
+
+    @include respond-to(md) {
+      font-size: var(--font-size-xl);
+    }
+  }
+
+  &__detail {
+    display: flex;
+    flex-direction: column;
+
+    &-label {
+      font-size: var(--font-size-xs);
+      color: var(--color-white);
+      opacity: 0.6;
     }
 
-    &-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to bottom, transparent, var(--color-black));
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-end;
-      padding: var(--space-2) var(--space-6);
-      z-index: 10000;
-      
-      @include respond-to(md) {
-        padding: var(--space-2);
-      }
-
-      &__content {
-        width: 100%;
-        &__title {
-          color: var(--color-white);
-        }
-
-        &__info {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          &__bio {
-            color: var(--color-white);
-            font-size: var(--font-size-lg);
-            width: 70%;
-          }
-  
-          &__country {
-            color: var(--color-white);
-            font-size: var(--font-size-md);
-            opacity: 0.6;
-          }
-        }
-  
-      }
+    &-value {
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-white);
     }
+  }
+
+  &__bio {
+    grid-area: bio;
+    margin: 0;
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+    color: var(--color-white);
+    opacity: 0.75;
+    white-space: pre-line;
   }
 
   // ─── Tracks section ───────────────────────────────────────
   &__tracks {
-    padding: 1.25rem 0 1.5rem;
+    padding: var(--space-5) 0 var(--space-6);
+    border-top: 1px solid rgba(245, 241, 232, 0.08);
  
     &-title {
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.16em;
+      margin: 0 0 var(--space-2);
+      padding: 0 var(--space-6);
+      font-family: 'Website', sans-serif;
+      font-size: var(--font-size-sm);
+      letter-spacing: 0.14em;
+      -webkit-text-stroke: 0;
       text-transform: uppercase;
-      color: rgba(245, 241, 232, 0.28);
-      margin: 0 0 0.5rem;
-      padding: 0 2rem;
- 
+      color: rgba(245, 241, 232, 0.35);
+
       @include respond-to(md) {
-        padding: 0 1rem;
+        padding: 0 var(--space-5);
       }
     }
- 
+
     &-list {
       display: flex;
       flex-direction: column;
-      padding: 0 0.5rem;
- 
+      padding: 0 var(--space-6);
+
       @include respond-to(md) {
-        padding: 0 0.35rem;
-      }
- 
-      // ─── Track row ────────────────────────────────────────
-      &__item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.6rem 0.75rem;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background 0.18s ease;
- 
-        &:hover {
-          background: rgba(245, 241, 232, 0.05);
- 
-          .modal__tracks-list__item__play {
-            opacity: 1;
-            color: var(--color-green, #00ff87);
-          }
- 
-          .modal__tracks-list__item__cover img {
-            transform: scale(1.04);
-          }
-        }
- 
-        &__content {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          min-width: 0;
-        }
- 
-        &__cover {
-          flex-shrink: 0;
-          width: 48px;
-          height: 48px;
-          border-radius: 8px;
-          overflow: hidden;
-          background: rgba(245, 241, 232, 0.04);
- 
-          img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.3s ease;
-          }
-        }
- 
-        &__info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.2rem;
-          min-width: 0;
-        }
- 
-        &__meta-container {
-          display: flex;
-          flex-direction: column;
-          gap: 0.1rem;
-          min-width: 0;
-        }
- 
-        &__title {
-          font-size: 1rem;
-          font-weight: 400;
-          color: rgba(245, 241, 232, 0.85);
-          margin: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
- 
-        &__meta {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-        }
- 
-        &__album,
-        &__year {
-          font-size: 1rem;
-          color: rgba(245, 241, 232, 0.3);
-          white-space: nowrap;
-        }
- 
-        &__album::after {
-          content: '·';
-          margin-left: 0.4rem;
-          opacity: 0.4;
-        }
- 
-        &__year:only-child::after,
-        &__year:last-child::after {
-          content: none;
-        }
- 
-        &__description {
-          font-size: 1rem;
-          color: rgba(245, 241, 232, 0.28);
-          font-style: italic;
-          margin: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
- 
-        &__play {
-          flex-shrink: 0;
-          opacity: 0;
-          color: rgba(245, 241, 232, 0.35);
-          transition: opacity 0.18s ease, color 0.18s ease;
-          padding-left: 0.5rem;
-        }
+        padding: 0 var(--space-5);
       }
     }
   }
+
+  // ─── Track row (mirrors the mobile app's TrackRow) ────────
+  &__track {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    cursor: pointer;
+    transition: opacity 0.18s ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
+
+    &:active {
+      opacity: 0.6;
+    }
+
+    &-cover {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: var(--border-radius-super-small);
+      overflow: hidden;
+      background: rgba(245, 241, 232, 0.05);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+
+    &-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    &-title {
+      margin: 0;
+      font-family: 'Website', sans-serif;
+      font-size: var(--font-size-md);
+      line-height: 1.5;
+      letter-spacing: normal;
+      -webkit-text-stroke: 0;
+      color: var(--color-white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &-meta {
+      margin: 0;
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+      color: rgba(245, 241, 232, 0.35);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // Currently playing track
+    &--active &-title {
+      color: #00ff87;
+    }
+
+    .favorite-btn {
+      flex-shrink: 0;
+    }
+  }
 }
 
-
-@keyframes fadeInModal {
+@keyframes artistModalSlideIn {
   from {
     opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes slideUpModal {
+@keyframes artistModalSlideInMobile {
   from {
-    transform: translateY(50px);
     opacity: 0;
+    transform: translateY(100%) scale(0.95);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
-  }
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .modal {
-    padding: 10px;
-
-    &__content {
-      max-height: 95vh;
-    }
-
-    &__info {
-      padding: 24px;
-    }
-
-    &__name {
-      font-size: 28px;
-    }
-
-    &__image {
-      height: 250px;
-    }
-  }
-
-  .track-card {
-    flex-direction: column;
-
-    &__cover {
-      width: 100%;
-      height: 150px;
-    }
-
-    &__badge {
-      top: 12px;
-      right: 12px;
-    }
+    transform: translateY(0) scale(1);
   }
 }

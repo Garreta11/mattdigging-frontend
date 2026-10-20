@@ -3,6 +3,7 @@
 import "./ArtistModal.scss";
 import { useAppContext } from "../../context/AppContext";
 import { FiX } from "react-icons/fi";
+import FavoriteButton from "../FavoriteButton/FavoriteButton";
 import { Artist, Track, fetchTracksByArtist } from "../../services/api";
 import ImageStorage from "../ImageStorage/ImageStorage";
 import { useState, useEffect } from "react";
@@ -15,7 +16,7 @@ interface ArtistModalProps {
 }
 
 const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
-  const { setTrack, setPlayerTrackList, isMember } = useAppContext();
+  const { track: currentTrack, setTrack, setPlayerTrackList, isMember } = useAppContext();
   const [tracks, setTracks] = useState<Track[]>([]);
   const panelRef = useSwipeToClose(isOpen, onClose);
 
@@ -36,98 +37,79 @@ const ArtistModal = ({ artist, isOpen, onClose }: ArtistModalProps) => {
   const hasTracks = tracks.length > 0;
 
   const handleTrackClick = (clickedTrack: Track) => {
+    // Keep the modal open, so you can keep browsing this artist's tracks
     setPlayerTrackList(tracks);
     setTrack(clickedTrack);
-    onClose();
   };
 
   return (
-    <div className="modal" onClick={onClose}>
-      <div className="modal__backdrop" />
+    <div className="artist-modal" onClick={onClose}>
+      <div className="artist-modal__backdrop" />
       <div
-        className="modal__content"
+        className="artist-modal__content"
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal__drag-handle" />
+        <div className="artist-modal__drag-handle" />
+        <button className="artist-modal__close" onClick={onClose} aria-label="Close">
+          <FiX size={24} />
+        </button>
 
-        {artist.photo_url && (
-          <div className="modal__image">
-            <ImageStorage
-              bucket="artist_photos"
-              path={artist.photo_url}
-              alt={artist.name}
-              className="modal__image"
-              // Full-width banner: resized by width only, original proportions kept
-              size={900}
-              square={false}
-            />
-            <button className="modal__close" onClick={onClose}>
-              <FiX size={24} />
-            </button>
-            <div className="modal__image-overlay">
-              <div className="modal__image-overlay__content">
-                <h1 className="modal__image-overlay__content__title">{artist.name}</h1>
-                {artist.bio && <div className="modal__image-overlay__content__info">
-                  <p className="modal__image-overlay__content__info__bio">{artist.bio}</p>
-                  {artist.country && <p className="modal__image-overlay__content__info__country">{artist.country}</p>}
-                </div>
-                }
-              </div>
+        <div className={`artist-modal__header${artist.photo_url ? "" : " artist-modal__header--no-photo"}`}>
+          {artist.photo_url && (
+            <div className="artist-modal__photo">
+              <ImageStorage
+                bucket="artist_photos"
+                path={artist.photo_url}
+                alt={artist.name}
+                // Square crop, same size as the Artists page so the hover-loaded photo is reused
+                size={600}
+              />
             </div>
+          )}
+
+          <div className="artist-modal__info">
+            <h2 className="artist-modal__name">{artist.name}</h2>
+            {artist.country && (
+              <div className="artist-modal__detail">
+                <span className="artist-modal__detail-label">Country</span>
+                <span className="artist-modal__detail-value">{artist.country}</span>
+              </div>
+            )}
           </div>
-        )}
+
+          {artist.bio && <p className="artist-modal__bio">{artist.bio}</p>}
+        </div>
 
         {hasTracks && (
-          <div className="modal__tracks">
-            <h2 className="modal__tracks-title">
+          <div className="artist-modal__tracks">
+            <h2 className="artist-modal__tracks-title">
               {/* <FiHeadphones size={20} /> */}
               Tracks ({tracks.length})
             </h2>
-            <div className="modal__tracks-list">
-              {tracks.map((track) => (
-                <div key={track.id} className="modal__tracks-list__item" onClick={() => handleTrackClick(track)}>
-                  <div className="modal__tracks-list__item__content">
-                    {track.cover_url && (
-                      <div className="modal__tracks-list__item__cover">
-                        <ImageStorage
-                          bucket="covers"
-                          path={track.cover_url}
-                          alt={track.title}
-                        />
-                      </div>
-                    )}
-                    <div className="modal__tracks-list__item__info">
-                      <div className="modal__tracks-list__item__meta-container">
-                        <h3 className="modal__tracks-list__item__title">{track.title}</h3>
-                        <div className="modal__tracks-list__item__meta">
-                          {track.album_name && (
-                            <span className="modal__tracks-list__item__album">
-                              {track.album_name}
-                            </span>
-                          )}
-                          {track.year && (
-                            <span className="modal__tracks-list__item__year">
-                              {track.year}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {track.description && (
-                        <p className="modal__tracks-list__item__description">
-                          {track.description}
-                        </p>
+            <div className="artist-modal__tracks-list">
+              {tracks.map((track) => {
+                const meta = [track.album_name, track.year].filter(Boolean).join(" · ");
+                return (
+                  <div
+                    key={track.id}
+                    className={`artist-modal__track${currentTrack?.id === track.id ? " artist-modal__track--active" : ""}`}
+                    onClick={() => handleTrackClick(track)}
+                  >
+                    <div className="artist-modal__track-cover">
+                      {track.cover_url && (
+                        <ImageStorage bucket="covers" path={track.cover_url} alt={track.title} />
                       )}
-                      
                     </div>
+                    <div className="artist-modal__track-info">
+                      <h3 className="artist-modal__track-title">{track.title}</h3>
+                      {meta && <p className="artist-modal__track-meta">{meta}</p>}
+                    </div>
+                    {/* stopPropagation inside, so the heart does not start playback */}
+                    <FavoriteButton track={track} />
                   </div>
-                  <div className="modal__tracks-list__item__play">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8 5.14286V18.8571L19 12L8 5.14286Z" fill="currentColor"/>
-                    </svg>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
