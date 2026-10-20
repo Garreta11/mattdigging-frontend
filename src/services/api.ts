@@ -188,6 +188,21 @@ export const fetchBillingPortal = async (
   return response.json();
 };
 
+// ACCOUNT
+// Permanently deletes the logged-in account; the backend also cancels any membership.
+export const deleteAccount = async (token: string): Promise<{ deleted: boolean }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/account`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(json.error || json.message || "Could not delete your account.");
+  return json;
+};
+
 // GENRES
 export const fetchGenres = async (): Promise<Genre[]> => {
   const response = await fetch(`${API_BASE_URL}/genres`);
