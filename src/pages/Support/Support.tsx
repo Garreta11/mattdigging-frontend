@@ -39,7 +39,7 @@ const FAQ: { question: string; answer: React.ReactNode }[] = [
     question: 'How do I manage or cancel my membership?',
     answer: (
       <>
-        Log in on mattdigging.com, open your <strong>Profile</strong> and use the settings button next to your
+        Log in on play.mattdigging.com, open your <strong>Profile</strong> and use the settings button next to your
         subscription. After cancelling, you keep access until the end of the period you have already paid for.
       </>
     ),

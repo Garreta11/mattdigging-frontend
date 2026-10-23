@@ -26,6 +26,7 @@ import Support from './pages/Support/Support';
 import Profile from './pages/Profile/Profile';
 import Membership from './pages/Membership/Membership';
 import Login from './pages/Login/Login';
+import Landing from './pages/Landing/Landing';
 
 // Components
 import Player from './components/Player/Player';
@@ -37,9 +38,35 @@ import Modals from './components/Modals/Modals';
 // Utils
 import { AppProvider } from './context/AppContext';
 import reportWebVitals from './reportWebVitals';
+import { IS_LANDING_SITE, PLAY_URL } from './lib/site';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 export let lenis: Lenis;
+
+// On mattdigging.com, any page that isn't part of the landing site belongs to the web app.
+// Keep the path, query and hash so email links (/auth/confirm#access_token=…) still work.
+function RedirectToPlay() {
+  const location = useLocation();
+  useEffect(() => {
+    window.location.replace(`${PLAY_URL}${location.pathname}${location.search}${location.hash}`);
+  }, [location]);
+  return null;
+}
+
+// mattdigging.com: landing page + legal, support and tester pages (see lib/site.ts).
+function LandingSite() {
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/support" element={<Support />} />
+      <Route path="/android" element={<AppTest platform="android" />} />
+      <Route path="/ios" element={<AppTest platform="ios" />} />
+      <Route path="*" element={<RedirectToPlay />} />
+    </Routes>
+  );
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -68,6 +95,8 @@ function App() {
       lenis.destroy();
     };
   }, [location.pathname]);
+
+  if (IS_LANDING_SITE) return <LandingSite />;
 
   return (
     <Routes>
